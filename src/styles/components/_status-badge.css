@@ -1,0 +1,21 @@
+
+/* --- Status Badge Component --- */
+.status-badge {
+  display: inline-block;
+  padding: 0.25em 0.6em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+  color: #fff;
+}
+
+.status-active, .status-online { background-color: var(--netgrip-primary-accent); }
+.status-in_work { background-color: var(--netgrip-warning); color: #000 }
+.status-completed { background-color: var(--netgrip-success); }
+.status-broken, .status-offline { background-color: var(--netgrip-danger); }
+.status-pending, .status-restarting { background-color: var(--netgrip-info); color: #000 }
+.status-reserved { background-color: var(--netgrip-secondary-accent); }

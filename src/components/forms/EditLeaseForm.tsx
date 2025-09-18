@@ -1,0 +1,67 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import React, { useState } from 'react';
+// Fix: Corrected import path for Lease type
+import { Lease } from '../../types/index';
+
+interface EditLeaseFormProps {
+    lease: Lease;
+    onSave: (lease: Lease) => void;
+    onCancel: () => void;
+    isSaving: boolean;
+}
+
+const EditLeaseForm = ({ lease, onSave, onCancel, isSaving }: EditLeaseFormProps) => {
+    const [formData, setFormData] = useState<Lease>(lease);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <div className="form-group">
+                <label>IP Address</label>
+                <input type="text" className="form-control" value={formData.ip} disabled />
+            </div>
+            <div className="form-group">
+                <label htmlFor="hostname">Hostname</label>
+                <input
+                    id="hostname"
+                    type="text"
+                    name="hostname"
+                    className="form-control"
+                    value={formData.hostname}
+                    onChange={handleChange}
+                />
+            </div>
+            <div className="form-group">
+                <label htmlFor="mac">MAC Address</label>
+                <input
+                    id="mac"
+                    type="text"
+                    name="mac"
+                    className="form-control"
+                    value={formData.mac}
+                    onChange={handleChange}
+                />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
+                <button type="button" className="btn" onClick={onCancel} style={{backgroundColor: 'var(--netgrip-border-dark)'}}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                    {isSaving ? <span className="spinner-inline" /> : 'Save Changes'}
+                </button>
+            </div>
+        </form>
+    );
+};
+
+export default EditLeaseForm;

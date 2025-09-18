@@ -1,0 +1,49 @@
+
+/* --- Light Theme Overrides --- */
+body[data-theme="light"] {
+  --netgrip-text-dark: #24292f;
+  --netgrip-bg-dark: #f6f8fa;
+  --netgrip-border-dark: #d0d7de;
+  --netgrip-component-bg-dark: #ffffff;
+  --netgrip-component-bg-glass: rgba(255, 255, 255, 0.7);
+  --netgrip-sidebar-bg-glass: rgba(255, 255, 255, 0.6);
+  --netgrip-link-hover: #0969da;
+  --netgrip-circuit-opacity: 0.1;
+}
+
+body[data-theme="light"] h1, 
+body[data-theme="light"] h2, 
+body[data-theme="light"] h3, 
+body[data-theme="light"] h4, 
+body[data-theme="light"] h5, 
+body[data-theme="light"] h6 {
+  color: #0969da;
+}
+
+body[data-theme="light"] .form-control {
+  background-color: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+body[data-theme="light"] .form-control:disabled {
+    background-color: #e9ecef;
+}
+
+body[data-theme="light"] tbody tr:nth-child(odd) {
+    background-color: #f6f8fa;
+}
+
+body[data-theme="light"] .loading-overlay {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+body[data-theme="light"] .server-logs-container {
+    background-color: #f8f9fa;
+    color: #333;
+}
+body[data-theme="light"] .log-entry .timestamp {
+    color: #6c757d;
+}
+body[data-theme="light"] .log-entry .level-INFO { color: #087990; }
+body[data-theme="light"] .log-entry .level-WARN { color: #997400; }
+body[data-theme="light"] .log-entry .level-ERROR { color: #dc3545; }

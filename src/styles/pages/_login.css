@@ -1,0 +1,81 @@
+
+/* --- Login Page --- */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-card {
+  background-color: var(--netgrip-component-bg-glass);
+  backdrop-filter: blur(10px);
+  padding: 2.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--netgrip-border-dark);
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.login-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.login-links button {
+    background: none;
+    border: none;
+    color: var(--netgrip-primary-accent);
+    cursor: pointer;
+    padding: 0;
+}
+
+.login-links button:hover {
+    color: var(--netgrip-link-hover);
+}
+
+.sso-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--netgrip-text-dark);
+    opacity: 0.6;
+    margin: 1.5rem 0;
+}
+
+.sso-divider::before, .sso-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--netgrip-border-dark);
+}
+
+.sso-divider:not(:empty)::before {
+    margin-right: .5em;
+}
+
+.sso-divider:not(:empty)::after {
+    margin-left: .5em;
+}
+
+.sso-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.sso-buttons .btn {
+    background-color: var(--netgrip-component-bg-dark);
+    border: 1px solid var(--netgrip-border-dark);
+}
+
+.success-message {
+    padding: 1rem;
+    background-color: rgba(40, 167, 69, 0.2);
+    border: 1px solid var(--netgrip-success);
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}

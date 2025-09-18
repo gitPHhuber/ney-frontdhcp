@@ -1,0 +1,49 @@
+
+/* --- Pagination --- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--netgrip-border-dark);
+  gap: 1rem;
+}
+
+.pagination-arrow, .page-number {
+  background: var(--netgrip-component-bg-dark);
+  border: 1px solid var(--netgrip-border-dark);
+  color: var(--netgrip-text-dark);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-number {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pagination-arrow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pagination-arrow:hover:not(:disabled), .page-number:hover {
+  border-color: var(--netgrip-primary-accent);
+  transform: translateY(-2px);
+}
+
+.page-number.active {
+  background-color: var(--netgrip-primary-accent);
+  border-color: var(--netgrip-primary-accent);
+  color: white;
+  font-weight: bold;
+  transform: translateY(-2px);
+}

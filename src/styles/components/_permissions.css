@@ -1,0 +1,40 @@
+
+/* --- Role Management Permissions --- */
+.permissions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.permission-category {
+    background-color: var(--netgrip-bg-dark);
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--netgrip-border-dark);
+}
+
+.permission-category h4 {
+    margin: 0 0 1rem 0;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    color: var(--netgrip-secondary-accent);
+    border-bottom: 1px solid var(--netgrip-border-dark);
+    padding-bottom: 0.5rem;
+}
+
+.permission-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.8rem;
+}
+
+.permission-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.permission-option input {
+    margin-right: 0.5rem;
+}

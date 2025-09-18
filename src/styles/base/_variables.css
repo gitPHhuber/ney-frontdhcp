@@ -1,0 +1,21 @@
+
+/* --- NetGrip Modern Theme --- */
+/* --- Dark Theme (Default) --- */
+:root {
+  --netgrip-text-dark: #e6edf3;
+  --netgrip-bg-dark: #0d1117;
+  --netgrip-primary-accent: #58a6ff;
+  --netgrip-primary-accent-rgb: 88, 166, 255;
+  --netgrip-secondary-accent: #b87eff;
+  --netgrip-border-dark: #30363d;
+  --netgrip-component-bg-dark: #161b22;
+  --netgrip-component-bg-glass: rgba(22, 27, 34, 0.7);
+  --netgrip-sidebar-bg-glass: rgba(22, 27, 34, 0.6);
+  --netgrip-success: #28a745;
+  --netgrip-danger: #f85149;
+  --netgrip-warning: #ffc107;
+  --netgrip-info: #0dcaf0;
+  --netgrip-link-hover: #8bb9fe;
+  --netgrip-circuit-color-rgba: rgba(var(--netgrip-primary-accent-rgb), 0.05);
+  --netgrip-circuit-opacity: 0.5;
+}

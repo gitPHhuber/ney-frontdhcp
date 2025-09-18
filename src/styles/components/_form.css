@@ -1,0 +1,43 @@
+
+/* --- Forms --- */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background-color: var(--netgrip-bg-dark);
+  border: 1px solid var(--netgrip-border-dark);
+  border-radius: 6px;
+  color: var(--netgrip-text-dark);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--netgrip-primary-accent);
+  box-shadow: 0 0 0 3px rgba(var(--netgrip-primary-accent-rgb), 0.3);
+}
+
+.form-control:disabled {
+    background-color: var(--netgrip-component-bg-dark);
+    opacity: 0.7;
+}
+
+.connection-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+.connection-form .form-group {
+    flex-grow: 1;
+    margin-bottom: 0;
+}

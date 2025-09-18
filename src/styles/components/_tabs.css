@@ -1,0 +1,39 @@
+
+/* --- Leases Page Controls --- */
+.leases-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tabs {
+  display: flex;
+  background-color: var(--netgrip-component-bg-dark);
+  border-radius: 6px;
+  padding: 4px;
+  border: 1px solid var(--netgrip-border-dark);
+}
+
+.tab-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: transparent;
+  color: var(--netgrip-text-dark);
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tab-button.active {
+  background-color: var(--netgrip-primary-accent);
+  color: white;
+  box-shadow: 0 2px 10px rgba(var(--netgrip-primary-accent-rgb), 0.3);
+}
+
+.search-box {
+  min-width: 300px;
+}
