@@ -16,3 +16,75 @@
     margin-top: 0.5rem;
     margin-bottom: 0;
 }
+
+.dashboard-lower-grid {
+    margin-top: 2rem;
+    display: grid;
+    gap: 1.5rem;
+}
+
+@media (min-width: 992px) {
+    .dashboard-lower-grid {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        align-items: stretch;
+    }
+}
+
+.technician-queue-card,
+.server-activity-card {
+    text-align: left;
+}
+
+.technician-queue-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.technician-queue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.technician-queue-subtitle {
+    margin: 0.35rem 0 0;
+    color: var(--netgrip-secondary-accent);
+    font-size: 0.9rem;
+}
+
+.technician-queue-user {
+    font-size: 0.85rem;
+    color: var(--netgrip-secondary-accent);
+}
+
+.technician-queue-table-wrapper {
+    background: var(--netgrip-component-bg-dark);
+}
+
+.technician-queue-placeholder {
+    padding: 2rem 1rem;
+    background: var(--netgrip-component-bg-dark);
+    border: 1px solid var(--netgrip-border-dark);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: var(--netgrip-secondary-accent);
+    text-align: center;
+}
+
+.server-activity-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.server-activity-header p {
+    margin: 0.35rem 0 0;
+    color: var(--netgrip-secondary-accent);
+    font-size: 0.9rem;
+}
+
+.server-activity-card .server-logs-container {
+    height: 220px;
+}
