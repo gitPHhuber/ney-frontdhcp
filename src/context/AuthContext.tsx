@@ -2,48 +2,61 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useEffect, useContext, createContext, ReactNode } from 'react';
-import { api } from '../services/api';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
 import LoadingScreen from '../components/ui/LoadingScreen';
-// Fix: Corrected import path for User and Permission types
-import { User, Permission } from '../types/index';
+import { api } from '../services/api';
+import type { Permission, User } from '../types';
 
 interface AuthContextType {
   user: User | null;
   permissions: Permission[];
-  login: (username, password) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   ssoLogin: (provider: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   hasPermission: (permission: Permission) => boolean;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+const AUTH_USER_KEY = 'authUser';
+const AUTH_PERMISSIONS_KEY = 'authPermissions';
+
+const getStoredValue = <T,>(key: string): T | null => {
+  const storedValue = localStorage.getItem(key);
+  return storedValue ? (JSON.parse(storedValue) as T) : null;
+};
+
+const persistValue = (key: string, value: unknown) => {
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
+export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for a saved user session in localStorage on initial load
-    const savedUser = localStorage.getItem('authUser');
-    const savedPermissions = localStorage.getItem('authPermissions');
-    if (savedUser && savedPermissions) {
-        setUser(JSON.parse(savedUser));
-        setPermissions(JSON.parse(savedPermissions));
+    const storedUser = getStoredValue<User>(AUTH_USER_KEY);
+    const storedPermissions = getStoredValue<Permission[]>(AUTH_PERMISSIONS_KEY);
+
+    if (storedUser && storedPermissions) {
+      setUser(storedUser);
+      setPermissions(storedPermissions);
     }
+
     setLoading(false);
   }, []);
 
-  const handleSuccessfulLogin = (loggedInUser, userPermissions) => {
-    localStorage.setItem('authUser', JSON.stringify(loggedInUser));
-    localStorage.setItem('authPermissions', JSON.stringify(userPermissions));
+  const handleSuccessfulLogin = (loggedInUser: User, userPermissions: Permission[]) => {
+    persistValue(AUTH_USER_KEY, loggedInUser);
+    persistValue(AUTH_PERMISSIONS_KEY, userPermissions);
     setUser(loggedInUser);
     setPermissions(userPermissions);
   };
 
-  const login = async (username, password) => {
+  const login = async (username: string, password: string) => {
     const { user: loggedInUser, permissions: userPermissions } = await api.login(username, password);
     handleSuccessfulLogin(loggedInUser, userPermissions);
   };
@@ -54,27 +67,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('authUser');
-    localStorage.removeItem('authPermissions');
+    localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem(AUTH_PERMISSIONS_KEY);
     setUser(null);
     setPermissions([]);
   };
-  
-  const hasPermission = (permission: Permission) => {
-      return permissions.includes(permission);
+
+  const hasPermission = (permission: Permission) => permissions.includes(permission);
+
+  const value: AuthContextType = {
+    user,
+    permissions,
+    login,
+    ssoLogin,
+    logout,
+    isAuthenticated: Boolean(user),
+    hasPermission,
   };
 
-  const value = { user, permissions, login, ssoLogin, logout, isAuthenticated: !!user, hasPermission };
-
-  if (loading) return <LoadingScreen />;
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+
+  return context;
 };

@@ -4,7 +4,7 @@
  */
 import { MOCK_LEASES, MOCK_STATIC_LEASES } from '../data/mockData';
 // Fix: Corrected import path for types
-import { Lease, User, Role, Permission, DhcpServerState } from '../types/index';
+import type { DhcpServerState, Lease, LogEntry, Permission, Role, User } from '../types';
 
 type LeaseStorageShape = Omit<Lease, 'labels'> & { labels?: string[] };
 
@@ -83,12 +83,12 @@ let nextUserId = Math.max(4, ...MOCK_USERS.map(u => u.id)) + 1;
 let nextRoleId = Math.max(4, ...MOCK_ROLES.map(r => r.id)) + 1;
 
 
-const addLog = (level, message) => {
-    MOCK_DHCP_SERVER.logs.unshift({ timestamp: Date.now(), level, message });
-    if (MOCK_DHCP_SERVER.logs.length > 100) {
-        MOCK_DHCP_SERVER.logs.pop();
-    }
-    saveToStorage('netgrip_dhcp_server', MOCK_DHCP_SERVER);
+const addLog = (level: LogEntry['level'], message: string) => {
+  MOCK_DHCP_SERVER.logs.unshift({ timestamp: Date.now(), level, message });
+  if (MOCK_DHCP_SERVER.logs.length > 100) {
+    MOCK_DHCP_SERVER.logs.pop();
+  }
+  saveToStorage('netgrip_dhcp_server', MOCK_DHCP_SERVER);
 };
 
 // Simulates network requests to a backend.

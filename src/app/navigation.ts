@@ -1,6 +1,9 @@
+import { ComponentType, LazyExoticComponent, lazy } from 'react';
 
 import { FeatureFlag } from '../shared/config/featureFlags';
 import type { Permission } from '../types';
+
+type NavigationComponent = LazyExoticComponent<ComponentType<Record<string, unknown>>>;
 
 export interface NavigationItem {
   path: string;
@@ -9,8 +12,8 @@ export interface NavigationItem {
   permission?: Permission | Permission[];
   featureFlag?: FeatureFlag;
   translationKey?: string;
-
   group: string;
+  element: NavigationComponent;
 }
 
 export interface NavigationSection {
@@ -29,8 +32,6 @@ const ExecutiveDashboardPage = lazy(() => import('../pages/executive-dashboard/E
 const AutomationPage = lazy(() => import('../pages/automation/AutomationPage'));
 const ProductPassportPage = lazy(() => import('../pages/product-passport/ProductPassportPage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
-
-
 
 export const appNavigation: NavigationSection[] = [
   {

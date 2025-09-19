@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useForm } from 'react-hook-form';
@@ -30,6 +30,14 @@ export const InventoryTable: React.FC = () => {
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
   const form = useForm({ defaultValues: { owner: '' } });
 
+  const handleEdit = useCallback(
+    (rowData: InventoryRow) => {
+      setEditingRowId(rowData.id);
+      form.reset({ owner: rowData.owner });
+    },
+    [form],
+  );
+
   const columns = useMemo<ColumnDef<InventoryRow>[]>(
     () => [
       { header: 'Asset tag', accessorKey: 'assetTag' },
@@ -38,12 +46,12 @@ export const InventoryTable: React.FC = () => {
       {
         header: 'Owner',
         accessorKey: 'owner',
-        cell: ({ row, getValue }) => {
+        cell: ({ row }) => {
           const isEditing = editingRowId === row.original.id;
           if (!isEditing) {
             return (
               <button type="button" className="link" onClick={() => handleEdit(row.original)}>
-
+                Edit owner
               </button>
             );
           }
@@ -73,7 +81,7 @@ export const InventoryTable: React.FC = () => {
         },
       },
     ],
-
+    [editingRowId, handleEdit, form],
   );
 
   const table = useReactTable({ columns, data: rows, getCoreRowModel: getCoreRowModel() });
