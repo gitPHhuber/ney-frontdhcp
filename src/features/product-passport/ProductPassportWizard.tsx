@@ -1,4 +1,5 @@
-
+import React, { useId } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 
 export interface ProductPassportForm {
   assetTag: string;
@@ -19,7 +20,30 @@ export const ProductPassportWizard: React.FC = () => {
       serialNumber: '',
       location: '',
       owner: '',
+      warrantyUntil: '',
     },
+  });
+
+  const idPrefix = useId();
+
+  const fieldConfigs: Array<{
+    name: keyof ProductPassportForm;
+    label: string;
+    placeholder?: string;
+    type?: string;
+    required?: boolean;
+  }> = [
+    { name: 'assetTag', label: 'Asset tag', placeholder: 'e.g. AST-1001', required: true },
+    { name: 'model', label: 'Model', placeholder: 'Cisco C9500', required: true },
+    { name: 'serialNumber', label: 'Serial number', placeholder: 'SN123456789', required: true },
+    { name: 'location', label: 'Location', placeholder: 'DC-West / Rack 42', required: true },
+    { name: 'owner', label: 'Owner', placeholder: 'Network Team', required: true },
+    { name: 'warrantyUntil', label: 'Warranty valid until', type: 'date' },
+  ];
+
+  const onSubmit = handleSubmit(data => {
+    // In a real app this would trigger generation of the product passport document.
+    console.log('Generating product passport', data);
   });
 
   return (
@@ -34,6 +58,30 @@ export const ProductPassportWizard: React.FC = () => {
         ))}
       </ol>
 
+      <form className="passport-wizard__form" onSubmit={onSubmit}>
+        <div className="form-grid">
+          {fieldConfigs.map(config => {
+            const inputId = `${idPrefix}-${config.name}`;
+            return (
+              <div key={config.name} className="form-field">
+                <label htmlFor={inputId}>{config.label}</label>
+                <Controller
+                  control={control}
+                  name={config.name}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      id={inputId}
+                      type={config.type ?? 'text'}
+                      placeholder={config.placeholder}
+                      required={config.required}
+                    />
+                  )}
+                />
+              </div>
+            );
+          })}
+        </div>
         <footer>
           <button type="submit" className="primary">
             Generate PDF passport
@@ -46,4 +94,3 @@ export const ProductPassportWizard: React.FC = () => {
     </section>
   );
 };
-

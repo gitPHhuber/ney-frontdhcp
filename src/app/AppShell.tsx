@@ -1,12 +1,13 @@
-
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { appNavigation, NavigationItem } from './navigation';
-import { useAuth } from '../context/AuthContext';
-import { NotificationCenter } from '../widgets/notification-center/NotificationCenter';
-import { CommandPalette } from '../widgets/command-palette/CommandPalette';
-import { isFeatureEnabled } from '../shared/config/featureFlags';
 
+import { useAuth } from '../context/AuthContext';
+import { isFeatureEnabled } from '../shared/config/featureFlags';
+import { CommandPalette } from '../widgets/command-palette/CommandPalette';
+import { NotificationCenter } from '../widgets/notification-center/NotificationCenter';
+
+import { appNavigation, type NavigationItem } from './navigation';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -16,7 +17,6 @@ const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const { t } = useTranslation();
   const { user, logout, hasPermission } = useAuth();
   const [isPaletteOpen, setPaletteOpen] = useState(false);
-
 
   const renderItem = (item: NavigationItem) => {
     const enabledByFlag = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;

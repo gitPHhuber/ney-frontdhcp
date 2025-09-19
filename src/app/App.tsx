@@ -1,13 +1,15 @@
 import React, { Suspense } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+
 import LoginPage from '../pages/LoginPage';
 import NotFoundPage from '../pages/NotFoundPage';
+import { useAuth } from '../context/AuthContext';
 import { AppLoader } from '../shared/ui/AppLoader';
-import AppShell from './AppShell';
-import { appNavigation } from './navigation';
-import type { NavigationItem } from './navigation';
 import { isFeatureEnabled } from '../shared/config/featureFlags';
+
+import AppShell from './AppShell';
+import type { NavigationItem } from './navigation';
+import { appNavigation } from './navigation';
 
 const RouteElement: React.FC<{ item: NavigationItem }> = ({ item }) => {
   const { hasPermission } = useAuth();
@@ -43,7 +45,11 @@ const App: React.FC = () => {
             <Route index element={<Navigate to="/dashboard" replace />} />
             {appNavigation.flatMap(section =>
               section.items.map(item => (
-
+                <Route
+                  key={item.path}
+                  path={item.path}
+                  element={<RouteElement item={item} />}
+                />
               )),
             )}
             <Route path="*" element={<NotFoundPage />} />

@@ -1,10 +1,10 @@
-
-import { useForm, Controller } from 'react-hook-form';
+import React, { useId } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const blockOptions = ['KPI Summary', 'Time Series', 'Capacity Table', 'Incident Timeline'] as const;
 
-type BlockOption = typeof blockOptions[number];
+type BlockOption = (typeof blockOptions)[number];
 
 const builderSchema = z.object({
   name: z.string().min(3),
@@ -20,7 +20,17 @@ export const ReportsBuilderCanvas: React.FC = () => {
   });
 
   const blocks = watch('blocks');
+  const idPrefix = useId();
 
+  const onSubmit = handleSubmit(data => {
+    const parseResult = builderSchema.safeParse(data);
+    if (!parseResult.success) {
+      console.warn('Validation failed', parseResult.error.flatten());
+      return;
+    }
+
+    console.log('Exporting report', parseResult.data);
+  });
 
   return (
     <section className="reports-builder">
@@ -29,19 +39,40 @@ export const ReportsBuilderCanvas: React.FC = () => {
         <p className="muted">Compose drag-and-drop layouts and export PDF/CSV/XLSX.</p>
       </header>
 
+      <form className="reports-builder__form" onSubmit={onSubmit}>
+        <div className="form-controls">
+          <div className="form-field">
+            <label htmlFor={`${idPrefix}-name`}>Report name</label>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field }) => (
+                <input
+                  {...field}
+                  id={`${idPrefix}-name`}
+                  placeholder="Executive summary"
+                  required
+                />
+              )}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor={`${idPrefix}-preset`}>Preset</label>
             <Controller
               control={control}
               name="preset"
               render={({ field }) => (
-
+                <select {...field} id={`${idPrefix}-preset`}>
                   <option value="day">Day</option>
                   <option value="week">Week</option>
                   <option value="month">Month</option>
                 </select>
               )}
             />
-
+          </div>
         </div>
+
         <fieldset>
           <legend>Blocks</legend>
           <Controller
@@ -71,6 +102,7 @@ export const ReportsBuilderCanvas: React.FC = () => {
             )}
           />
         </fieldset>
+
         <div className="builder-preview">
           {blocks.map(block => (
             <article key={block} className="builder-block">
