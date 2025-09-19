@@ -3,19 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { FaEllipsisV, FaEdit, FaTrash } from 'react-icons/fa';
 import { api } from '../services/api';
 // Fix: Corrected import path for Lease type
 import { Lease } from '../types/index';
 import LoadingScreen from '../components/ui/LoadingScreen';
 import Pagination from '../components/ui/Pagination';
-import PriorityIcon from '../components/ui/PriorityIcon';
-import StatusBadge from '../components/ui/StatusBadge';
 import Modal from '../components/ui/Modal';
 import EditLeaseForm from '../components/forms/EditLeaseForm';
-import Dropdown from '../components/ui/Dropdown';
 import { useAuth } from '../context/AuthContext';
 import ConfirmationModal from '../components/ui/ConfirmationModal';
+import TechnicianQueueTable from '../components/admin/TechnicianQueueTable';
 
 function LeasesPage() {
     const [leases, setLeases] = useState<Lease[]>([]);
@@ -87,11 +84,15 @@ function LeasesPage() {
         }
     };
 
+    const handleLeaseUpdated = (savedLease: Lease) => {
+        setLeases(prev => prev.map(l => l.id === savedLease.id ? savedLease : l));
+    };
+
     const handleSaveLease = async (updatedLease: Lease) => {
         setIsActionLoading(true);
         try {
             const savedLease = await api.editLease(updatedLease);
-            setLeases(prev => prev.map(l => l.id === savedLease.id ? savedLease : l));
+            handleLeaseUpdated(savedLease);
             handleCloseEditModal();
         } catch (error) {
             console.error("Failed to save lease:", error);
@@ -100,12 +101,22 @@ function LeasesPage() {
         }
     };
 
-    const handlePriorityChange = (leaseId: number, newPriority: Lease['priority']) => {
-        setLeases(prevLeases =>
-            prevLeases.map(lease =>
-                lease.id === leaseId ? { ...lease, priority: newPriority } : lease
-            )
-        );
+    const handlePriorityChange = async (leaseId: number, newPriority: Lease['priority']) => {
+        const existingLease = leases.find(lease => lease.id === leaseId);
+        if (!existingLease || existingLease.priority === newPriority) {
+            return;
+        }
+
+        const optimisticLease = { ...existingLease, priority: newPriority };
+        setLeases(prev => prev.map(lease => lease.id === leaseId ? optimisticLease : lease));
+
+        try {
+            const savedLease = await api.editLease(optimisticLease);
+            handleLeaseUpdated(savedLease);
+        } catch (error) {
+            console.error('Failed to update lease priority:', error);
+            setLeases(prev => prev.map(lease => lease.id === leaseId ? existingLease : lease));
+        }
     };
 
     const filteredLeases = useMemo(() => {
@@ -175,75 +186,15 @@ function LeasesPage() {
                         />
                     </div>
                 </div>
-                <div className="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Priority</th>
-                                <th>IP Address</th>
-                                <th>MAC Address</th>
-                                <th>Hostname</th>
-                                <th>Status</th>
-                                <th>Taken By</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {paginatedLeases.map(lease => (
-                                <tr key={lease.id}>
-                                    <td><PriorityIcon priority={lease.priority} /></td>
-                                    <td>{lease.ip}</td>
-                                    <td>{lease.mac}</td>
-                                    <td>{lease.hostname}</td>
-                                    <td><StatusBadge status={lease.status} /></td>
-                                    <td>{lease.taken_by || 'N/A'}</td>
-                                    <td className="actions-cell">
-                                        {(canUpdate || canDelete) && (
-                                            <Dropdown
-                                                trigger={
-                                                    <button className="action-menu-button" aria-label={`Actions for lease ${lease.ip}`}>
-                                                        <FaEllipsisV />
-                                                    </button>
-                                                }
-                                            >
-                                                {canUpdate && (
-                                                    <>
-                                                        <div className="dropdown-header">Set Priority</div>
-                                                        <button onClick={() => handlePriorityChange(lease.id, 'high')} role="menuitem">
-                                                            <PriorityIcon priority="high" /> High
-                                                        </button>
-                                                        <button onClick={() => handlePriorityChange(lease.id, 'medium')} role="menuitem">
-                                                            <PriorityIcon priority="medium" /> Medium
-                                                        </button>
-                                                        <button onClick={() => handlePriorityChange(lease.id, 'low')} role="menuitem">
-                                                            <PriorityIcon priority="low" /> Low
-                                                        </button>
-                                                    </>
-                                                )}
-                                                {(canUpdate || canDelete) && <div className="dropdown-divider"></div>}
-                                                {canUpdate && (
-                                                     <button onClick={() => handleOpenEditModal(lease)} role="menuitem">
-                                                        <FaEdit /> Edit
-                                                    </button>
-                                                )}
-                                                {canDelete && (
-                                                    <button onClick={() => setLeaseToDelete(lease)} role="menuitem" className="delete-action">
-                                                        <FaTrash /> Delete
-                                                    </button>
-                                                )}
-                                            </Dropdown>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                             {paginatedLeases.length === 0 && (
-                                <tr>
-                                    <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>No leases found.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <TechnicianQueueTable
+                    leases={paginatedLeases}
+                    canUpdate={canUpdate}
+                    canDelete={canDelete}
+                    onEdit={handleOpenEditModal}
+                    onDeleteRequest={(lease) => setLeaseToDelete(lease)}
+                    onPriorityChange={handlePriorityChange}
+                    onLeaseUpdated={handleLeaseUpdated}
+                />
                 <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
             </div>
 

@@ -12,6 +12,7 @@ export interface Lease {
     status: 'active' | 'in_work' | 'completed' | 'broken' | 'pending' | 'reserved' | 'online' | 'offline' | 'restarting';
     taken_by: string | null;
     priority: 'high' | 'medium' | 'low';
+    labels: string[];
 }
 
 export type Permission = 
