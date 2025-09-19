@@ -4,7 +4,7 @@ import { appNavigation } from '../../app/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { isFeatureEnabled } from '../../shared/config/featureFlags';
 import { useHotkeysContext } from '../../shared/hotkeys/HotkeysProvider';
-import { useTranslation } from 'react-i18next';
+
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -16,17 +16,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
   const [query, setQuery] = useState('');
   const { hasPermission } = useAuth();
   const { shortcuts } = useHotkeysContext();
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const titleId = useId();
-  const descriptionId = useId();
-  const { t } = useTranslation();
 
-  useEffect(() => {
-    if (!isOpen) {
-      setQuery('');
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -206,9 +196,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
         </ul>
         {visibleShortcuts.length > 0 && (
           <footer className="command-palette__footer">
-            <p className="muted">
-              {t('commandPalette.shortcutsHeading', { defaultValue: 'Keyboard shortcuts' })}
-            </p>
+
             <ul className="command-palette__shortcuts">
               {visibleShortcuts.map(shortcut => (
                 <li key={shortcut.combo} className="command-palette__shortcut">
