@@ -14,6 +14,7 @@ interface State {
 }
 
 class ErrorBoundary extends Component<Props, State> {
+  public declare readonly props: Readonly<Props>;
   public state: State = {
     hasError: false,
   };
@@ -28,12 +29,14 @@ class ErrorBoundary extends Component<Props, State> {
     console.error("Uncaught error:", error, errorInfo);
   }
 
-  public render() {
+  public render(): ReactNode {
     if (this.state.hasError) {
       // Render custom fallback UI
       return (
         <div className="error-boundary-container" role="alert">
-            <FaBug className="error-icon" aria-hidden="true" />
+            <span className="error-icon" aria-hidden="true">
+              <FaBug />
+            </span>
             <h1>Oops! Something Went Wrong.</h1>
             <p>A critical error occurred in the application. Please try reloading the page.</p>
             <button className="btn btn-primary" onClick={() => window.location.reload()}>

@@ -16,7 +16,9 @@ export const AccordionItem = ({ title, children }: AccordionItemProps) => {
         <div className="accordion-item">
             <button className="accordion-header" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen}>
                 <span>{title}</span>
-                <FaChevronDown className={`accordion-chevron ${isOpen ? 'open' : ''}`} />
+                <span className={`accordion-chevron ${isOpen ? 'open' : ''}`} aria-hidden="true">
+                    <FaChevronDown />
+                </span>
             </button>
             <div className={`accordion-content ${isOpen ? 'open' : ''}`}>
                 <div className="accordion-content-inner">

@@ -1,0 +1,304 @@
+.erp-catalog {
+  display: grid;
+  gap: 2rem;
+}
+
+.erp-catalog__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.erp-catalog__header .actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+.catalog-grid__panel,
+.catalog-grid__aside {
+  background: var(--surface-card);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow-md);
+}
+
+.catalog-table__viewport {
+  max-height: 360px;
+  overflow: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+
+.bom-list {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.bom-list > li {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.bom-list ul {
+  list-style: disc;
+  margin-left: 1.5rem;
+  color: var(--text-muted);
+}
+
+.two-column {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.two-column .field {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.form-grid .field {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.warehouse-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.warehouse-table th,
+.warehouse-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+
+.order-list {
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.order-list__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.125rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+  background: var(--accent-muted);
+  color: var(--accent-foreground);
+}
+
+.status--completed,
+.status--available,
+.status--running {
+  background: rgba(16, 185, 129, 0.16);
+  color: var(--success-strong);
+}
+
+.status--in-progress,
+.status--approved {
+  background: rgba(37, 99, 235, 0.16);
+  color: var(--info-strong);
+}
+
+.status--investigating,
+.status--warning {
+  background: rgba(245, 158, 11, 0.16);
+  color: var(--warning-strong);
+}
+
+.status--error,
+.status--blocked,
+.status--failed {
+  background: rgba(239, 68, 68, 0.16);
+  color: var(--danger-strong);
+}
+
+.status--idle {
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--text-muted);
+}
+
+.erp-orders__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.mes-dashboard {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.mes-dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.mes-dashboard__panel {
+  background: var(--surface-card);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow-md);
+  display: grid;
+  gap: 1rem;
+}
+
+.timeline {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.progress {
+  background: var(--surface-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+  height: 14px;
+}
+
+.progress__bar {
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-strong) 100%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.5rem;
+  color: var(--white);
+  font-size: 0.65rem;
+}
+
+.work-centers,
+.quality-list,
+.maintenance-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.work-centers li,
+.quality-list li,
+.maintenance-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.task-board {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.task-board__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.task-column {
+  background: var(--surface-card);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 1rem;
+  min-height: 320px;
+}
+
+.task-column__list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.task-card {
+  background: var(--surface-subtle);
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+  cursor: grab;
+}
+
+.task-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.task-card footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.status-badge {
+  background: rgba(37, 99, 235, 0.14);
+  color: var(--info-strong);
+  border-radius: 999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+
+.priority-high .status-badge {
+  background: rgba(239, 68, 68, 0.14);
+  color: var(--danger-strong);
+}
+
+.priority-critical .status-badge {
+  background: rgba(190, 24, 93, 0.2);
+  color: #be185d;
+}
+
+.task-board__aside {
+  background: var(--surface-card);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.timesheet-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.timesheet-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.muted {
+  color: var(--text-muted);
+}
