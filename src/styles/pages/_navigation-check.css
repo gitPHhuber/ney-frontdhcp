@@ -1,0 +1,143 @@
+/* --- Navigation Check Page --- */
+.navigation-check-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.navigation-check-page .page-header-copy {
+  max-width: 560px;
+}
+
+.navigation-check-page .page-subtitle {
+  color: var(--netgrip-text-muted);
+  margin: 0.5rem 0 0;
+}
+
+.navigation-check-page .last-run {
+  font-size: 0.85rem;
+  color: var(--netgrip-secondary-accent);
+  margin-top: 0.5rem;
+}
+
+.navigation-check-page .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.navigation-check-page .header-actions .btn {
+  min-width: 170px;
+}
+
+.navigation-check-page .header-actions .dropdown-wrapper {
+  display: inline-flex;
+}
+
+.navigation-check-page .diagnostics-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.navigation-check-page .summary-card {
+  text-align: center;
+}
+
+.navigation-check-page .summary-card.success .card-value {
+  color: var(--netgrip-success);
+}
+
+.navigation-check-page .summary-card.warning .card-value {
+  color: var(--netgrip-warning);
+}
+
+.navigation-check-page .summary-card.error .card-value {
+  color: var(--netgrip-danger);
+}
+
+.navigation-check-page .diagnostics-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.navigation-check-page .diagnostics-results h2 {
+  margin: 0;
+}
+
+.navigation-check-page .section-hint {
+  margin: 0;
+  color: var(--netgrip-text-muted);
+}
+
+.navigation-check-page .table-wrapper {
+  margin-top: 0.5rem;
+}
+
+.navigation-check-page .diagnostic-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.navigation-check-page .diagnostic-status.success {
+  color: var(--netgrip-success);
+}
+
+.navigation-check-page .diagnostic-status.warning {
+  color: var(--netgrip-warning);
+}
+
+.navigation-check-page .diagnostic-status.error {
+  color: var(--netgrip-danger);
+}
+
+.navigation-check-page .severity {
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.navigation-check-page .severity.low {
+  color: var(--netgrip-success);
+}
+
+.navigation-check-page .severity.medium {
+  color: var(--netgrip-warning);
+}
+
+.navigation-check-page .severity.high {
+  color: var(--netgrip-danger);
+}
+
+.navigation-check-page .target-cell {
+  font-family: 'Fira Code', monospace;
+}
+
+.navigation-check-page .notes-cell {
+  max-width: 320px;
+}
+
+.navigation-check-page .empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: var(--netgrip-text-muted);
+  border: 1px dashed var(--netgrip-border-dark);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (max-width: 768px) {
+  .navigation-check-page .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .navigation-check-page .header-actions .btn {
+    flex: 1 1 auto;
+  }
+}
