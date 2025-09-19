@@ -1,4 +1,4 @@
-import { lazy, type LazyExoticComponent, type ReactElement } from 'react';
+
 import { FeatureFlag } from '../shared/config/featureFlags';
 import type { Permission } from '../types';
 
@@ -9,7 +9,7 @@ export interface NavigationItem {
   permission?: Permission | Permission[];
   featureFlag?: FeatureFlag;
   translationKey?: string;
-  element: LazyExoticComponent<() => ReactElement>;
+
   group: string;
 }
 
@@ -29,10 +29,8 @@ const ExecutiveDashboardPage = lazy(() => import('../pages/executive-dashboard/E
 const AutomationPage = lazy(() => import('../pages/automation/AutomationPage'));
 const ProductPassportPage = lazy(() => import('../pages/product-passport/ProductPassportPage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
-const ErpCatalogPage = lazy(() => import('../pages/erp/CatalogPage'));
-const ErpOrdersPage = lazy(() => import('../pages/erp/OrdersPage'));
-const MesProductionPage = lazy(() => import('../pages/mes/ProductionPage'));
-const TaskBoardPage = lazy(() => import('../pages/tasks/TaskBoardPage'));
+
+
 
 export const appNavigation: NavigationSection[] = [
   {
@@ -146,55 +144,5 @@ export const appNavigation: NavigationSection[] = [
       },
     ],
   },
-  {
-    title: 'ERP',
-    items: [
-      {
-        path: '/erp/catalog',
-        title: 'Catalog & stock',
-        icon: 'layers',
-        translationKey: 'navigation.erpCatalog',
-        element: ErpCatalogPage,
-        group: 'ERP',
-        featureFlag: 'erp-suite',
-      },
-      {
-        path: '/erp/orders',
-        title: 'Purchasing & sales',
-        icon: 'shopping',
-        translationKey: 'navigation.erpOrders',
-        element: ErpOrdersPage,
-        group: 'ERP',
-        featureFlag: 'erp-suite',
-      },
-    ],
-  },
-  {
-    title: 'MES',
-    items: [
-      {
-        path: '/mes/production',
-        title: 'Production',
-        icon: 'factory',
-        translationKey: 'navigation.mesProduction',
-        element: MesProductionPage,
-        group: 'MES',
-        featureFlag: 'mes-suite',
-      },
-    ],
-  },
-  {
-    title: 'Tasks',
-    items: [
-      {
-        path: '/tasks/board',
-        title: 'Task board',
-        icon: 'kanban',
-        translationKey: 'navigation.taskBoard',
-        element: TaskBoardPage,
-        group: 'Tasks',
-        featureFlag: 'taskboard-suite',
-      },
-    ],
-  },
+
 ];

@@ -2,8 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useEffect, useMemo, useState } from 'react';
-import type { ReactElement } from 'react';
+
 import {
     FaCheckCircle,
     FaDownload,
@@ -29,7 +28,7 @@ interface DiagnosticResult {
     durationMs: number;
 }
 
-const STATUS_ICON: Record<DiagnosticStatus, ReactElement> = {
+
     success: <FaCheckCircle />, 
     warning: <FaExclamationTriangle />, 
     error: <FaTimesCircle />, 
@@ -175,23 +174,6 @@ const NavigationCheckPage = () => {
 
     const hasDiagnostics = diagnostics.length > 0;
 
-    useEffect(() => {
-        if (!diagnostics.length) {
-            return;
-        }
-        if (typeof window !== 'undefined') {
-            console.groupCollapsed('NavigationCheck');
-            diagnostics.forEach(result => {
-                console.info(`%c${result.check}`, 'font-weight:bold;', {
-                    target: result.target,
-                    status: result.status,
-                    severity: result.severity,
-                    checkedAt: result.checkedAt,
-                });
-            });
-            console.groupEnd();
-        }
-    }, [diagnostics]);
 
     return (
         <div className="navigation-check-page">

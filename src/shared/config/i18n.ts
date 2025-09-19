@@ -20,10 +20,7 @@ const resources = {
         productPassports: 'Product Passports',
         navigationCheck: 'Navigation Check',
         settings: 'Settings',
-        erpCatalog: 'Catalog & Stock',
-        erpOrders: 'Purchasing & Sales',
-        mesProduction: 'Production',
-        taskBoard: 'Task Board',
+
       },
     },
   },
@@ -45,10 +42,7 @@ const resources = {
         productPassports: 'Паспорта изделий',
         navigationCheck: 'Навигационная проверка',
         settings: 'Настройки',
-        erpCatalog: 'Каталог и склад',
-        erpOrders: 'Закупки и продажи',
-        mesProduction: 'Производство',
-        taskBoard: 'Доска задач',
+
       },
     },
   },

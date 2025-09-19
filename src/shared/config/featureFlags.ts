@@ -5,10 +5,7 @@ export type FeatureFlag =
   | 'executive-dashboard-insights'
   | 'automation-playbooks'
   | 'product-passport-autofill'
-  | 'navigation-diagnostics-export'
-  | 'erp-suite'
-  | 'mes-suite'
-  | 'taskboard-suite';
+
 
 const activeFlags: Record<FeatureFlag, boolean> = {
   'inventory-presets': true,
@@ -18,9 +15,7 @@ const activeFlags: Record<FeatureFlag, boolean> = {
   'automation-playbooks': true,
   'product-passport-autofill': true,
   'navigation-diagnostics-export': true,
-  'erp-suite': true,
-  'mes-suite': true,
-  'taskboard-suite': true,
+
 };
 
 export const featureFlags = activeFlags;

@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -20,8 +20,7 @@ export const ReportsBuilderCanvas: React.FC = () => {
   });
 
   const blocks = watch('blocks');
-  const nameId = useId();
-  const presetId = useId();
+
 
   return (
     <section className="reports-builder">
@@ -29,26 +28,19 @@ export const ReportsBuilderCanvas: React.FC = () => {
         <h2>Reports Builder</h2>
         <p className="muted">Compose drag-and-drop layouts and export PDF/CSV/XLSX.</p>
       </header>
-      <form onSubmit={handleSubmit(value => builderSchema.parse(value))}>
-        <div className="form-grid">
-          <div className="field">
-            <label htmlFor={nameId}>Report name</label>
-            <Controller control={control} name="name" render={({ field }) => <input id={nameId} {...field} />} />
-          </div>
-          <div className="field">
-            <label htmlFor={presetId}>Preset</label>
+
             <Controller
               control={control}
               name="preset"
               render={({ field }) => (
-                <select id={presetId} {...field}>
+
                   <option value="day">Day</option>
                   <option value="week">Week</option>
                   <option value="month">Month</option>
                 </select>
               )}
             />
-          </div>
+
         </div>
         <fieldset>
           <legend>Blocks</legend>

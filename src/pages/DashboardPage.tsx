@@ -6,13 +6,15 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import Card from '../components/ui/Card';
 import LoadingScreen from '../components/ui/LoadingScreen';
-import { FaTasks, FaExclamationTriangle, FaHourglassStart, FaList, FaServer } from 'react-icons/fa';
+import { FaTasks, FaExclamationTriangle, FaHourglassStart, FaList, FaServer, FaTags } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useDhcpServer } from '../context/DhcpServerContext';
 import StatusBadge from '../components/ui/StatusBadge';
 
+type DashboardStats = Awaited<ReturnType<typeof api.getDashboardStats>>;
+
 function DashboardPage() {
-    const [stats, setStats] = useState(null);
+    const [stats, setStats] = useState<DashboardStats | null>(null);
     const { user } = useAuth();
     const { serverState } = useDhcpServer();
 
@@ -39,6 +41,16 @@ function DashboardPage() {
                 <Card title="Broken" value={stats.broken} icon={<FaExclamationTriangle />} />
                 <Card title="Pending" value={stats.pending} icon={<FaHourglassStart />} />
                 <Card title="Total Leases" value={stats.total} icon={<FaList />} />
+                <Card
+                    title="Top Labels"
+                    value={stats.popularLabels.length > 0 ? stats.popularLabels[0].label : 'No labels'}
+                    helperText={
+                        stats.popularLabels.length > 0
+                            ? stats.popularLabels.map(({ label, count }) => `${label} (${count})`).join(', ')
+                            : 'Add labels to leases to see trends.'
+                    }
+                    icon={<FaTags />}
+                />
             </div>
 
             <div className="card" style={{marginTop: '2rem'}}>

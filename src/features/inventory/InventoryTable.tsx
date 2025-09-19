@@ -30,14 +30,6 @@ export const InventoryTable: React.FC = () => {
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
   const form = useForm({ defaultValues: { owner: '' } });
 
-  const handleEdit = React.useCallback(
-    (row: InventoryRow) => {
-      form.reset({ owner: row.owner });
-      setEditingRowId(row.id);
-    },
-    [form],
-  );
-
   const columns = useMemo<ColumnDef<InventoryRow>[]>(
     () => [
       { header: 'Asset tag', accessorKey: 'assetTag' },
@@ -51,7 +43,7 @@ export const InventoryTable: React.FC = () => {
           if (!isEditing) {
             return (
               <button type="button" className="link" onClick={() => handleEdit(row.original)}>
-                {String(getValue() ?? '')}
+
               </button>
             );
           }
@@ -81,7 +73,7 @@ export const InventoryTable: React.FC = () => {
         },
       },
     ],
-    [editingRowId, form, handleEdit],
+
   );
 
   const table = useReactTable({ columns, data: rows, getCoreRowModel: getCoreRowModel() });
@@ -93,6 +85,7 @@ export const InventoryTable: React.FC = () => {
     estimateSize: () => 48,
     overscan: 12,
   });
+
 
   React.useEffect(() => {
     startMeasure('inventory-table-render');
