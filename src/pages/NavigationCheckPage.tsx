@@ -3,300 +3,189 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useMemo, useState } from 'react';
-import {
-  FaCheckCircle,
-  FaDownload,
-  FaExclamationTriangle,
-  FaFileCode,
-  FaFileCsv,
-  FaTimesCircle,
-} from 'react-icons/fa';
 
-import Dropdown from '../components/ui/Dropdown';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
+import { appNavigation } from '../app/navigation';
 
-type DiagnosticStatus = 'success' | 'warning' | 'error';
-type DiagnosticSeverity = 'low' | 'medium' | 'high';
-
-interface DiagnosticResult {
-  id: string;
-  check: string;
-  target: string;
-  status: DiagnosticStatus;
-  severity: DiagnosticSeverity;
-  message: string;
-  checkedAt: string;
-  durationMs: number;
+interface RouteDescriptor {
+  path: string;
+  title: string;
+  group: string;
+  loader?: () => Promise<unknown>;
 }
 
-const STATUS_ICONS: Record<DiagnosticStatus, React.ReactNode> = {
-  success: <FaCheckCircle />,
-  warning: <FaExclamationTriangle />,
-  error: <FaTimesCircle />,
-};
+interface RouteHealthResult extends RouteDescriptor {
+  status: 'ok' | 'fail';
+  durationMs: number;
+  error?: string;
+}
 
-const formatDateTime = (isoString: string) => {
-  const date = new Date(isoString);
-  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-};
-
-const createSampleDiagnostics = (): DiagnosticResult[] => {
-  const now = new Date();
-  return [
-    {
-      id: 'NAV-001',
-      check: 'DNS Resolution',
-      target: 'core.netgrip.local',
-      status: 'success',
-      severity: 'low',
-      message: 'Host resolved correctly (10.10.10.10).',
-      checkedAt: now.toISOString(),
-      durationMs: 118,
-    },
-    {
-      id: 'NAV-002',
-      check: 'Gateway Reachability',
-      target: '192.168.1.1',
-      status: 'warning',
-      severity: 'medium',
-      message: 'Latency exceeded threshold (142ms).',
-      checkedAt: new Date(now.getTime() - 2 * 60 * 1000).toISOString(),
-      durationMs: 142,
-    },
-    {
-      id: 'NAV-003',
-      check: 'Routing Consistency',
-      target: 'edge-router-01',
-      status: 'success',
-      severity: 'low',
-      message: 'Routes match expected configuration snapshot.',
-      checkedAt: new Date(now.getTime() - 4 * 60 * 1000).toISOString(),
-      durationMs: 96,
-    },
-    {
-      id: 'NAV-004',
-      check: 'Firewall Policy',
-      target: 'fw-core',
-      status: 'error',
-      severity: 'high',
-      message: 'Unexpected deny rule detected for navigation subnet.',
-      checkedAt: new Date(now.getTime() - 6 * 60 * 1000).toISOString(),
-      durationMs: 87,
-    },
-  ];
-};
-
-const wrapCsvValue = (value: string | number) => {
-  const stringified = String(value ?? '');
-  const escaped = stringified.replace(/"/g, '""');
-  return `"${escaped}"`;
-};
-
-const serializeDiagnosticsToCsv = (data: DiagnosticResult[]) => {
-  const headerRow = [
-    'ID',
-    'Check',
-    'Target',
-    'Status',
-    'Severity',
-    'Message',
-    'Checked At',
-    'Duration (ms)',
-  ]
-    .map(wrapCsvValue)
-    .join(',');
-
-  const bodyRows = data.map(result =>
-    [
-      wrapCsvValue(result.id),
-      wrapCsvValue(result.check),
-      wrapCsvValue(result.target),
-      wrapCsvValue(result.status),
-      wrapCsvValue(result.severity),
-      wrapCsvValue(result.message),
-      wrapCsvValue(new Date(result.checkedAt).toISOString()),
-      wrapCsvValue(result.durationMs),
-    ].join(','),
+const flattenNavigation = (): RouteDescriptor[] =>
+  appNavigation.flatMap(section =>
+    section.items.map(item => ({
+      path: item.path,
+      title: item.translationKey ?? item.title,
+      group: section.title,
+      loader: item.loader,
+    })),
   );
 
-  return [headerRow, ...bodyRows].join('\n');
-};
-
-const triggerFileDownload = (blob: Blob, filename: string) => {
-  const objectUrl = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = objectUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(objectUrl);
-};
+const formatTimestamp = (iso: string) => new Date(iso).toLocaleString();
 
 const NavigationCheckPage: React.FC = () => {
-  const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([]);
+  const routes = useMemo(() => flattenNavigation(), []);
+  const [results, setResults] = useState<RouteHealthResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [lastRun, setLastRun] = useState<string | null>(null);
 
-  const summary = useMemo(
-    () =>
-      diagnostics.reduce(
-        (acc, item) => {
-          acc[item.status] += 1;
-          return acc;
-        },
-        {
-          success: 0,
-          warning: 0,
-          error: 0,
-        } as Record<DiagnosticStatus, number>,
-      ),
-    [diagnostics],
-  );
+  const summary = useMemo(() => {
+    const ok = results.filter(result => result.status === 'ok').length;
+    const fail = results.filter(result => result.status === 'fail').length;
+    return { ok, fail, total: results.length };
+  }, [results]);
 
-  const handleRunDiagnostics = () => {
+  const runHealthCheck = async () => {
     setIsRunning(true);
-    setTimeout(() => {
-      const results = createSampleDiagnostics();
-      setDiagnostics(results);
-      setLastRun(new Date().toISOString());
-      setIsRunning(false);
-    }, 900);
-  };
+    const nextResults: RouteHealthResult[] = [];
 
-  const handleExport = (format: 'csv' | 'json') => {
-    if (!diagnostics.length) {
-      return;
+    for (const route of routes) {
+      const started = performance.now();
+      try {
+        if (route.loader) {
+          await route.loader();
+        }
+        const durationMs = performance.now() - started;
+        nextResults.push({ ...route, status: 'ok', durationMs });
+      } catch (error) {
+        const durationMs = performance.now() - started;
+        nextResults.push({
+          ...route,
+          status: 'fail',
+          durationMs,
+          error: error instanceof Error ? error.message : 'Unknown module error',
+        });
+      }
     }
 
-    const timestamp = new Date().toISOString().replace(/[:T]/g, '-').split('.')[0];
-    const baseFilename = `navigation-diagnostics-${timestamp}`;
+    nextResults.sort((a, b) => {
+      if (a.status === b.status) {
+        return a.title.localeCompare(b.title);
+      }
+      return a.status === 'fail' ? -1 : 1;
+    });
 
-    if (format === 'json') {
-      const json = JSON.stringify(diagnostics, null, 2);
-      const blob = new Blob([json], { type: 'application/json' });
-      triggerFileDownload(blob, `${baseFilename}.json`);
-      return;
-    }
-
-    const csv = serializeDiagnosticsToCsv(diagnostics);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    triggerFileDownload(blob, `${baseFilename}.csv`);
+    setResults(nextResults);
+    setLastRun(new Date().toISOString());
+    setIsRunning(false);
   };
-
-  const hasDiagnostics = diagnostics.length > 0;
 
   return (
     <div className="navigation-check-page">
       <header className="page-header">
         <div className="page-header-copy">
-          <h1>Navigation Check</h1>
+          <h1>Navigation health check</h1>
           <p className="page-subtitle">
-            Run automated diagnostics to verify routing, gateway reachability, and navigation policies across your network.
+            Validate that every lazy route resolves without throwing, and capture a timestamped OK/FAIL summary for release notes.
           </p>
-          {lastRun && <p className="last-run">Last run: {formatDateTime(lastRun)}</p>}
+          {lastRun && <p className="last-run">Last run: {formatTimestamp(lastRun)}</p>}
         </div>
-
         <div className="header-actions">
           <button
-            className={`btn btn-primary${isRunning ? ' is-loading' : ''}`}
-            onClick={handleRunDiagnostics}
-            disabled={isRunning}
             type="button"
+            className={`btn btn-primary ${isRunning ? 'is-loading' : ''}`}
+            onClick={runHealthCheck}
+            disabled={isRunning}
           >
-            <span className="btn-text-content">Run diagnostics</span>
-            {isRunning && <span className="spinner-inline" aria-hidden="true" />}
+            <span className="btn-text-content">{isRunning ? 'Checking…' : 'Run health check'}</span>
+            {isRunning && <span className="spinner-inline" />}
           </button>
-
-          <Dropdown
-            trigger={
-              <button type="button" className="btn" disabled={!hasDiagnostics} aria-disabled={!hasDiagnostics}>
-                <FaDownload />
-                <span>Export</span>
-              </button>
-            }
-          >
-            <button type="button" onClick={() => handleExport('csv')} disabled={!hasDiagnostics}>
-              <FaFileCsv /> Export CSV
-            </button>
-            <button type="button" onClick={() => handleExport('json')} disabled={!hasDiagnostics}>
-              <FaFileCode /> Export JSON
-            </button>
-          </Dropdown>
         </div>
       </header>
 
       <section className="diagnostics-summary">
-        <div className="card summary-card success">
-          <div className="card-icon">
-            <FaCheckCircle />
-          </div>
-          <div className="card-value">{summary.success}</div>
-          <div className="card-title">Passing checks</div>
+        <div className="summary-card success">
+          <p className="card-title">Healthy routes</p>
+          <p className="card-value">{summary.ok}</p>
         </div>
-        <div className="card summary-card warning">
-          <div className="card-icon">
-            <FaExclamationTriangle />
-          </div>
-          <div className="card-value">{summary.warning}</div>
-          <div className="card-title">Warnings</div>
+        <div className="summary-card error">
+          <p className="card-title">Failed routes</p>
+          <p className="card-value">{summary.fail}</p>
         </div>
-        <div className="card summary-card error">
-          <div className="card-icon">
-            <FaTimesCircle />
-          </div>
-          <div className="card-value">{summary.error}</div>
-          <div className="card-title">Failed checks</div>
+        <div className="summary-card">
+          <p className="card-title">Total routes</p>
+          <p className="card-value">{summary.total}</p>
         </div>
       </section>
 
-      <section className="card diagnostics-results">
-        <h2>Diagnostics timeline</h2>
+      <section className="diagnostics-results">
+        <h2>Route validation report</h2>
         <p className="section-hint">
-          Review the detailed output from the most recent diagnostic run. Export results for sharing or further analysis.
+          Each entry attempts to import the lazy module inside an ErrorBoundary. Failures include the thrown message for quick triage.
         </p>
-
-        {hasDiagnostics ? (
-          <div className="table-wrapper">
+        <div className="table-wrapper">
+          {results.length ? (
             <table>
               <thead>
                 <tr>
-                  <th scope="col">Check</th>
-                  <th scope="col">Target</th>
+                  <th scope="col">Route</th>
+                  <th scope="col">Section</th>
                   <th scope="col">Status</th>
-                  <th scope="col">Severity</th>
-                  <th scope="col">Duration</th>
-                  <th scope="col">Checked</th>
+                  <th scope="col">Load time</th>
                   <th scope="col">Notes</th>
                 </tr>
               </thead>
               <tbody>
-                {diagnostics.map(result => (
-                  <tr key={result.id}>
-                    <td>{result.check}</td>
-                    <td className="target-cell">{result.target}</td>
-                    <td>
-                      <span className={`diagnostic-status ${result.status}`}>
-                        {STATUS_ICONS[result.status]}
-                        {result.status}
-                      </span>
-                    </td>
-                    <td className={`severity ${result.severity}`}>{result.severity}</td>
-                    <td>{result.durationMs} ms</td>
-                    <td>{formatDateTime(result.checkedAt)}</td>
-                    <td className="notes-cell">{result.message}</td>
-                  </tr>
+                {results.map(result => (
+                  <ErrorBoundary
+                    key={result.path}
+                    fallback={
+                      <tr>
+                        <td colSpan={5} className="diagnostic-status error">
+                          Failed to render health row for {result.path}
+                        </td>
+                      </tr>
+                    }
+                  >
+                    <RouteResultRow result={result} />
+                  </ErrorBoundary>
                 ))}
               </tbody>
             </table>
-          </div>
-        ) : (
-          <div className="empty-state">
-            <p>No diagnostics available yet. Run diagnostics to generate the latest insights.</p>
-          </div>
-        )}
+          ) : (
+            <div className="empty-state">
+              Launch the health check to populate the OK/FAIL matrix for every route in the application shell.
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );
 };
+
+interface RouteResultRowProps {
+  result: RouteHealthResult;
+}
+
+const RouteResultRow: React.FC<RouteResultRowProps> = ({ result }) => (
+  <tr>
+    <td className="target-cell">
+      <div>
+        <strong>{result.title}</strong>
+      </div>
+      <div>{result.path}</div>
+    </td>
+    <td>{result.group}</td>
+    <td>
+      <span
+        className={`diagnostic-status ${result.status === 'ok' ? 'success' : 'error'}`}
+        aria-label={result.status === 'ok' ? 'OK' : 'FAIL'}
+      >
+        {result.status === 'ok' ? 'OK' : 'FAIL'}
+      </span>
+    </td>
+    <td>{`${Math.round(result.durationMs)} ms`}</td>
+    <td className="notes-cell">{result.error ?? 'Module resolved successfully.'}</td>
+  </tr>
+);
 
 export default NavigationCheckPage;

@@ -35,3 +35,57 @@
 @import './pages/_login.css';
 @import './pages/_reports.css';
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --content-max: 1440px;
+  }
+
+  body {
+    @apply text-neutral-200 antialiased;
+    min-height: 100vh;
+    background-color: var(--netgrip-bg-dark);
+    color: var(--netgrip-text-dark);
+  }
+
+  body[data-theme='dark'] {
+    background-color: var(--netgrip-bg-dark);
+    color: var(--netgrip-text-dark);
+  }
+
+  body[data-theme='light'] {
+    color: var(--netgrip-text-dark);
+    background-color: var(--netgrip-bg-dark);
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-semibold tracking-tight;
+    color: inherit;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl;
+  }
+
+  p {
+    @apply text-base leading-relaxed text-neutral-300;
+  }
+
+  strong {
+    @apply text-neutral-100;
+  }
+}
+

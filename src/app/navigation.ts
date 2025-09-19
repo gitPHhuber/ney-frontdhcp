@@ -3,6 +3,7 @@ import { ComponentType, LazyExoticComponent, lazy } from 'react';
 import { FeatureFlag } from '../shared/config/featureFlags';
 import type { Permission } from '../types';
 
+type LazyImport = () => Promise<{ default: ComponentType<Record<string, unknown>> }>;
 type NavigationComponent = LazyExoticComponent<ComponentType<Record<string, unknown>>>;
 
 export interface NavigationItem {
@@ -14,6 +15,7 @@ export interface NavigationItem {
   translationKey?: string;
   group: string;
   element: NavigationComponent;
+  loader?: LazyImport;
 }
 
 export interface NavigationSection {
@@ -21,17 +23,29 @@ export interface NavigationSection {
   items: NavigationItem[];
 }
 
-const DashboardPage = lazy(() => import('../pages/dashboard'));
-const NavigationDiagnosticsPage = lazy(() => import('../pages/navigation-check'));
-const InventoryPage = lazy(() => import('../pages/inventory/InventoryPage'));
-const TopologyPage = lazy(() => import('../pages/topology/TopologyPage'));
-const AlertsPage = lazy(() => import('../pages/alerts/AlertsPage'));
-const IncidentsPage = lazy(() => import('../pages/incidents/IncidentsPage'));
-const ReportsBuilderPage = lazy(() => import('../pages/reports-builder/ReportsBuilderPage'));
-const ExecutiveDashboardPage = lazy(() => import('../pages/executive-dashboard/ExecutiveDashboardPage'));
-const AutomationPage = lazy(() => import('../pages/automation/AutomationPage'));
-const ProductPassportPage = lazy(() => import('../pages/product-passport/ProductPassportPage'));
-const SettingsPage = lazy(() => import('../pages/SettingsPage'));
+const loadDashboardPage = () => import('../pages/dashboard');
+const loadNavigationDiagnosticsPage = () => import('../pages/navigation-check');
+const loadInventoryPage = () => import('../pages/inventory/InventoryPage');
+const loadTopologyPage = () => import('../pages/topology/TopologyPage');
+const loadAlertsPage = () => import('../pages/alerts/AlertsPage');
+const loadIncidentsPage = () => import('../pages/incidents/IncidentsPage');
+const loadReportsBuilderPage = () => import('../pages/reports-builder/ReportsBuilderPage');
+const loadExecutiveDashboardPage = () => import('../pages/executive-dashboard/ExecutiveDashboardPage');
+const loadAutomationPage = () => import('../pages/automation/AutomationPage');
+const loadProductPassportPage = () => import('../pages/product-passport/ProductPassportPage');
+const loadSettingsPage = () => import('../pages/SettingsPage');
+
+const DashboardPage = lazy(loadDashboardPage);
+const NavigationDiagnosticsPage = lazy(loadNavigationDiagnosticsPage);
+const InventoryPage = lazy(loadInventoryPage);
+const TopologyPage = lazy(loadTopologyPage);
+const AlertsPage = lazy(loadAlertsPage);
+const IncidentsPage = lazy(loadIncidentsPage);
+const ReportsBuilderPage = lazy(loadReportsBuilderPage);
+const ExecutiveDashboardPage = lazy(loadExecutiveDashboardPage);
+const AutomationPage = lazy(loadAutomationPage);
+const ProductPassportPage = lazy(loadProductPassportPage);
+const SettingsPage = lazy(loadSettingsPage);
 
 export const appNavigation: NavigationSection[] = [
   {
@@ -43,6 +57,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'dashboard',
         translationKey: 'navigation.dashboard',
         element: DashboardPage,
+        loader: loadDashboardPage,
         group: 'Operations',
       },
       {
@@ -51,6 +66,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'route',
         translationKey: 'navigation.navigationCheck',
         element: NavigationDiagnosticsPage,
+        loader: loadNavigationDiagnosticsPage,
         group: 'Operations',
         featureFlag: 'navigation-diagnostics-export',
       },
@@ -60,6 +76,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'inventory',
         translationKey: 'navigation.inventory',
         element: InventoryPage,
+        loader: loadInventoryPage,
         group: 'Operations',
         featureFlag: 'inventory-presets',
       },
@@ -69,6 +86,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'topology',
         translationKey: 'navigation.topology',
         element: TopologyPage,
+        loader: loadTopologyPage,
         group: 'Operations',
         featureFlag: 'topology-layouts',
       },
@@ -83,6 +101,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'bell',
         translationKey: 'navigation.alerts',
         element: AlertsPage,
+        loader: loadAlertsPage,
         group: 'Observability',
       },
       {
@@ -91,6 +110,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'incident',
         translationKey: 'navigation.incidents',
         element: IncidentsPage,
+        loader: loadIncidentsPage,
         group: 'Observability',
       },
       {
@@ -99,6 +119,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'reports',
         translationKey: 'navigation.reports',
         element: ReportsBuilderPage,
+        loader: loadReportsBuilderPage,
         group: 'Observability',
         featureFlag: 'reports-builder',
       },
@@ -108,6 +129,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'leader',
         translationKey: 'navigation.executiveDashboard',
         element: ExecutiveDashboardPage,
+        loader: loadExecutiveDashboardPage,
         group: 'Observability',
         featureFlag: 'executive-dashboard-insights',
       },
@@ -122,6 +144,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'robot',
         translationKey: 'navigation.automation',
         element: AutomationPage,
+        loader: loadAutomationPage,
         group: 'Automation',
         featureFlag: 'automation-playbooks',
       },
@@ -131,6 +154,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'passport',
         translationKey: 'navigation.productPassports',
         element: ProductPassportPage,
+        loader: loadProductPassportPage,
         group: 'Automation',
         featureFlag: 'product-passport-autofill',
       },
@@ -140,6 +164,7 @@ export const appNavigation: NavigationSection[] = [
         icon: 'settings',
         translationKey: 'navigation.settings',
         element: SettingsPage,
+        loader: loadSettingsPage,
         group: 'Automation',
         permission: 'settings:read',
       },

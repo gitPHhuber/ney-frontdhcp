@@ -11,6 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
+playwright-report
+test-results
+.playwright
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +25,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Binary artifacts
+docs/diagnostics/*.png
+static/images/*.png
+static/images/*.jpg
+static/images/*.jpeg

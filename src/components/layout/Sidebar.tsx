@@ -28,29 +28,29 @@ const Sidebar = () => {
             </div>
             <nav>
                 <ul className="sidebar-nav">
-                    <li><Link href="#/dashboard"><FaTachometerAlt /> Dashboard</Link></li>
-                    <li><Link href="#/profile"><FaUser /> Profile</Link></li>
+                    <li><Link href="/dashboard"><FaTachometerAlt /> Dashboard</Link></li>
+                    <li><Link href="/profile"><FaUser /> Profile</Link></li>
 
                     {hasPermission('leases:read') && (
-                        <li><Link href="#/leases"><FaList /> Leases</Link></li>
+                        <li><Link href="/leases"><FaList /> Leases</Link></li>
                     )}
                     {hasPermission('static_ips:read') && (
-                        <li><Link href="#/static-ips"><FaAnchor /> Static IPs</Link></li>
+                        <li><Link href="/static-ips"><FaAnchor /> Static IPs</Link></li>
                     )}
                     {hasPermission('reports:read') && (
-                        <li><Link href="#/reports"><FaChartLine /> Reports</Link></li>
+                        <li><Link href="/reports"><FaChartLine /> Reports</Link></li>
                     )}
                     
                     {hasPermission('roles:read') && (
-                         <li><Link href="#/roles"><FaUserShield /> Roles</Link></li>
+                         <li><Link href="/roles"><FaUserShield /> Roles</Link></li>
                     )}
                     {hasPermission('settings:read') && (
                         <>
-                            <li><Link href="#/dhcp-server"><FaServer /> DHCP Server</Link></li>
-                            <li><Link href="#/settings"><FaCog /> Settings</Link></li>
+                            <li><Link href="/dhcp-server"><FaServer /> DHCP Server</Link></li>
+                            <li><Link href="/settings"><FaCog /> Settings</Link></li>
                         </>
                     )}
-                     <li><Link href="#/help"><FaQuestionCircle /> Help</Link></li>
+                     <li><Link href="/help"><FaQuestionCircle /> Help</Link></li>
                 </ul>
             </nav>
             <footer className="sidebar-footer">

@@ -9,6 +9,8 @@ import { FaArrowRight } from 'react-icons/fa';
 import { useDhcpServer } from '../context/DhcpServerContext';
 import { useTheme } from '../context/ThemeContext';
 import { Theme } from '../context/ThemeContext';
+import { GuidedTour } from '../widgets/guided-tour/GuidedTour';
+import { NavLink } from 'react-router-dom';
 
 function SettingsPage() {
     const { hasPermission } = useAuth();
@@ -48,9 +50,9 @@ function SettingsPage() {
                  <div className="settings-card">
                     <h2>Access Control</h2>
                     <p>Define user roles and assign granular permissions.</p>
-                    <a href="#/roles" className="btn btn-primary">
+                    <NavLink to="/roles" className="btn btn-primary">
                         Manage Roles & Permissions <FaArrowRight />
-                    </a>
+                    </NavLink>
                 </div>
             )}
            
@@ -112,6 +114,8 @@ function SettingsPage() {
                     <UserManagementTable />
                 </div>
             )}
+
+            <GuidedTour />
         </>
     );
 }
