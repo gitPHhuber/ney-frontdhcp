@@ -1,1 +1,1 @@
-export { default } from '../NavigationCheckPage';
+export { default } from './NavigationCheckPage';

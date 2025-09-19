@@ -25,10 +25,12 @@ const AppShell: React.FC = () => {
 
   const paletteHotkey = useMemo(
     () => ({
-      description: 'Toggle command palette',
-      group: 'Navigation',
+      description: t('commandPalette.shortcutDescription', {
+        defaultValue: 'Toggle command palette',
+      }),
+      group: t('navigation.primary', { defaultValue: 'Navigation' }),
     }),
-    [],
+    [t],
   );
 
   useHotkeys('mod+k', togglePalette, paletteHotkey);
@@ -68,13 +70,20 @@ const AppShell: React.FC = () => {
     <div className="app-shell grid min-h-screen grid-cols-[280px_1fr] grid-rows-[56px_1fr] text-neutral-100">
       <aside className="app-shell__sidebar col-start-1 row-span-2 flex min-h-0 flex-col border-r border-white/10 bg-slate-950/75 px-6 py-8">
         <div className="flex items-center justify-between gap-3 px-1">
-          <span className="brand text-sm font-semibold uppercase tracking-[0.24em] text-white">NetGrip NOC</span>
+          <span className="brand text-sm font-semibold uppercase tracking-[0.24em] text-white">
+            {t('brand.name', { defaultValue: 'NetGrip NOC' })}
+          </span>
         </div>
-        <nav className="app-shell__nav mt-8 space-y-6" aria-label={t('navigation.primary', { defaultValue: 'Primary navigation' })}>
+        <nav
+          className="app-shell__nav mt-8 space-y-6"
+          aria-label={t('navigation.primary', { defaultValue: 'Primary navigation' })}
+        >
           {appNavigation.map(section => (
             <section key={section.title} className="space-y-3">
               <p className="nav-section__title px-3 text-xs font-medium uppercase tracking-[0.2em] text-neutral-400/80">
-                {section.title}
+                {section.translationKey
+                  ? t(section.translationKey, { defaultValue: section.title })
+                  : section.title}
               </p>
               <div className="space-y-1">{section.items.map(renderItem)}</div>
             </section>
@@ -88,12 +97,16 @@ const AppShell: React.FC = () => {
           onClick={() => setPaletteOpen(true)}
         >
           ⌘K
-          <span className="hidden sm:inline">{t('commandPalette.open', { defaultValue: 'Command palette' })}</span>
+          <span className="hidden sm:inline">
+            {t('commandPalette.open', { defaultValue: 'Command palette' })}
+          </span>
         </button>
         <div className="flex items-center gap-4">
           <NotificationCenter />
           <div className="user-menu inline-flex items-center gap-3 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-neutral-100">
-            <span className="font-medium leading-none">{user?.username ?? 'guest'}</span>
+            <span className="font-medium leading-none">
+              {user?.username ?? t('auth.userFallback', { defaultValue: 'guest' })}
+            </span>
             <button
               type="button"
               className="ghost inline-flex items-center gap-1 text-sm text-neutral-300 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"

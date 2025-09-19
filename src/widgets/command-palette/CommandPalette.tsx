@@ -4,6 +4,7 @@ import { appNavigation } from '../../app/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { isFeatureEnabled } from '../../shared/config/featureFlags';
 import { useHotkeysContext } from '../../shared/hotkeys/HotkeysProvider';
+import { useTranslation } from 'react-i18next';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const titleId = useId();
   const descriptionId = useId();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!isOpen) {
@@ -85,8 +87,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
   }, [isOpen]);
 
   const options = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
     return appNavigation
       .flatMap(section => section.items)
+      .map(item => {
+        const label = item.translationKey
+          ? t(item.translationKey, { defaultValue: item.title })
+          : item.title;
+        const groupLabel = item.groupKey
+          ? t(item.groupKey, { defaultValue: item.group })
+          : item.group;
+        return { ...item, label, groupLabel };
+      })
       .filter(item => {
         if (item.featureFlag && !isFeatureEnabled(item.featureFlag)) {
           return false;
@@ -98,12 +110,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
             return false;
           }
         }
+        if (normalizedQuery.length === 0) {
+          return true;
+        }
         return (
-          item.title.toLowerCase().includes(query.toLowerCase()) ||
-          item.path.toLowerCase().includes(query.toLowerCase())
+          item.label.toLowerCase().includes(normalizedQuery) ||
+          item.groupLabel.toLowerCase().includes(normalizedQuery) ||
+          item.path.toLowerCase().includes(normalizedQuery)
         );
       });
-  }, [hasPermission, query]);
+  }, [hasPermission, query, t]);
 
   if (!isOpen) {
     return null;
@@ -129,6 +145,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
       <div
         ref={dialogRef}
         className="command-palette__content"
+        data-testid="command-palette"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -138,19 +155,29 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
       >
         <header className="command-palette__header">
           <div>
-            <h2 id={titleId}>Command palette</h2>
+            <h2 id={titleId}>{t('commandPalette.title', { defaultValue: 'Command palette' })}</h2>
             <p id={descriptionId} className="muted">
-              Search actions, data sets, and navigation targets. Use Ctrl/⌘ + K to open, Esc to close.
+              {t('commandPalette.subtitle', {
+                defaultValue:
+                  'Search actions, datasets, and navigation targets. Use Ctrl/⌘ + K to open, Esc to close.',
+              })}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="ghost" aria-label="Close command palette">
+          <button
+            type="button"
+            onClick={onClose}
+            className="ghost"
+            aria-label={t('commandPalette.close', { defaultValue: 'Close command palette' })}
+          >
             Esc
           </button>
         </header>
         <input
           ref={inputRef}
           type="search"
-          placeholder="Search nodes, reports, incidents…"
+          placeholder={t('commandPalette.searchPlaceholder', {
+            defaultValue: 'Search nodes, reports, incidents…',
+          })}
           value={query}
           onChange={event => setQuery(event.target.value)}
         />
@@ -166,20 +193,22 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
                   onClose();
                 }}
               >
-                <span>{option.title}</span>
-                <span className="muted">{option.group}</span>
+                <span>{option.label}</span>
+                <span className="muted">{option.groupLabel}</span>
               </button>
             </li>
           ))}
           {options.length === 0 && (
             <li className="muted" role="option">
-              No matches
+              {t('commandPalette.noResults', { defaultValue: 'No matches' })}
             </li>
           )}
         </ul>
         {visibleShortcuts.length > 0 && (
           <footer className="command-palette__footer">
-            <p className="muted">Keyboard shortcuts</p>
+            <p className="muted">
+              {t('commandPalette.shortcutsHeading', { defaultValue: 'Keyboard shortcuts' })}
+            </p>
             <ul className="command-palette__shortcuts">
               {visibleShortcuts.map(shortcut => (
                 <li key={shortcut.combo} className="command-palette__shortcut">

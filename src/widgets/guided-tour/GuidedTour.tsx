@@ -1,43 +1,23 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface GuidedTourProps {
   onComplete?: () => void;
 }
 
-interface TourStep {
-  title: string;
-  body: string;
+interface TourTemplate {
+  titleKey: string;
+  bodyKey: string;
 }
 
-const TOUR_STEPS: TourStep[] = [
-  {
-    title: 'Dashboard overview',
-    body: 'Track SLA compliance, DHCP load, and capacity from the executive dashboard widgets.',
-  },
-  {
-    title: 'Inventory insights',
-    body: 'Use filters in Inventory to locate assets, passports, and lifecycle metadata instantly.',
-  },
-  {
-    title: 'Topology explorer',
-    body: 'Switch between force, radial, or geo layouts to validate connectivity and dependencies.',
-  },
-  {
-    title: 'Alerts and incidents',
-    body: 'Investigate alerts, then escalate to incidents with full remediation context and timelines.',
-  },
-  {
-    title: 'Automation playbooks',
-    body: 'Trigger ready-made workflows for failover, compliance checks, or on-demand provisioning.',
-  },
-  {
-    title: 'Reports & analytics',
-    body: 'Build ad-hoc or scheduled reports, then export executive-ready PDFs in one click.',
-  },
-  {
-    title: 'Command palette',
-    body: 'Press Ctrl/⌘ + K anywhere to jump to routes, run playbooks, or open recent incident timelines.',
-  },
+const TOUR_TEMPLATES: TourTemplate[] = [
+  { titleKey: 'guidedTour.steps.dashboard.title', bodyKey: 'guidedTour.steps.dashboard.body' },
+  { titleKey: 'guidedTour.steps.inventory.title', bodyKey: 'guidedTour.steps.inventory.body' },
+  { titleKey: 'guidedTour.steps.topology.title', bodyKey: 'guidedTour.steps.topology.body' },
+  { titleKey: 'guidedTour.steps.incidents.title', bodyKey: 'guidedTour.steps.incidents.body' },
+  { titleKey: 'guidedTour.steps.automation.title', bodyKey: 'guidedTour.steps.automation.body' },
+  { titleKey: 'guidedTour.steps.reports.title', bodyKey: 'guidedTour.steps.reports.body' },
+  { titleKey: 'guidedTour.steps.palette.title', bodyKey: 'guidedTour.steps.palette.body' },
 ];
 
 export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
@@ -46,6 +26,16 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const titleId = useId();
   const descriptionId = useId();
+  const { t } = useTranslation();
+
+  const steps = useMemo(
+    () =>
+      TOUR_TEMPLATES.map(template => ({
+        title: t(template.titleKey),
+        body: t(template.bodyKey),
+      })),
+    [t],
+  );
 
   useEffect(() => {
     if (!isOpen) {
@@ -79,27 +69,31 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
   };
 
   const goToNext = () => {
-    if (stepIndex === TOUR_STEPS.length - 1) {
+    if (stepIndex === steps.length - 1) {
       closeTour();
       return;
     }
-    setStepIndex(previous => Math.min(previous + 1, TOUR_STEPS.length - 1));
+    setStepIndex(previous => Math.min(previous + 1, steps.length - 1));
   };
 
   const goToPrevious = () => {
     setStepIndex(previous => Math.max(previous - 1, 0));
   };
 
-  const activeStep = useMemo(() => TOUR_STEPS[stepIndex], [stepIndex]);
+  const activeStep = steps[stepIndex];
 
   return (
     <section className="guided-tour-card">
       <div className="guided-tour-card__body">
-        <h2>Guided tour</h2>
-        <p className="muted">Preview the eight most important workflows before inviting the wider team.</p>
+        <h2>{t('guidedTour.cardTitle', { defaultValue: 'Guided tour' })}</h2>
+        <p className="muted">
+          {t('guidedTour.cardDescription', {
+            defaultValue: 'Preview the eight most important workflows before inviting the wider team.',
+          })}
+        </p>
       </div>
       <button type="button" className="btn btn-primary" onClick={openTour}>
-        Start interactive tour
+        {t('guidedTour.start', { defaultValue: 'Start interactive tour' })}
       </button>
 
       {isOpen && (
@@ -115,12 +109,18 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
             onClick={event => event.stopPropagation()}
           >
             <header className="guided-tour__panel-header">
-              <p className="guided-tour__step">Step {stepIndex + 1} of {TOUR_STEPS.length}</p>
+              <p className="guided-tour__step">
+                {t('guidedTour.stepLabel', {
+                  current: stepIndex + 1,
+                  total: steps.length,
+                  defaultValue: `Step ${stepIndex + 1} of ${steps.length}`,
+                })}
+              </p>
               <button
                 type="button"
                 className="ghost"
                 onClick={closeTour}
-                aria-label="Close guided tour"
+                aria-label={t('guidedTour.close', { defaultValue: 'Close guided tour' })}
               >
                 ×
               </button>
@@ -136,10 +136,12 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
                 onClick={goToPrevious}
                 disabled={stepIndex === 0}
               >
-                Back
+                {t('guidedTour.previous', { defaultValue: 'Back' })}
               </button>
               <button type="button" className="btn btn-primary" onClick={goToNext}>
-                {stepIndex === TOUR_STEPS.length - 1 ? 'Finish tour' : 'Next step'}
+                {stepIndex === steps.length - 1
+                  ? t('guidedTour.finish', { defaultValue: 'Finish tour' })
+                  : t('guidedTour.next', { defaultValue: 'Next step' })}
               </button>
             </footer>
           </div>

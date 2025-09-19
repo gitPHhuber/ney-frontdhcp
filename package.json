@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint \"src/app/**/*.{ts,tsx}\" \"src/entities/**/*.{ts,tsx}\" \"src/features/**/*.{ts,tsx}\" \"src/pages/erp/**/*.{ts,tsx}\" \"src/pages/mes/**/*.{ts,tsx}\" \"src/pages/tasks/**/*.{ts,tsx}\" src/pages/NavigationCheckPage.tsx \"src/shared/**/*.{ts,tsx}\"",
+    "lint": "eslint \"src/app/**/*.{ts,tsx}\" \"src/entities/**/*.{ts,tsx}\" \"src/features/**/*.{ts,tsx}\" \"src/pages/erp/**/*.{ts,tsx}\" \"src/pages/mes/**/*.{ts,tsx}\" \"src/pages/tasks/**/*.{ts,tsx}\" \"src/pages/navigation-check/**/*.{ts,tsx}\" \"src/shared/**/*.{ts,tsx}\"",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",

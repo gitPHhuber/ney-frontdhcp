@@ -63,15 +63,15 @@ test.describe('App shell smoke', () => {
 
     await page.goto(toHashUrl('/dashboard'));
 
-    const notificationsButton = page.getByRole('button', { name: /notifications/i });
+    const notificationsButton = page.getByTestId('notifications-toggle');
     await notificationsButton.click();
-    const notificationsDialog = page.getByRole('dialog', { name: 'Notifications' });
+    const notificationsDialog = page.getByTestId('notifications-panel');
     await expect(notificationsDialog).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(notificationsDialog).toBeHidden();
 
     await page.keyboard.press('Control+KeyK');
-    const paletteDialog = page.getByRole('dialog', { name: 'Command palette' });
+    const paletteDialog = page.getByTestId('command-palette');
     await expect(paletteDialog).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(paletteDialog).toBeHidden();

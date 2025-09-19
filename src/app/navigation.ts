@@ -14,12 +14,14 @@ export interface NavigationItem {
   featureFlag?: FeatureFlag;
   translationKey?: string;
   group: string;
+  groupKey?: string;
   element: NavigationComponent;
   loader?: LazyImport;
 }
 
 export interface NavigationSection {
   title: string;
+  translationKey?: string;
   items: NavigationItem[];
 }
 
@@ -50,6 +52,7 @@ const SettingsPage = lazy(loadSettingsPage);
 export const appNavigation: NavigationSection[] = [
   {
     title: 'Operations',
+    translationKey: 'navigation.sections.operations',
     items: [
       {
         path: '/dashboard',
@@ -59,6 +62,7 @@ export const appNavigation: NavigationSection[] = [
         element: DashboardPage,
         loader: loadDashboardPage,
         group: 'Operations',
+        groupKey: 'navigation.sections.operations',
       },
       {
         path: '/navigation-check',
@@ -68,6 +72,7 @@ export const appNavigation: NavigationSection[] = [
         element: NavigationDiagnosticsPage,
         loader: loadNavigationDiagnosticsPage,
         group: 'Operations',
+        groupKey: 'navigation.sections.operations',
         featureFlag: 'navigation-diagnostics-export',
       },
       {
@@ -78,6 +83,7 @@ export const appNavigation: NavigationSection[] = [
         element: InventoryPage,
         loader: loadInventoryPage,
         group: 'Operations',
+        groupKey: 'navigation.sections.operations',
         featureFlag: 'inventory-presets',
       },
       {
@@ -88,12 +94,14 @@ export const appNavigation: NavigationSection[] = [
         element: TopologyPage,
         loader: loadTopologyPage,
         group: 'Operations',
+        groupKey: 'navigation.sections.operations',
         featureFlag: 'topology-layouts',
       },
     ],
   },
   {
     title: 'Observability',
+    translationKey: 'navigation.sections.observability',
     items: [
       {
         path: '/alerts',
@@ -103,6 +111,7 @@ export const appNavigation: NavigationSection[] = [
         element: AlertsPage,
         loader: loadAlertsPage,
         group: 'Observability',
+        groupKey: 'navigation.sections.observability',
       },
       {
         path: '/incidents',
@@ -112,6 +121,7 @@ export const appNavigation: NavigationSection[] = [
         element: IncidentsPage,
         loader: loadIncidentsPage,
         group: 'Observability',
+        groupKey: 'navigation.sections.observability',
       },
       {
         path: '/reports/builder',
@@ -121,6 +131,7 @@ export const appNavigation: NavigationSection[] = [
         element: ReportsBuilderPage,
         loader: loadReportsBuilderPage,
         group: 'Observability',
+        groupKey: 'navigation.sections.observability',
         featureFlag: 'reports-builder',
       },
       {
@@ -131,12 +142,14 @@ export const appNavigation: NavigationSection[] = [
         element: ExecutiveDashboardPage,
         loader: loadExecutiveDashboardPage,
         group: 'Observability',
+        groupKey: 'navigation.sections.observability',
         featureFlag: 'executive-dashboard-insights',
       },
     ],
   },
   {
     title: 'Automation',
+    translationKey: 'navigation.sections.automation',
     items: [
       {
         path: '/automation',
@@ -146,6 +159,7 @@ export const appNavigation: NavigationSection[] = [
         element: AutomationPage,
         loader: loadAutomationPage,
         group: 'Automation',
+        groupKey: 'navigation.sections.automation',
         featureFlag: 'automation-playbooks',
       },
       {
@@ -156,6 +170,7 @@ export const appNavigation: NavigationSection[] = [
         element: ProductPassportPage,
         loader: loadProductPassportPage,
         group: 'Automation',
+        groupKey: 'navigation.sections.automation',
         featureFlag: 'product-passport-autofill',
       },
       {
@@ -166,6 +181,7 @@ export const appNavigation: NavigationSection[] = [
         element: SettingsPage,
         loader: loadSettingsPage,
         group: 'Automation',
+        groupKey: 'navigation.sections.automation',
         permission: 'settings:read',
       },
     ],
