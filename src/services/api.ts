@@ -6,6 +6,15 @@ import { MOCK_LEASES, MOCK_STATIC_LEASES } from '../data/mockData';
 // Fix: Corrected import path for types
 import { Lease, User, Role, Permission, DhcpServerState } from '../types/index';
 
+type LeaseStorageShape = Omit<Lease, 'labels'> & { labels?: string[] };
+
+const normalizeLease = (lease: LeaseStorageShape): Lease => ({
+    ...lease,
+    labels: Array.isArray(lease.labels) ? lease.labels : [],
+});
+
+const normalizeLeases = (items: LeaseStorageShape[]): Lease[] => items.map(normalizeLease);
+
 // --- LOCAL STORAGE HELPERS ---
 const loadFromStorage = <T>(key: string, defaultValue: T): T => {
     try {
@@ -63,8 +72,8 @@ const INITIAL_DHCP_SERVER: DhcpServerState = {
     logs: []
 };
 
-let leases = loadFromStorage('netgrip_leases', [...MOCK_LEASES]);
-let staticLeases = loadFromStorage('netgrip_static_leases', [...MOCK_STATIC_LEASES]);
+let leases = normalizeLeases(loadFromStorage<LeaseStorageShape[]>('netgrip_leases', [...MOCK_LEASES]));
+let staticLeases = normalizeLeases(loadFromStorage<LeaseStorageShape[]>('netgrip_static_leases', [...MOCK_STATIC_LEASES]));
 let MOCK_ROLES = loadFromStorage('netgrip_roles', INITIAL_ROLES);
 let MOCK_USERS = loadFromStorage('netgrip_users', INITIAL_USERS);
 let MOCK_DHCP_SERVER = loadFromStorage('netgrip_dhcp_server', INITIAL_DHCP_SERVER);
@@ -229,8 +238,30 @@ export const api = {
   }),
 
   // --- Dashboard & Leases API ---
-  getDashboardStats: (): Promise<any> => new Promise(resolve => {
+  getDashboardStats: (): Promise<{
+    total: number;
+    active: number;
+    in_work: number;
+    broken: number;
+    pending: number;
+    completed: number;
+    popularLabels: { label: string; count: number }[];
+  }> => new Promise(resolve => {
     setTimeout(() => {
+        const labelCounts = leases.reduce<Record<string, number>>((acc, lease) => {
+            lease.labels.forEach(label => {
+                const normalizedLabel = label.trim();
+                if (!normalizedLabel) return;
+                acc[normalizedLabel] = (acc[normalizedLabel] || 0) + 1;
+            });
+            return acc;
+        }, {});
+
+        const popularLabels = Object.entries(labelCounts)
+            .map(([label, count]) => ({ label, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 3);
+
         const stats = {
             total: leases.length,
             active: leases.filter(l => l.status === 'active').length,
@@ -238,20 +269,22 @@ export const api = {
             broken: leases.filter(l => l.status === 'broken').length,
             pending: leases.filter(l => l.status === 'pending').length,
             completed: leases.filter(l => l.status === 'completed').length,
+            popularLabels,
         };
         resolve(stats);
     }, 300);
   }),
   getLeases: (): Promise<Lease[]> => new Promise(resolve => {
-    setTimeout(() => resolve([...leases]), 300);
+    setTimeout(() => resolve(leases.map(lease => ({ ...lease, labels: [...lease.labels] }))), 300);
   }),
   editLease: (updatedLease: Lease): Promise<Lease> => new Promise((resolve, reject) => {
     setTimeout(() => {
       const index = leases.findIndex(l => l.id === updatedLease.id);
       if (index !== -1) {
-        leases[index] = updatedLease;
+        const normalizedLease = normalizeLease(updatedLease);
+        leases[index] = normalizedLease;
         saveToStorage('netgrip_leases', leases);
-        resolve(updatedLease);
+        resolve(normalizedLease);
       } else {
         reject(new Error('Lease not found'));
       }
@@ -265,7 +298,7 @@ export const api = {
     }, 300);
   }),
   getStaticLeases: (): Promise<Lease[]> => new Promise(resolve => {
-    setTimeout(() => resolve([...staticLeases]), 300);
+    setTimeout(() => resolve(staticLeases.map(lease => ({ ...lease, labels: [...lease.labels] }))), 300);
   }),
   addStaticLease: (data: { ip: string; mac: string; hostname: string }): Promise<Lease> => new Promise(resolve => {
     setTimeout(() => {
@@ -275,6 +308,7 @@ export const api = {
         status: 'reserved',
         taken_by: 'admin',
         priority: 'medium',
+        labels: [],
       };
       staticLeases.push(newStaticLease);
       saveToStorage('netgrip_static_leases', staticLeases);
