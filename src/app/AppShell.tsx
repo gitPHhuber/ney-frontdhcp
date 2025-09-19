@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../context/AuthContext';
 import { isFeatureEnabled } from '../shared/config/featureFlags';
+import { useHotkeys } from '../shared/hotkeys/useHotkeys';
 import { CommandPalette } from '../widgets/command-palette/CommandPalette';
 import { NotificationCenter } from '../widgets/notification-center/NotificationCenter';
 
@@ -17,6 +18,19 @@ const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const { t } = useTranslation();
   const { user, logout, hasPermission } = useAuth();
   const [isPaletteOpen, setPaletteOpen] = useState(false);
+
+  const togglePalette = useCallback(
+    (event: KeyboardEvent) => {
+      event.preventDefault();
+      setPaletteOpen(previous => !previous);
+    },
+    [],
+  );
+
+  useHotkeys('mod+k', togglePalette, {
+    description: 'Toggle command palette',
+    group: 'Navigation',
+  });
 
   const renderItem = (item: NavigationItem) => {
     const enabledByFlag = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;
