@@ -26,6 +26,7 @@
 /* 4. Layout */
 @import './layout/_layout.css';
 @import './layout/_sidebar.css';
+@import './app/_app-shell.css';
 
 /* 5. Page-Specific Styles */
 @import './pages/_dashboard.css';
@@ -33,3 +34,4 @@
 @import './pages/_error.css';
 @import './pages/_login.css';
 @import './pages/_reports.css';
+@import './pages/_navigation-check.css';
