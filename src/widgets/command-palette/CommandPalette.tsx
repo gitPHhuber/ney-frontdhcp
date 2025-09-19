@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { appNavigation } from '../../app/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { isFeatureEnabled } from '../../shared/config/featureFlags';
+import { useHotkeysContext } from '../../shared/hotkeys/HotkeysProvider';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const { hasPermission } = useAuth();
+  const { shortcuts } = useHotkeysContext();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -51,6 +53,21 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
     return null;
   }
 
+  const visibleShortcuts = shortcuts.filter(shortcut => Boolean(shortcut.description));
+
+  const formatCombo = (combo: string) =>
+    combo
+      .split('+')
+      .map(part => {
+        if (part === 'mod') return 'Ctrl / ⌘';
+        if (part === 'ctrl') return 'Ctrl';
+        if (part === 'meta') return '⌘';
+        if (part === 'shift') return 'Shift';
+        if (part === 'alt') return 'Alt';
+        return part.length === 1 ? part.toUpperCase() : `${part.charAt(0).toUpperCase()}${part.slice(1)}`;
+      })
+      .join(' + ');
+
   return (
     <div className="command-palette" role="dialog" aria-modal onClick={onClose}>
       <div
@@ -83,6 +100,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
           ))}
           {options.length === 0 && <li className="muted">No matches</li>}
         </ul>
+        {visibleShortcuts.length > 0 && (
+          <footer className="command-palette__footer">
+            <p className="muted">Keyboard shortcuts</p>
+            <ul className="command-palette__shortcuts">
+              {visibleShortcuts.map(shortcut => (
+                <li key={shortcut.combo} className="command-palette__shortcut">
+                  <span>{shortcut.description}</span>
+                  <kbd>{formatCombo(shortcut.combo)}</kbd>
+                </li>
+              ))}
+            </ul>
+          </footer>
+        )}
       </div>
     </div>
   );

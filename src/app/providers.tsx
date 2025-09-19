@@ -6,6 +6,7 @@ import ErrorBoundary from '../components/ui/ErrorBoundary';
 import { AuthProvider } from '../context/AuthContext';
 import { DhcpServerProvider } from '../context/DhcpServerContext';
 import { ThemeProvider } from '../context/ThemeContext';
+import { HotkeysProvider } from '../shared/hotkeys/HotkeysProvider';
 import { i18n } from '../shared/config/i18n';
 import { Toaster } from '../shared/ui/Toaster';
 
@@ -30,14 +31,16 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
     <ErrorBoundary>
       <I18nextProvider i18n={i18n}>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            <AuthProvider>
-              <DhcpServerProvider>
-                {children}
-                <Toaster />
-              </DhcpServerProvider>
-            </AuthProvider>
-          </ThemeProvider>
+          <HotkeysProvider>
+            <ThemeProvider>
+              <AuthProvider>
+                <DhcpServerProvider>
+                  {children}
+                  <Toaster />
+                </DhcpServerProvider>
+              </AuthProvider>
+            </ThemeProvider>
+          </HotkeysProvider>
         </QueryClientProvider>
       </I18nextProvider>
     </ErrorBoundary>
