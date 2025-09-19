@@ -16,6 +16,7 @@ export const queryKeys = {
     all: ['reports'] as const,
     builder: ['reports', 'builder'] as const,
   },
+
   productPassports: {
     all: ['product-passports'] as const,
     byId: (id: string) => [...queryKeys.productPassports.all, id] as const,

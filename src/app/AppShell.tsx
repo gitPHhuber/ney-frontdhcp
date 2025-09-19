@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { appNavigation, NavigationItem } from './navigation';
@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { NotificationCenter } from '../widgets/notification-center/NotificationCenter';
 import { CommandPalette } from '../widgets/command-palette/CommandPalette';
 import { isFeatureEnabled } from '../shared/config/featureFlags';
+
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -16,16 +17,6 @@ const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const { user, logout, hasPermission } = useAuth();
   const [isPaletteOpen, setPaletteOpen] = useState(false);
 
-  useEffect(() => {
-    const handler = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        setPaletteOpen(true);
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
 
   const renderItem = (item: NavigationItem) => {
     const enabledByFlag = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;

@@ -20,6 +20,7 @@ const resources = {
         productPassports: 'Product Passports',
         navigationCheck: 'Navigation Check',
         settings: 'Settings',
+
       },
     },
   },
@@ -41,6 +42,7 @@ const resources = {
         productPassports: 'Паспорта изделий',
         navigationCheck: 'Навигационная проверка',
         settings: 'Настройки',
+
       },
     },
   },

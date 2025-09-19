@@ -27,18 +27,19 @@ src/
 ├── pages/                   # Top-level routed screens
 ├── widgets/                 # Cross-cutting UI widgets (command palette, notifications, guided tour)
 ├── features/                # Feature slices (inventory table, topology canvas, reports builder...)
-├── entities/                # (reserved) data-centric components/models
+
 ├── shared/                  # Config, hooks, UI primitives, utilities
 └── styles/                  # Design tokens and component/page styles
 ```
 
-`src/app/providers.tsx` wires Theme, TanStack Query, i18n, legacy DHCP contexts, an error boundary, and the global toaster. Routes are hash-based and lazy-loaded for code-splitting; Suspense fallbacks use lightweight skeletons.
+
 
 ### Feature scaffolds
 
 | Area | Highlights |
 | --- | --- |
 | Inventory (`features/inventory/InventoryTable.tsx`) | Virtualised TanStack Table with inline edit stub, export presets hooks, performance markers. |
+
 | Topology (`features/topology/TopologyCanvas.tsx`) | Cytoscape canvas with layout switching placeholder and animated status badges. |
 | Reports (`features/reports/ReportsBuilderCanvas.tsx`) | Drag-and-drop ready form with preset selection and export CTAs. |
 | Automation (`features/automation/PlaybookList.tsx`) | Playbook list with dry-run/launch slots and risk scoring badges. |
@@ -49,12 +50,10 @@ Executive dashboards, incidents, alerts, and change calendars are stubbed as con
 ### Observability & UX aids
 
 * **Notification Center** accumulates non-P1/P2 alerts, while critical ones can surface through the Sonner toaster.
-* **Command Palette (`Cmd/Ctrl+K`)** enables quick navigation to nodes, metrics, reports, or playbooks.
+
 * **Guided tour** and inline hints accelerate onboarding with links to documentation stubs.
 * **Performance tooling** via `shared/lib/performance.ts` exposes `startMeasure/endMeasure` helpers to instrument heavy tables/topology renders.
 
 ### Feature flags & caching
 
-Feature availability is controlled via `shared/config/featureFlags.ts`. Toggle flags to stage UI variants or gate new topology layouts/playbook engines.
 
-TanStack Query cache keys follow a hierarchical convention (`inventory/`, `metrics/`, `alerts/*`) defined in `shared/api/queryKeys.ts`, simplifying selective invalidation.

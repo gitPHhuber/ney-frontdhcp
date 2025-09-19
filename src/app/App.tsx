@@ -43,7 +43,7 @@ const App: React.FC = () => {
             <Route index element={<Navigate to="/dashboard" replace />} />
             {appNavigation.flatMap(section =>
               section.items.map(item => (
-                <Route key={item.path} path={item.path} element={<RouteElement item={item} />} />
+
               )),
             )}
             <Route path="*" element={<NotFoundPage />} />

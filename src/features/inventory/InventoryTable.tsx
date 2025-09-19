@@ -43,7 +43,7 @@ export const InventoryTable: React.FC = () => {
           if (!isEditing) {
             return (
               <button type="button" className="link" onClick={() => handleEdit(row.original)}>
-                {getValue<string>()}
+
               </button>
             );
           }
@@ -73,7 +73,7 @@ export const InventoryTable: React.FC = () => {
         },
       },
     ],
-    [editingRowId, form],
+
   );
 
   const table = useReactTable({ columns, data: rows, getCoreRowModel: getCoreRowModel() });
@@ -86,10 +86,6 @@ export const InventoryTable: React.FC = () => {
     overscan: 12,
   });
 
-  const handleEdit = (row: InventoryRow) => {
-    form.reset({ owner: row.owner });
-    setEditingRowId(row.id);
-  };
 
   React.useEffect(() => {
     startMeasure('inventory-table-render');

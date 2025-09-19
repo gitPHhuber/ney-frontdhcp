@@ -1,5 +1,4 @@
-import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
+
 
 export interface ProductPassportForm {
   assetTag: string;
@@ -34,62 +33,7 @@ export const ProductPassportWizard: React.FC = () => {
           <li key={step}>{step}</li>
         ))}
       </ol>
-      <form
-        onSubmit={handleSubmit(values => {
-          console.info('Passport draft', values);
-        })}
-        className="wizard-form"
-      >
-        <div className="two-column">
-          <label>
-            Asset tag
-            <Controller
-              control={control}
-              name="assetTag"
-              render={({ field }) => <input {...field} required />}
-            />
-          </label>
-          <label>
-            Serial number
-            <Controller
-              control={control}
-              name="serialNumber"
-              render={({ field }) => <input {...field} required />}
-            />
-          </label>
-          <label>
-            Model
-            <Controller
-              control={control}
-              name="model"
-              render={({ field }) => <input {...field} />}
-            />
-          </label>
-          <label>
-            Location
-            <Controller
-              control={control}
-              name="location"
-              render={({ field }) => <input {...field} />}
-            />
-          </label>
-          <label>
-            Owner
-            <Controller
-              control={control}
-              name="owner"
-              render={({ field }) => <input {...field} />}
-            />
-          </label>
-          <label>
-            Warranty until
-            <Controller
-              control={control}
-              name="warrantyUntil"
-              render={({ field }) => <input type="date" {...field} />}
-            />
-          </label>
-        </div>
+
         <footer>
           <button type="submit" className="primary">
             Generate PDF passport
@@ -102,3 +46,4 @@ export const ProductPassportWizard: React.FC = () => {
     </section>
   );
 };
+

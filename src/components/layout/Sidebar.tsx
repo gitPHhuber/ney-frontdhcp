@@ -21,7 +21,9 @@ const Sidebar = () => {
         <aside className="sidebar">
             <header className="sidebar-header">NetGrip</header>
             <div className="sidebar-user">
-                <FaUserCircle className="user-icon" />
+                <span className="user-icon" aria-hidden="true">
+                    <FaUserCircle />
+                </span>
                 <span>{user?.username || 'Guest'}</span>
             </div>
             <nav>

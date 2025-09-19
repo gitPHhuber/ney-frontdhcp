@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useMemo, useState } from 'react';
+
 import {
     FaCheckCircle,
     FaDownload,
@@ -28,7 +28,7 @@ interface DiagnosticResult {
     durationMs: number;
 }
 
-const STATUS_ICON: Record<DiagnosticStatus, JSX.Element> = {
+
     success: <FaCheckCircle />, 
     warning: <FaExclamationTriangle />, 
     error: <FaTimesCircle />, 
@@ -173,6 +173,7 @@ const NavigationCheckPage = () => {
     };
 
     const hasDiagnostics = diagnostics.length > 0;
+
 
     return (
         <div className="navigation-check-page">

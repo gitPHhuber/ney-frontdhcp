@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 // Fix: Corrected import path for Role and Permission types
-import { Role, Permission } from '../../types/index';
+import type { Role, Permission } from '../../types';
 
 interface RoleEditFormProps {
     role: Role | null;
@@ -43,7 +43,7 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
             return;
         }
         setError('');
-        const roleData = {
+        const roleData: Omit<Role, 'id'> = {
             name,
             permissions: Array.from(permissions),
         };
@@ -66,7 +66,7 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
             <div className="form-group">
                 <label>Permissions</label>
                 <div className="permissions-grid">
-                    {Object.entries(allPermissions).map(([category, perms]) => (
+                    {(Object.entries(allPermissions) as Array<[string, Permission[]]>).map(([category, perms]) => (
                         <div key={category} className="permission-category">
                             <h4>{category}</h4>
                             <div className="permission-options">
