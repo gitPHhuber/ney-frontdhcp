@@ -22,6 +22,7 @@ const AppShell: FC = () => {
     return initial;
   });
 
+
   const brandLabel = t('brand.name', { defaultValue: 'NETGRIP NOC' });
 
   const toggleSection = (title: string) => {
@@ -69,7 +70,7 @@ const AppShell: FC = () => {
       to={item.path}
       className={({ isActive }) =>
         [
-          'nav-link group relative flex items-center gap-3 rounded-lg px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] transition',
+
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80',
           isActive ? 'is-active' : '',
         ].join(' ')
@@ -85,8 +86,7 @@ const AppShell: FC = () => {
   );
 
   return (
-    <div className="app-shell grid min-h-screen grid-cols-[280px_1fr] grid-rows-[56px_1fr] text-neutral-100">
-      <aside className="app-shell__sidebar col-start-1 row-span-2 flex min-h-0 flex-col px-6 py-8">
+
         <div className="brand" aria-label={brandLabel}>
           <span className="brand__glow" aria-hidden />
           <span className="brand__label">{brandLabel}</span>
@@ -160,8 +160,8 @@ const AppShell: FC = () => {
           </div>
         </div>
       </header>
-      <main className="app-shell__content col-start-2 row-start-2 min-h-0 overflow-auto p-6 md:p-8">
-        <div className="container flex w-full flex-col gap-6">
+      <main className="app-shell__content col-start-2 row-start-2 min-h-0 overflow-auto p-6 md:p-10">
+        <div className="container w-full">
           <Outlet />
         </div>
       </main>

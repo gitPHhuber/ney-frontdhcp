@@ -25,6 +25,7 @@ export const ProductPassportWizard: React.FC = () => {
   });
 
   const idPrefix = useId();
+  const activeStepIndex = 2;
 
   const fieldConfigs: Array<{
     name: keyof ProductPassportForm;
@@ -48,18 +49,28 @@ export const ProductPassportWizard: React.FC = () => {
 
   return (
     <section className="passport-wizard">
-      <header>
-        <h2>Product passport wizard</h2>
-        <p className="muted">Auto-populate fields from inventory and finalize a PDF passport.</p>
+      <header className="passport-wizard__header">
+        <div>
+          <h2>Product passport wizard</h2>
+          <p className="muted">Auto-populate fields from inventory and finalize a PDF passport.</p>
+        </div>
+        <span className="status-badge status-online">Connected</span>
       </header>
-      <ol className="steps">
-        {steps.map(step => (
-          <li key={step}>{step}</li>
-        ))}
+      <ol className="wizard-steps">
+        {steps.map((step, index) => {
+          const state =
+            index < activeStepIndex ? 'completed' : index === activeStepIndex ? 'active' : 'upcoming';
+          return (
+            <li key={step} className="wizard-step" data-state={state}>
+              <span className="wizard-step__index">{index + 1}</span>
+              <span className="wizard-step__label">{step}</span>
+            </li>
+          );
+        })}
       </ol>
 
       <form className="passport-wizard__form" onSubmit={onSubmit}>
-        <div className="form-grid">
+        <div className="passport-wizard__grid">
           {fieldConfigs.map(config => {
             const inputId = `${idPrefix}-${config.name}`;
             return (
@@ -82,11 +93,11 @@ export const ProductPassportWizard: React.FC = () => {
             );
           })}
         </div>
-        <footer>
+        <footer className="passport-wizard__actions">
           <button type="submit" className="primary">
             Generate PDF passport
           </button>
-          <button type="button" className="ghost">
+          <button type="button" className="secondary">
             Export registry CSV
           </button>
         </footer>
