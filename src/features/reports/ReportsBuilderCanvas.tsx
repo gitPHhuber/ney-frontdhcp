@@ -2,7 +2,12 @@ import React, { useId } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-const blockOptions = ['KPI Summary', 'Time Series', 'Capacity Table', 'Incident Timeline'] as const;
+const blockOptions = [
+  'Сводка KPI',
+  'Временной ряд',
+  'Таблица пропускной способности',
+  'Хронология инцидентов',
+] as const;
 
 type BlockOption = (typeof blockOptions)[number];
 
@@ -16,7 +21,11 @@ type ReportsBuilderForm = z.infer<typeof builderSchema>;
 
 export const ReportsBuilderCanvas: React.FC = () => {
   const { control, handleSubmit, watch } = useForm<ReportsBuilderForm>({
-    defaultValues: { name: 'Executive Weekly Snapshot', preset: 'week', blocks: ['KPI Summary'] },
+    defaultValues: {
+      name: 'Еженедельный обзор для руководства',
+      preset: 'week',
+      blocks: ['Сводка KPI'],
+    },
   });
 
   const blocks = watch('blocks');
@@ -73,16 +82,16 @@ export const ReportsBuilderCanvas: React.FC = () => {
     <section className="reports-builder">
       <header className="reports-builder__header">
         <div>
-          <h2>Reports Builder</h2>
-          <p className="muted">Compose drag-and-drop layouts and export PDF/CSV/XLSX.</p>
+          <h2>Конструктор отчётов</h2>
+          <p className="muted">Создавайте макеты методом перетаскивания и экспортируйте их в PDF/CSV/XLSX.</p>
         </div>
-        <span className="status-badge status-active">Live preview</span>
+        <span className="status-badge status-active">Предпросмотр в реальном времени</span>
       </header>
 
       <form className="reports-builder__form" onSubmit={onSubmit}>
         <div className="form-controls">
           <div className="form-field">
-            <label htmlFor={`${idPrefix}-name`}>Report name</label>
+            <label htmlFor={`${idPrefix}-name`}>Название отчёта</label>
             <Controller
               control={control}
               name="name"
@@ -90,7 +99,7 @@ export const ReportsBuilderCanvas: React.FC = () => {
                 <input
                   {...field}
                   id={`${idPrefix}-name`}
-                  placeholder="Executive summary"
+                  placeholder="Сводка для руководства"
                   required
                 />
               )}
@@ -98,15 +107,15 @@ export const ReportsBuilderCanvas: React.FC = () => {
           </div>
 
           <div className="form-field">
-            <label htmlFor={`${idPrefix}-preset`}>Preset</label>
+            <label htmlFor={`${idPrefix}-preset`}>Предустановка</label>
             <Controller
               control={control}
               name="preset"
               render={({ field }) => (
                 <select {...field} id={`${idPrefix}-preset`}>
-                  <option value="day">Day</option>
-                  <option value="week">Week</option>
-                  <option value="month">Month</option>
+                  <option value="day">День</option>
+                  <option value="week">Неделя</option>
+                  <option value="month">Месяц</option>
                 </select>
               )}
             />
@@ -114,7 +123,7 @@ export const ReportsBuilderCanvas: React.FC = () => {
         </div>
 
         <fieldset>
-          <legend>Blocks</legend>
+          <legend>Блоки</legend>
           <Controller
             control={control}
             name="blocks"
@@ -164,7 +173,7 @@ export const ReportsBuilderCanvas: React.FC = () => {
                   strokeLinejoin="round"
                 />
               </svg>
-              <p>Report preview will appear here</p>
+              <p>Предпросмотр отчёта будет отображаться здесь</p>
             </div>
           ) : (
             <div className="preview-grid">
@@ -185,7 +194,7 @@ export const ReportsBuilderCanvas: React.FC = () => {
                   </div>
                   <div className="builder-block__body">
                     <h3>{block}</h3>
-                    <p className="muted">Report preview will appear here</p>
+                    <p className="muted">Предпросмотр отчёта будет отображаться здесь</p>
                   </div>
                 </article>
               ))}
@@ -195,15 +204,15 @@ export const ReportsBuilderCanvas: React.FC = () => {
         <footer className="reports-builder__actions">
           <button type="submit" className="primary">
             <FormatIcon variant="pdf" />
-            Export PDF
+            Экспорт в PDF
           </button>
           <button type="button" className="secondary">
             <FormatIcon variant="csv" />
-            Export CSV
+            Экспорт в CSV
           </button>
           <button type="button" className="ghost">
             <FormatIcon variant="xlsx" />
-            Export XLSX
+            Экспорт в XLSX
           </button>
         </footer>
       </form>
