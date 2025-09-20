@@ -1,4 +1,5 @@
 
+import { useCallback, useMemo, useState, type FC } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -10,7 +11,7 @@ import { NotificationCenter } from '../widgets/notification-center/NotificationC
 
 import { appNavigation, type NavigationItem } from './navigation';
 
-const AppShell: React.FC = () => {
+const AppShell: FC = () => {
   const { t } = useTranslation();
   const { user, logout, hasPermission } = useAuth();
   const [isPaletteOpen, setPaletteOpen] = useState(false);
@@ -19,6 +20,10 @@ const AppShell: React.FC = () => {
     event.preventDefault();
     setPaletteOpen(previous => !previous);
   }, []);
+
+  const paletteHotkeyOptions = useMemo(() => ({ preventDefault: true }), []);
+
+  useHotkeys('mod+k', togglePalette, paletteHotkeyOptions);
 
   const renderItem = (item: NavigationItem) => {
     const enabledByFlag = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;
