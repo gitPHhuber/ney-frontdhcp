@@ -69,7 +69,7 @@ const AppShell: FC = () => {
       to={item.path}
       className={({ isActive }) =>
         [
-
+          'nav-link',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80',
           isActive ? 'is-active' : '',
         ].join(' ')
@@ -85,53 +85,55 @@ const AppShell: FC = () => {
   );
 
   return (
+    <>
+      <div className="app-shell grid min-h-screen grid-cols-[280px_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)]">
+        <aside className="app-shell__sidebar col-start-1 row-span-2 flex flex-col px-6 py-8">
+          <div className="brand" aria-label={brandLabel}>
+            <span className="brand__glow" aria-hidden />
+            <span className="brand__label">{brandLabel}</span>
+          </div>
+          <nav
+            className="app-shell__nav mt-8 space-y-6"
+            aria-label={t('navigation.primary', { defaultValue: 'Primary navigation' })}
+          >
+            {visibleSections.map(section => {
+              const isExpanded = expandedSections[section.title] ?? true;
+              const sectionId = `nav-section-${section.title.toLowerCase().replace(/[^a-z0-9]+/gi, '-')}`;
 
-        <div className="brand" aria-label={brandLabel}>
-          <span className="brand__glow" aria-hidden />
-          <span className="brand__label">{brandLabel}</span>
-        </div>
-        <nav
-          className="app-shell__nav mt-8 space-y-6"
-          aria-label={t('navigation.primary', { defaultValue: 'Primary navigation' })}
-        >
-          {visibleSections.map(section => {
-            const isExpanded = expandedSections[section.title] ?? true;
-            const sectionId = `nav-section-${section.title.toLowerCase().replace(/[^a-z0-9]+/gi, '-')}`;
-
-            return (
-              <section key={section.title} className="nav-section">
-                <button
-                  type="button"
-                  className="nav-section__toggle"
-                  onClick={() => toggleSection(section.title)}
-                  aria-expanded={isExpanded}
-                  aria-controls={sectionId}
-                >
-                  <span className="nav-section__title">
-                    {section.translationKey
-                      ? t(section.translationKey, { defaultValue: section.title })
-                      : section.title}
-                  </span>
-                  <span className="nav-section__chevron" aria-hidden data-expanded={isExpanded}>
-                    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M5 8.25L10 12.75L15 8.25"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
-                </button>
-                <div id={sectionId} className="nav-section__items" data-expanded={isExpanded}>
-                  {isExpanded && section.items.map(renderItem)}
-                </div>
-              </section>
-            );
-          })}
-        </nav>
-      </aside>
+              return (
+                <section key={section.title} className="nav-section">
+                  <button
+                    type="button"
+                    className="nav-section__toggle"
+                    onClick={() => toggleSection(section.title)}
+                    aria-expanded={isExpanded}
+                    aria-controls={sectionId}
+                  >
+                    <span className="nav-section__title">
+                      {section.translationKey
+                        ? t(section.translationKey, { defaultValue: section.title })
+                        : section.title}
+                    </span>
+                    <span className="nav-section__chevron" aria-hidden data-expanded={isExpanded}>
+                      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M5 8.25L10 12.75L15 8.25"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+                  <div id={sectionId} className="nav-section__items" data-expanded={isExpanded}>
+                    {isExpanded && section.items.map(renderItem)}
+                  </div>
+                </section>
+              );
+            })}
+          </nav>
+        </aside>
       <header className="app-shell__header sticky top-0 col-start-2 row-start-1 flex h-14 items-center justify-between gap-4 border-b border-white/10 px-6">
         <button
           type="button"
@@ -164,8 +166,9 @@ const AppShell: FC = () => {
           <Outlet />
         </div>
       </main>
-      <CommandPalette isOpen={isPaletteOpen} onClose={() => setPaletteOpen(false)} />
     </div>
+    <CommandPalette isOpen={isPaletteOpen} onClose={() => setPaletteOpen(false)} />
+  </>
   );
 };
 

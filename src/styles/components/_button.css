@@ -18,7 +18,7 @@
   font-family: 'Inter', 'Poppins', 'Segoe UI', sans-serif;
   font-weight: 600;
   font-size: 0.9rem;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.015em;
   cursor: pointer;
   position: relative;
   transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
@@ -35,26 +35,29 @@
 }
 
 .primary {
-  background: linear-gradient(135deg, rgba(var(--netgrip-primary-accent-rgb), 0.95), rgba(124, 58, 237, 0.85));
-  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.65);
-  color: #021219;
-  box-shadow: 0 12px 26px rgba(var(--netgrip-primary-accent-rgb), 0.28);
+  background: linear-gradient(135deg, rgba(var(--netgrip-primary-accent-rgb), 0.78), rgba(45, 212, 191, 0.65));
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.45);
+  color: #04121b;
+  box-shadow: 0 6px 14px rgba(var(--netgrip-primary-accent-rgb), 0.18);
 }
 
 .primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 16px 32px rgba(var(--netgrip-primary-accent-rgb), 0.35);
+  box-shadow: 0 10px 20px rgba(var(--netgrip-primary-accent-rgb), 0.2);
 }
 
 .secondary {
-  background: transparent;
-  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.45);
-  color: var(--netgrip-primary-accent);
+  background: rgba(12, 20, 32, 0.85);
+  border-width: 2px;
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.75);
+  color: #f0f9ff;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.48), 0 4px 12px rgba(3, 15, 24, 0.35);
 }
 
 .secondary:hover {
-  background: rgba(var(--netgrip-primary-accent-rgb), 0.12);
-  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.65);
+  background: rgba(13, 120, 122, 0.32);
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.85);
 }
 
 .ghost {

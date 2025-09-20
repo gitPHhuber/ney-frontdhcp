@@ -16,39 +16,39 @@
 .form-field label,
 .form-group label,
 label {
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.82);
+  color: rgba(248, 250, 252, 0.96);
 }
 
 input,
 select,
 textarea {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 0.9rem;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  background: linear-gradient(145deg, rgba(11, 16, 26, 0.92), rgba(8, 12, 20, 0.86));
-  color: var(--netgrip-text-strong);
+  padding: 0.85rem 1.05rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: linear-gradient(150deg, rgba(12, 18, 30, 0.96), rgba(7, 12, 22, 0.9));
+  color: rgba(248, 250, 252, 0.98);
   font-family: 'Inter', 'Segoe UI', sans-serif;
-  font-size: 0.95rem;
+  font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: rgba(148, 163, 184, 0.55);
+  color: rgba(226, 232, 240, 0.88);
 }
 
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.65);
-  box-shadow: 0 0 0 3px rgba(var(--netgrip-primary-accent-rgb), 0.25), 0 0 16px rgba(var(--netgrip-primary-accent-rgb), 0.18);
-  background: linear-gradient(145deg, rgba(12, 21, 32, 0.96), rgba(6, 12, 20, 0.92));
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.6);
+  box-shadow: 0 0 0 2px rgba(var(--netgrip-primary-accent-rgb), 0.2);
+  background: linear-gradient(145deg, rgba(13, 23, 38, 0.98), rgba(8, 14, 26, 0.94));
 }
 
 input:disabled,
