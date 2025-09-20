@@ -8,6 +8,7 @@ import LoadingScreen from '../components/ui/LoadingScreen';
 import StatusBadge from '../components/ui/StatusBadge';
 import { FaPowerOff, FaStopCircle, FaSyncAlt, FaServer, FaNetworkWired, FaClock } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import { NavLink } from 'react-router-dom';
 
 function DhcpServerPage() {
     const { serverState, isConnected, controlServer, loading } = useDhcpServer();
@@ -27,7 +28,11 @@ function DhcpServerPage() {
                 </header>
                 <div className="card">
                     <h2>Server Not Connected</h2>
-                    <p>Please connect to a DHCP server from the <a href="#/settings">Settings</a> page to manage it.</p>
+                    <p>
+                        Please connect to a DHCP server from the{' '}
+                        <NavLink to="/settings">Settings</NavLink>{' '}
+                        page to manage it.
+                    </p>
                 </div>
             </div>
         );

@@ -1,21 +1,54 @@
 
 /* --- Status Badge Component --- */
 .status-badge {
-  display: inline-block;
-  padding: 0.25em 0.6em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: baseline;
-  border-radius: 0.25rem;
-  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  color: var(--netgrip-text-strong);
 }
 
-.status-active, .status-online { background-color: var(--netgrip-primary-accent); }
-.status-in_work { background-color: var(--netgrip-warning); color: #000 }
-.status-completed { background-color: var(--netgrip-success); }
-.status-broken, .status-offline { background-color: var(--netgrip-danger); }
-.status-pending, .status-restarting { background-color: var(--netgrip-info); color: #000 }
-.status-reserved { background-color: var(--netgrip-secondary-accent); }
+.status-badge::before {
+  content: '';
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.18);
+}
+
+.status-active,
+.status-online {
+  background: rgba(34, 197, 94, 0.16);
+  border-color: rgba(34, 197, 94, 0.32);
+  color: #bbf7d0;
+}
+
+.status-in_work,
+.status-pending,
+.status-restarting {
+  background: rgba(250, 204, 21, 0.18);
+  border-color: rgba(250, 204, 21, 0.35);
+  color: #fde68a;
+}
+
+.status-completed,
+.status-reserved {
+  background: rgba(59, 130, 246, 0.16);
+  border-color: rgba(59, 130, 246, 0.28);
+  color: #bfdbfe;
+}
+
+.status-broken,
+.status-offline {
+  background: rgba(248, 113, 113, 0.18);
+  border-color: rgba(248, 113, 113, 0.38);
+  color: #fecaca;
+}

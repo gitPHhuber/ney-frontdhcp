@@ -67,7 +67,7 @@ for (const route of routes) {
   finish();
 }
 
-await page.screenshot({ path: 'docs/diagnostics/before.png', fullPage: true });
+
 await browser.close();
 
 await writeFile('docs/diagnostics/route-diagnostics.md', logLines.join('\n'), 'utf8');

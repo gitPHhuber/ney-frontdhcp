@@ -30,6 +30,24 @@ const RouteElement: React.FC<{ item: NavigationItem }> = ({ item }) => {
   return <Component />;
 };
 
+const AppRoutes: React.FC = () => (
+  <Suspense fallback={<AppLoader />}>
+    <Routes>
+      <Route element={<AppShell />}>
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        {appNavigation.flatMap(section =>
+          section.items.map(item => (
+            <React.Fragment key={item.path}>
+              <Route path={item.path} element={<RouteElement item={item} />} />
+            </React.Fragment>
+          )),
+        )}
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
+  </Suspense>
+);
+
 const App: React.FC = () => {
   const { isAuthenticated } = useAuth();
 
@@ -39,23 +57,7 @@ const App: React.FC = () => {
 
   return (
     <HashRouter>
-      <AppShell>
-        <Suspense fallback={<AppLoader />}>
-          <Routes>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            {appNavigation.flatMap(section =>
-              section.items.map(item => (
-                <Route
-                  key={item.path}
-                  path={item.path}
-                  element={<RouteElement item={item} />}
-                />
-              )),
-            )}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
-      </AppShell>
+      <AppRoutes />
     </HashRouter>
   );
 };

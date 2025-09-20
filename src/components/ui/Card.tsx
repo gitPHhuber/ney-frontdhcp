@@ -4,22 +4,24 @@
  */
 import React, { ReactNode } from 'react';
 
-interface CardProps {
+export interface CardProps {
     title: string;
     value: ReactNode;
     icon: ReactNode;
     helperText?: ReactNode;
 }
 
-const Card = ({ title, value, icon, helperText }: CardProps) => (
-  <div className="card">
-    <div className="card-content">
-        <div className="card-icon">{icon}</div>
-        <div className="card-value">{value}</div>
-        <div className="card-title">{title}</div>
-        {helperText && <div className="card-helper">{helperText}</div>}
-    </div>
-  </div>
+const Card: React.FC<CardProps> = ({ title, value, icon, helperText }) => (
+    <article className="card" aria-live="polite">
+        <div className="card-content">
+            <span className="card-icon" aria-hidden="true">
+                {icon}
+            </span>
+            <div className="card-value">{value}</div>
+            <p className="card-title">{title}</p>
+            {helperText && <p className="card-helper">{helperText}</p>}
+        </div>
+    </article>
 );
 
 export default Card;

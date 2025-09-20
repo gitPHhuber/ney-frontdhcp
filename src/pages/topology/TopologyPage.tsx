@@ -1,6 +1,5 @@
 import React from 'react';
 import { TopologyCanvas } from '../../features/topology/TopologyCanvas';
-import { GuidedTour } from '../../widgets/guided-tour/GuidedTour';
 
 const TopologyPage: React.FC = () => (
   <div className="page-with-sidebar">
@@ -12,7 +11,12 @@ const TopologyPage: React.FC = () => (
       <TopologyCanvas />
     </section>
     <aside className="page-sidebar">
-      <GuidedTour />
+      <div className="page-placeholder">
+        <h2>Automation ideas</h2>
+        <p className="muted">
+          Document site interconnect dependencies and export snapshots to share topology deltas with peers.
+        </p>
+      </div>
     </aside>
   </div>
 );
