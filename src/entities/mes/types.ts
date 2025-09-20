@@ -23,6 +23,64 @@ export interface WorkCenter {
   capabilityTags: string[];
 }
 
+export interface ProductionLine {
+  id: string;
+  name: string;
+  streamId: string;
+  workCenterIds: string[];
+  shiftPattern: string;
+  taktTimeSec: number;
+  targetPerShift: number;
+  currentWip: number;
+  throughputPerShift: number;
+  availability: number;
+  blockers: string[];
+}
+
+export interface ValueStream {
+  id: string;
+  name: string;
+  focus: string;
+  demandThisWeek: number;
+  backlogUnits: number;
+  riskLevel: 'low' | 'medium' | 'high';
+  gatekeepers: string[];
+  nextMilestone: string;
+}
+
+export interface TestCell {
+  id: string;
+  name: string;
+  capability: string;
+  status: 'online' | 'maintenance' | 'idle';
+  queueDepth: number;
+  activePlanId?: string;
+  shift: string;
+  operators: string[];
+}
+
+export interface TestPlan {
+  id: string;
+  name: string;
+  coverage: number;
+  cycleTimeMin: number;
+  ownerTeam: string;
+  requiredFor: string[];
+  lastValidatedAt: string;
+}
+
+export interface TestRun {
+  id: string;
+  testCellId: string;
+  planId: string;
+  boardSerial: string;
+  status: 'queued' | 'running' | 'failed' | 'passed';
+  startedAt: string;
+  finishedAt?: string;
+  operatorId: string;
+  defectsFound: number;
+}
+
 export interface ProductionOrder {
   id: string;
   itemId: string;
@@ -92,4 +150,9 @@ export interface MesState {
   qualityChecks: QualityCheck[];
   nonconformances: Nonconformance[];
   maintenanceOrders: MaintenanceOrder[];
+  productionLines: ProductionLine[];
+  valueStreams: ValueStream[];
+  testCells: TestCell[];
+  testPlans: TestPlan[];
+  testRuns: TestRun[];
 }

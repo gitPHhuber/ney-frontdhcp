@@ -14,6 +14,10 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+      test: {
+        environment: 'node',
+        exclude: ['tests/e2e/**', 'node_modules/**'],
+      },
     };
 });

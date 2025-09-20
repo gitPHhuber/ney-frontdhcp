@@ -2,29 +2,72 @@
 /* --- NetGrip Modern Theme --- */
 /* --- Dark Theme (Default) --- */
 :root {
-  --netgrip-text-dark: #e6edf3;
-  --netgrip-text-strong: #f8fafc;
-  --netgrip-text-muted: rgba(226, 232, 240, 0.86);
-  --netgrip-bg-dark: #05070d;
-  --netgrip-bg-elevated: #0c111d;
-  --netgrip-surface-card: rgba(10, 16, 26, 0.86);
-  --netgrip-surface-subtle: rgba(12, 16, 24, 0.65);
-  --netgrip-primary-accent: #33f5ff;
-  --netgrip-primary-accent-rgb: 51, 245, 255;
-  --netgrip-secondary-accent: #7c3aed;
-  --netgrip-border-dark: rgba(148, 163, 184, 0.3);
-  --netgrip-border-strong: rgba(148, 163, 184, 0.46);
-  --netgrip-component-bg-dark: rgba(9, 13, 22, 0.82);
-  --netgrip-component-bg-glass: rgba(11, 18, 30, 0.72);
-  --netgrip-sidebar-bg-glass: rgba(7, 11, 20, 0.9);
-  --netgrip-surface-shadow: rgba(2, 6, 23, 0.46);
+  /* Core palette */
+  --bg-base: #050b17;
+  --bg-subtle: rgba(8, 15, 31, 0.86);
+  --surface-sidebar: rgba(8, 17, 33, 0.94);
+  --surface-header: rgba(7, 16, 31, 0.9);
+  --surface-card: rgba(10, 21, 40, 0.92);
+  --surface-panel: rgba(11, 22, 41, 0.84);
+  --surface-glass: rgba(8, 20, 37, 0.72);
+  --surface-contrast: rgba(15, 23, 42, 0.62);
+
+  /* Typography */
+  --text-primary: #f8fafc;
+  --text-secondary: rgba(226, 232, 240, 0.88);
+  --text-muted: rgba(148, 163, 184, 0.72);
+
+  /* Accent & semantic colors */
+  --accent-primary: #38bdf8;
+  --accent-primary-rgb: 56, 189, 248;
+  --accent-strong: #22d3ee;
+  --accent-muted: rgba(56, 189, 248, 0.18);
+  --accent-foreground: #e0f2fe;
+  --success-strong: #22c55e;
+  --info-strong: #38bdf8;
+  --warning-strong: #f59e0b;
+  --danger-strong: #ef4444;
+
+  /* Borders & shadows */
+  --border-soft: rgba(148, 163, 184, 0.18);
+  --border-strong: rgba(148, 163, 184, 0.32);
+  --shadow-sm: 0 8px 18px rgba(7, 12, 26, 0.25);
+  --shadow-md: 0 20px 40px rgba(4, 10, 24, 0.28);
+  --shadow-lg: 0 28px 60px rgba(2, 6, 18, 0.35);
+
+  /* Radii */
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+
+  /* Legacy variable aliases */
+  --netgrip-text-dark: var(--text-secondary);
+  --netgrip-text-strong: var(--text-primary);
+  --netgrip-text-muted: var(--text-muted);
+  --netgrip-bg-dark: var(--bg-base);
+  --netgrip-bg-elevated: var(--surface-header);
+  --netgrip-surface-card: var(--surface-card);
+  --netgrip-surface-subtle: var(--bg-subtle);
+  --netgrip-primary-accent: var(--accent-primary);
+  --netgrip-primary-accent-rgb: var(--accent-primary-rgb);
+  --netgrip-secondary-accent: var(--accent-strong);
+  --netgrip-border-dark: var(--border-soft);
+  --netgrip-border-strong: var(--border-strong);
+  --netgrip-component-bg-dark: var(--surface-panel);
+  --netgrip-component-bg-glass: var(--surface-glass);
+  --netgrip-sidebar-bg-glass: var(--surface-sidebar);
+  --netgrip-surface-shadow: rgba(2, 6, 23, 0.38);
   --netgrip-success: #34d399;
   --netgrip-danger: #f97316;
   --netgrip-warning: #facc15;
-  --netgrip-info: #38bdf8;
+  --netgrip-info: var(--accent-primary);
   --netgrip-link-hover: #8df6ff;
-  --netgrip-focus-ring: rgba(51, 245, 255, 0.45);
-  --netgrip-focus-ring-soft: rgba(51, 245, 255, 0.16);
-  --netgrip-circuit-color-rgba: rgba(var(--netgrip-primary-accent-rgb), 0.05);
-  --netgrip-circuit-opacity: 0.42;
+  --netgrip-focus-ring: rgba(var(--accent-primary-rgb), 0.45);
+  --netgrip-focus-ring-soft: rgba(var(--accent-primary-rgb), 0.18);
+  --netgrip-circuit-color-rgba: rgba(var(--accent-primary-rgb), 0.08);
+  --netgrip-circuit-opacity: 0.36;
+
+  /* Shared tokens */
+  --surface-card-strong: rgba(13, 24, 46, 0.96);
+  --surface-card-soft: rgba(15, 26, 48, 0.75);
 }
