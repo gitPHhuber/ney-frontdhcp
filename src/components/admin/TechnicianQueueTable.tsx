@@ -2,13 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FaEllipsisV, FaEdit, FaTrash, FaPlus, FaTimes, FaCheck } from 'react-icons/fa';
 import { Lease } from '../../types/index';
 import PriorityIcon from '../ui/PriorityIcon';
 import StatusBadge from '../ui/StatusBadge';
 import Dropdown from '../ui/Dropdown';
 import { api } from '../../services/api';
+import { toast } from 'sonner';
 
 interface TechnicianQueueTableProps {
     leases: Lease[];
@@ -31,21 +32,42 @@ const TechnicianQueueTable = ({
 }: TechnicianQueueTableProps) => {
     const [activeAddLeaseId, setActiveAddLeaseId] = useState<number | null>(null);
     const [labelInputs, setLabelInputs] = useState<Record<number, string>>({});
-    const [updatingLeaseId, setUpdatingLeaseId] = useState<number | null>(null);
+    const [updatingLeaseIds, setUpdatingLeaseIds] = useState<Set<number>>(() => new Set());
+    const labelInputRef = useRef<HTMLInputElement | null>(null);
+
+    useEffect(() => {
+        if (activeAddLeaseId === null) {
+            return;
+        }
+
+        const frame = requestAnimationFrame(() => {
+            labelInputRef.current?.focus();
+        });
+
+        return () => cancelAnimationFrame(frame);
+    }, [activeAddLeaseId]);
 
     const handleLabelInputChange = (leaseId: number, value: string) => {
         setLabelInputs(prev => ({ ...prev, [leaseId]: value }));
     };
 
     const persistLeaseUpdate = async (lease: Lease) => {
-        setUpdatingLeaseId(lease.id);
+        setUpdatingLeaseIds(prev => {
+            const next = new Set(prev);
+            next.add(lease.id);
+            return next;
+        });
         try {
             const savedLease = await api.editLease(lease);
             onLeaseUpdated(savedLease);
         } catch (error) {
             console.error('Failed to update lease labels:', error);
         } finally {
-            setUpdatingLeaseId(null);
+            setUpdatingLeaseIds(prev => {
+                const next = new Set(prev);
+                next.delete(lease.id);
+                return next;
+            });
         }
     };
 
@@ -60,6 +82,7 @@ const TechnicianQueueTable = ({
             return;
         }
         if (lease.labels.some(existing => existing.toLowerCase() === inputValue.toLowerCase())) {
+            toast.warning('This label already exists.');
             setLabelInputs(prev => ({ ...prev, [lease.id]: '' }));
             setActiveAddLeaseId(null);
             return;
@@ -74,7 +97,7 @@ const TechnicianQueueTable = ({
         setLabelInputs(prev => ({ ...prev, [leaseId]: '' }));
     };
 
-    const isLeaseUpdating = (leaseId: number) => updatingLeaseId === leaseId;
+    const isLeaseUpdating = (leaseId: number) => updatingLeaseIds.has(leaseId);
 
     return (
         <div className="table-wrapper">
@@ -134,13 +157,13 @@ const TechnicianQueueTable = ({
                                                     }}
                                                 >
                                                     <input
+                                                        ref={activeAddLeaseId === lease.id ? labelInputRef : undefined}
                                                         type="text"
                                                         className="label-input"
                                                         value={labelInputs[lease.id] || ''}
                                                         onChange={(event) => handleLabelInputChange(lease.id, event.target.value)}
                                                         placeholder="Add label"
                                                         disabled={isLeaseUpdating(lease.id)}
-                                                        autoFocus
                                                     />
                                                     <button
                                                         type="submit"

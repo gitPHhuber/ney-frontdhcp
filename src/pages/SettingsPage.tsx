@@ -90,11 +90,12 @@ function SettingsPage() {
                 </div>
             </div>
 
-            <div className="settings-card">
+                <div className="settings-card">
                 <h2>Theme</h2>
                  <div className="form-group">
-                    <label>Interface Theme</label>
-                    <select 
+                    <label htmlFor="theme-select">Interface Theme</label>
+                    <select
+                        id="theme-select"
                         className="form-control"
                         value={selectedTheme}
                         onChange={(e) => setSelectedTheme(e.target.value as Theme)}

@@ -28,6 +28,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Build
+        run: npm run build
+
       - name: Playwright E2E
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1

@@ -159,7 +159,7 @@ function DashboardPage() {
                     </p>
                 </div>
                 {recentLogs.length > 0 ? (
-                    <ul className="server-logs" role="list">
+                    <ul className="server-logs">
                         {recentLogs.map((log, index) => {
                             const levelKey = log.level.toLowerCase();
                             const levelLabel = t(`dashboard.logLevel.${levelKey}`, {

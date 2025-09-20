@@ -4,8 +4,6 @@
  */
 import React from 'react';
 import { FaFlag } from 'react-icons/fa';
-// Fix: Corrected import path for Lease type
-import { Lease } from '../../types/index';
 
 interface PriorityIconProps {
     priority: string;
