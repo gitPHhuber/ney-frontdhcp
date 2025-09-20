@@ -2,10 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 // Fix: Corrected import path for Role and Permission types
-import type { Role, Permission } from '../../types';
+import type { Permission, Role } from '../../types';
 
 const permissionLabels: Record<Permission, string> = {
     'leases:read': 'Просмотр аренды',
@@ -37,80 +37,111 @@ interface RoleEditFormProps {
 }
 
 const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) => {
-    const [name, setName] = useState(role?.name || '');
-    const [permissions, setPermissions] = useState<Set<Permission>>(new Set(role?.permissions || []));
+    const [name, setName] = useState(role?.name ?? '');
+    const [permissions, setPermissions] = useState<Set<Permission>>(new Set(role?.permissions ?? []));
     const [allPermissions, setAllPermissions] = useState<Record<string, Permission[]>>({});
     const [error, setError] = useState('');
 
     useEffect(() => {
-        api.getAllPermissions().then(setAllPermissions);
+        void api.getAllPermissions().then(setAllPermissions);
     }, []);
 
     const handlePermissionChange = (permission: Permission) => {
-        setPermissions(prev => {
-            const newPermissions = new Set(prev);
-            if (newPermissions.has(permission)) {
-                newPermissions.delete(permission);
+        setPermissions(previous => {
+            const next = new Set(previous);
+            if (next.has(permission)) {
+                next.delete(permission);
             } else {
-                newPermissions.add(permission);
+                next.add(permission);
             }
-            return newPermissions;
+            return next;
         });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!name) {
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        if (!name.trim()) {
             setError('Укажите название роли.');
             return;
         }
+
         setError('');
         const roleData: Omit<Role, 'id'> = {
-            name,
+            name: name.trim(),
             permissions: Array.from(permissions),
         };
+
         onSave(role ? { ...roleData, id: role.id } : roleData);
     };
 
+    const permissionGroups = Object.entries(allPermissions) as Array<[string, Permission[]]>;
+
     return (
-        <form onSubmit={handleSubmit}>
-            {error && <p style={{ color: 'var(--netgrip-danger)', marginBottom: '1rem' }}>{error}</p>}
-            <div className="form-group">
+        <form className="role-editor" onSubmit={handleSubmit}>
+            {error && (
+                <div className="role-editor__error" role="alert">
+                    {error}
+                </div>
+            )}
+
+            <div className="role-editor__field">
                 <label htmlFor="role-name">Название роли</label>
                 <input
                     id="role-name"
                     type="text"
-                    className="form-control"
+                    placeholder="Например: Инженер мониторинга"
                     value={name}
-                    onChange={e => setName(e.target.value)}
+                    onChange={event => setName(event.target.value)}
                 />
+                <p className="role-editor__hint">
+                    Кратко опишите область ответственности. Название появится в выпадающих списках назначения ролей.
+                </p>
             </div>
-            <fieldset className="form-group">
 
-                <div className="permissions-grid">
-                    {(Object.entries(allPermissions) as Array<[string, Permission[]]>).map(([category, perms]) => (
-                        <div key={category} className="permission-category">
-                            <h4>{category}</h4>
-                            <div className="permission-options">
-                                {perms.map(p => (
-                                    <label key={p} className="permission-option">
-                                        <input
-                                            type="checkbox"
-                                            checked={permissions.has(p)}
-                                            onChange={() => handlePermissionChange(p)}
-                                        />
-                                        {permissionLabels[p] ?? p}
-                                    </label>
-                                ))}
+            <section className="role-editor__permissions" aria-label="Разрешения роли">
+                <header className="role-editor__section-head">
+                    <div>
+                        <h3>Матрица доступа</h3>
+                        <p>Отметьте операционные зоны, к которым должен иметь доступ профиль.</p>
+                    </div>
+                    <span className="role-editor__selected-count">
+                        {permissions.size}{' '}
+                        {permissions.size === 1 ? 'право' : 'прав доступа'}
+                    </span>
+                </header>
+
+                {permissionGroups.length > 0 ? (
+                    <div className="permissions-grid role-editor__permissions-grid">
+                        {permissionGroups.map(([category, perms]) => (
+                            <div key={category} className="permission-category">
+                                <h4>{category}</h4>
+                                <div className="permission-options">
+                                    {perms.map(permission => (
+                                        <label key={permission} className="permission-option">
+                                            <input
+                                                type="checkbox"
+                                                checked={permissions.has(permission)}
+                                                onChange={() => handlePermissionChange(permission)}
+                                            />
+                                            {permissionLabels[permission] ?? permission}
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </fieldset>
-             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
-                <button type="button" className="btn" onClick={onCancel} style={{backgroundColor: 'var(--netgrip-border-dark)'}}>Отмена</button>
-                <button type="submit" className="btn btn-primary" disabled={isSaving}>
-                    {isSaving ? <span className="spinner-inline" /> : 'Сохранить роль' }
+                        ))}
+                    </div>
+                ) : (
+                    <p className="role-editor__empty">Загружаем каталог разрешений…</p>
+                )}
+            </section>
+
+            <div className="role-editor__actions">
+                <button type="button" className="secondary" onClick={onCancel}>
+                    Отмена
+                </button>
+                <button type="submit" className="primary" disabled={isSaving}>
+                    {isSaving ? <span className="spinner-inline" /> : 'Сохранить роль'}
                 </button>
             </div>
         </form>

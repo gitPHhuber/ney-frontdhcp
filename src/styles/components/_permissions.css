@@ -1,40 +1,74 @@
-
 /* --- Role Management Permissions --- */
 .permissions-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+  display: grid;
+  gap: 1.25rem;
 }
 
-.permission-category {
-    background-color: var(--netgrip-bg-dark);
-    padding: 1rem;
-    border-radius: 6px;
-    border: 1px solid var(--netgrip-border-dark);
+.permissions-grid .permission-category {
+  position: relative;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 1rem;
+  padding: 1.1rem 1.25rem;
+  background: linear-gradient(145deg, rgba(9, 15, 26, 0.88), rgba(6, 10, 18, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 36px rgba(2, 6, 23, 0.35);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.permission-category h4 {
-    margin: 0 0 1rem 0;
-    font-family: 'Roboto', sans-serif;
-    font-size: 1rem;
-    color: var(--netgrip-secondary-accent);
-    border-bottom: 1px solid var(--netgrip-border-dark);
-    padding-bottom: 0.5rem;
+.permissions-grid .permission-category::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(circle at 20% 20%, rgba(var(--netgrip-primary-accent-rgb), 0.18), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.permissions-grid .permission-category:hover {
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.55);
+  box-shadow: 0 20px 44px rgba(2, 6, 23, 0.45);
+  transform: translateY(-2px);
+}
+
+.permissions-grid .permission-category:hover::after {
+  opacity: 0.8;
+}
+
+.permissions-grid .permission-category h4 {
+  margin: 0 0 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.86);
 }
 
 .permission-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 0.8rem;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
 .permission-option {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(11, 18, 30, 0.65);
+  font-size: 0.9rem;
+  color: rgba(226, 232, 240, 0.82);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.permission-option:hover {
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.55);
+  background: rgba(12, 22, 36, 0.85);
+  box-shadow: 0 12px 24px rgba(2, 6, 23, 0.4);
 }
 
 .permission-option input {
-    margin-right: 0.5rem;
+  margin: 0;
 }

@@ -22,7 +22,6 @@ const AppShell: FC = () => {
     return initial;
   });
 
-
   const brandLabel = t('brand.name', { defaultValue: 'NETGRIP NOC' });
 
   const toggleSection = (title: string) => {
