@@ -95,10 +95,7 @@ function SettingsPage() {
                 </div>
             </div>
 
-            <div className="settings-card">
-                <h2>Тема интерфейса</h2>
-                <div className="form-group">
-                    <label htmlFor="theme-select">Выберите оформление</label>
+
                     <select
                         id="theme-select"
                         className="form-control"

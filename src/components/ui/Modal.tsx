@@ -32,7 +32,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
             className="modal-overlay"
             role="button"
             tabIndex={0}
-            aria-label="Закрыть модальное окно"
+
             onClick={(event) => {
                 if (event.currentTarget === event.target) {
                     onClose();
@@ -48,7 +48,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
             >
                 <header className="modal-header">
                     <h2 id={titleId}>{title}</h2>
-                    <button className="modal-close-button" onClick={onClose} aria-label="Закрыть модальное окно">&times;</button>
+
                 </header>
                 <div className="modal-body">
                     {children}

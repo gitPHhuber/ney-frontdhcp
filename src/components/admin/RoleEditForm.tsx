@@ -86,7 +86,7 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
                 />
             </div>
             <fieldset className="form-group">
-                <legend>Права</legend>
+
                 <div className="permissions-grid">
                     {(Object.entries(allPermissions) as Array<[string, Permission[]]>).map(([category, perms]) => (
                         <div key={category} className="permission-category">

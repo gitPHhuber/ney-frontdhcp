@@ -10,7 +10,7 @@ import { NotificationCenter } from '../widgets/notification-center/NotificationC
 
 import { appNavigation, type NavigationItem } from './navigation';
 
-const AppShell: React.FC = () => {
+const AppShell: FC = () => {
   const { t } = useTranslation();
   const { user, logout, hasPermission } = useAuth();
   const [isPaletteOpen, setPaletteOpen] = useState(false);
@@ -29,6 +29,7 @@ const AppShell: React.FC = () => {
     window.addEventListener('keydown', handleHotkey);
     return () => window.removeEventListener('keydown', handleHotkey);
   }, []);
+
 
   const renderItem = (item: NavigationItem) => {
     const enabledByFlag = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;

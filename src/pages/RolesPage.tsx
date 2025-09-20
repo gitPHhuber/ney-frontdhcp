@@ -196,8 +196,7 @@ function RolesPage() {
                 title="Удалить роль?"
                 isConfirming={isActionLoading}
             >
-                Роль <strong>{roleToDelete?.name}</strong> будет удалена без возможности восстановления. Убедитесь, что она не
-                используется в процессах доступа.
+
             </ConfirmationModal>
         </div>
     );
