@@ -1,5 +1,4 @@
 
-import { useCallback, useMemo, useState, type FC } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -21,9 +20,6 @@ const AppShell: FC = () => {
     setPaletteOpen(previous => !previous);
   }, []);
 
-  const paletteHotkeyOptions = useMemo(() => ({ preventDefault: true }), []);
-
-  useHotkeys('mod+k', togglePalette, paletteHotkeyOptions);
 
   const renderItem = (item: NavigationItem) => {
     const enabledByFlag = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;
