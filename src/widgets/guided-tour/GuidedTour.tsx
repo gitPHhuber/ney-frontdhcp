@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface GuidedTourProps {
@@ -37,6 +37,22 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
     [t],
   );
 
+  const closeTour = useCallback(() => {
+    setIsOpen(false);
+    onComplete?.();
+  }, [onComplete]);
+
+  const handleOverlayKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.currentTarget !== event.target) {
+      return;
+    }
+
+    if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      closeTour();
+    }
+  }, [closeTour]);
+
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -56,16 +72,11 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
       window.removeEventListener('keydown', handleKeydown);
       window.cancelAnimationFrame(frame);
     };
-  }, [isOpen]);
+  }, [closeTour, isOpen]);
 
   const openTour = () => {
     setStepIndex(0);
     setIsOpen(true);
-  };
-
-  const closeTour = () => {
-    setIsOpen(false);
-    onComplete?.();
   };
 
   const goToNext = () => {
@@ -97,7 +108,18 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
       </button>
 
       {isOpen && (
-        <div className="guided-tour__overlay" role="presentation" onClick={closeTour}>
+        <div
+          className="guided-tour__overlay"
+          role="button"
+          tabIndex={0}
+          aria-label={t('guidedTour.close', { defaultValue: 'Close guided tour' })}
+          onClick={event => {
+            if (event.currentTarget === event.target) {
+              closeTour();
+            }
+          }}
+          onKeyDown={handleOverlayKeyDown}
+        >
           <div
             ref={panelRef}
             className="guided-tour__panel"
@@ -106,7 +128,6 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
             aria-labelledby={titleId}
             aria-describedby={descriptionId}
             tabIndex={-1}
-            onClick={event => event.stopPropagation()}
           >
             <header className="guided-tour__panel-header">
               <p className="guided-tour__step">

@@ -162,7 +162,7 @@ function RolesPage() {
                 title="Confirm Role Deletion"
                 isConfirming={isActionLoading}
             >
-                Are you sure you want to delete the role "<strong>{roleToDelete?.name}</strong>"? This cannot be undone.
+                Are you sure you want to delete the role <strong>{roleToDelete?.name}</strong>? This action cannot be undone.
             </ConfirmationModal>
         </div>
     );

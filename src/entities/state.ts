@@ -54,10 +54,38 @@ const seedState: EnterpriseState = {
       { id: 'loc-eu-fg', warehouseId: 'wh-eu', path: 'FG/RowB/Bay4' },
     ],
     stockLots: [
-      { id: 'lot-raw-001', itemId: 'item-raw-001', lotNo: 'PCB-2403A', qty: 120, locationId: 'loc-main-raw', status: 'available' },
-      { id: 'lot-raw-002', itemId: 'item-raw-002', lotNo: 'CAP-2403', qty: 2500, locationId: 'loc-main-raw', status: 'available' },
-      { id: 'lot-sub-001', itemId: 'item-sub-001', lotNo: 'FPGA-2402', qty: 40, locationId: 'loc-main-wip', status: 'reserved' },
-      { id: 'lot-fin-001', itemId: 'item-fin-001', lotNo: 'FG-2402', qty: 18, locationId: 'loc-main-fg', status: 'available' },
+      {
+        id: 'lot-raw-001',
+        itemId: 'item-raw-001',
+        lotNo: 'PCB-2403A',
+        qty: 120,
+        locationId: 'loc-main-raw',
+        status: 'available',
+      },
+      {
+        id: 'lot-raw-002',
+        itemId: 'item-raw-002',
+        lotNo: 'CAP-2403',
+        qty: 2500,
+        locationId: 'loc-main-raw',
+        status: 'available',
+      },
+      {
+        id: 'lot-sub-001',
+        itemId: 'item-sub-001',
+        lotNo: 'FPGA-2402',
+        qty: 40,
+        locationId: 'loc-main-wip',
+        status: 'reserved',
+      },
+      {
+        id: 'lot-fin-001',
+        itemId: 'item-fin-001',
+        lotNo: 'FG-2402',
+        qty: 18,
+        locationId: 'loc-main-fg',
+        status: 'available',
+      },
     ],
     stockMoves: [
       {

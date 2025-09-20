@@ -93,7 +93,8 @@ const addLog = (level: LogEntry['level'], message: string) => {
 
 // Simulates network requests to a backend.
 export const api = {
-  login: (username, password): Promise<{ token: string; user: User, permissions: Permission[] }> => new Promise((resolve, reject) => {
+  login: (username, _password): Promise<{ token: string; user: User, permissions: Permission[] }> => new Promise((resolve, reject) => {
+    void _password;
     setTimeout(() => {
       const user = MOCK_USERS.find(u => u.username === username);
       if (user) {
@@ -123,7 +124,8 @@ export const api = {
     }, 500);
   }),
 
-  register: (username, password): Promise<{ success: boolean }> => new Promise((resolve, reject) => {
+  register: (username, _password): Promise<{ success: boolean }> => new Promise((resolve, reject) => {
+    void _password;
     setTimeout(() => {
         if (MOCK_USERS.some(u => u.username === username)) {
             reject(new Error('Username already exists.'));

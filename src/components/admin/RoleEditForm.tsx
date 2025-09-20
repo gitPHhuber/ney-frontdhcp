@@ -63,8 +63,8 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
                     onChange={e => setName(e.target.value)}
                 />
             </div>
-            <div className="form-group">
-                <label>Permissions</label>
+            <fieldset className="form-group">
+                <legend>Permissions</legend>
                 <div className="permissions-grid">
                     {(Object.entries(allPermissions) as Array<[string, Permission[]]>).map(([category, perms]) => (
                         <div key={category} className="permission-category">
@@ -84,7 +84,7 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
                         </div>
                     ))}
                 </div>
-            </div>
+            </fieldset>
              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
                 <button type="button" className="btn" onClick={onCancel} style={{backgroundColor: 'var(--netgrip-border-dark)'}}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={isSaving}>

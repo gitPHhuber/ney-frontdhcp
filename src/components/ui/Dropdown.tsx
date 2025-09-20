@@ -38,6 +38,21 @@ const Dropdown: React.FC<DropdownProps> = ({ trigger, children }) => {
     setIsOpen(false);
   }, []);
 
+  const handleMenuKeyDown = useCallback<React.KeyboardEventHandler<HTMLDivElement>>(
+    event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsOpen(false);
+      }
+
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleMenuClick();
+      }
+    },
+    [handleMenuClick],
+  );
+
   return (
     <div className="dropdown-wrapper" ref={dropdownRef}>
       {React.cloneElement(trigger, {
@@ -46,7 +61,13 @@ const Dropdown: React.FC<DropdownProps> = ({ trigger, children }) => {
         'aria-expanded': isOpen,
       })}
       {isOpen && (
-        <div className="dropdown-menu" role="menu" onClick={handleMenuClick}>
+        <div
+          className="dropdown-menu"
+          role="menu"
+          tabIndex={-1}
+          onClick={handleMenuClick}
+          onKeyDown={handleMenuKeyDown}
+        >
           {children}
         </div>
       )}

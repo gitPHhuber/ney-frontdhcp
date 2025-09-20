@@ -12,8 +12,20 @@ type View = 'login' | 'register' | 'forgotPassword' | 'registerSuccess' | 'forgo
 
 // --- View Components ---
 
+interface LoginViewProps {
+    onLogin: (event: React.FormEvent<HTMLFormElement>) => void;
+    onSsoLogin: (provider: string) => void;
+    onSwitchView: (view: View) => void;
+    username: string;
+    setUsername: React.Dispatch<React.SetStateAction<string>>;
+    password: string;
+    setPassword: React.Dispatch<React.SetStateAction<string>>;
+    error: string;
+    loading: boolean;
+}
+
 // Component for the main login form
-const LoginView = ({ onLogin, onSsoLogin, onSwitchView, username, setUsername, password, setPassword, error, loading }) => (
+const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSsoLogin, onSwitchView, username, setUsername, password, setPassword, error, loading }) => (
     <form onSubmit={onLogin}>
         <div className="form-group">
             <label htmlFor="username">Username</label>
@@ -57,7 +69,11 @@ const LoginView = ({ onLogin, onSsoLogin, onSwitchView, username, setUsername, p
 );
 
 // Component for registration success message
-const RegisterSuccessView = ({ onSwitchView }) => (
+interface SimpleViewProps {
+    onSwitchView: (view: View) => void;
+}
+
+const RegisterSuccessView: React.FC<SimpleViewProps> = ({ onSwitchView }) => (
      <div>
         <div className="success-message">
             <strong>Registration Successful!</strong>
@@ -68,7 +84,7 @@ const RegisterSuccessView = ({ onSwitchView }) => (
 );
 
 // Component for forgot password success message
-const ForgotSuccessView = ({ onSwitchView }) => (
+const ForgotSuccessView: React.FC<SimpleViewProps> = ({ onSwitchView }) => (
      <div>
         <div className="success-message">
             <strong>Request Received</strong>
