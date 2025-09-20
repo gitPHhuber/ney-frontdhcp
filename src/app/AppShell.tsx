@@ -23,6 +23,7 @@ const AppShell: React.FC = () => {
 
   const paletteHotkey = useMemo(
     () => ({
+      preventDefault: true,
       description: t('commandPalette.open', { defaultValue: 'Command palette' }),
       group: t('hotkeys.navigation', { defaultValue: 'Navigation' }),
     }),
