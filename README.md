@@ -1,48 +1,63 @@
+# DHCP Monitoring Frontend
 
-**Prerequisites:** Node.js 20+
+## Назначение проекта
+Этот репозиторий содержит прототип веб-интерфейса для мониторинга и администрирования DHCP-инфраструктуры и связанных сетевых сервисов. Приложение имитирует реальные сценарии эксплуатации: контроль аренды адресов, управление статическими записями, визуализацию топологии, работу с инвентарём оборудования, отчётами и автоматизацией. Благодаря этому интерфейс можно использовать как демонстрационный стенд, основу для пилота или площадку для UX-исследований без обращения к боевым системам.
 
+## Требования
+- Node.js 20 или новее
+- npm (поставляется вместе с Node.js)
+
+## Быстрый старт
 ```bash
 npm install
 MOCK_API=1 BYPASS_AUTH=1 npm run dev
 ```
 
-The development server boots with authentication bypassed (auto-login as `admin`) and with the mock API adapters enabled. These flags emulate Prometheus/SNMP/NetFlow/Loki integrations without reaching real endpoints.
+Флаги окружения `MOCK_API=1` и `BYPASS_AUTH=1` включают мок-адаптеры (эмулируют Prometheus, SNMP, NetFlow и Loki) и обход авторизации. При запуске дев-сервера происходит автологин под пользователем `admin`, что позволяет сразу исследовать UI.
 
-## Architecture snapshot
+## Доступные скрипты
+- `npm run dev` — запуск Vite в режиме разработки.
+- `npm run build` — сборка оптимизированной версии приложения.
+- `npm run preview` — предпросмотр собранного бандла.
+- `npm run lint` — проверка ESLint для основных областей кода.
+- `npm run test` — запуск юнит-тестов через Vitest.
+- `npm run typecheck` — проверка типизации TypeScript без генерации артефактов.
+- `npm run e2e` — энд-ту-энд тесты на Playwright.
 
+## Структура проекта
 ```
 src/
-├── app/                     # App shell, router, providers
-├── pages/                   # Top-level routed screens
-├── widgets/                 # Cross-cutting UI widgets (command palette, notifications, guided tour)
-├── features/                # Feature slices (inventory table, topology canvas, reports builder...)
-
-├── shared/                  # Config, hooks, UI primitives, utilities
-└── styles/                  # Design tokens and component/page styles
+├── app/                     # Каркас приложения: оболочка, роутер, провайдеры контекстов
+├── pages/                   # Отдельные страницы и маршруты (Dashboard, DHCP, отчёты и т.д.)
+├── features/                # Фичи уровня домена (инвентарь, топология, отчётный конструктор, автоматизация)
+├── widgets/                 # Повторно используемые виджеты (командная палитра, уведомления, гид)
+├── shared/                  # Общие хуки, конфигурации, примитивы UI и утилиты
+├── components/              # Базовые UI-компоненты
+├── services/                # Адаптеры данных и клиенты API
+└── styles/                  # Токены дизайна и глобальные стили
 ```
 
+## Ключевые сценарии
+- **Инвентаризация** (`features/inventory/InventoryTable.tsx`) — виртуализированная таблица TanStack с черновиками inline-редактирования, экспортом и пресетами фильтров.
+- **Топология сети** (`features/topology/TopologyCanvas.tsx`) — полотно Cytoscape с переключением раскладок и индикаторами статусов.
+- **Конструктор отчётов** (`features/reports/ReportsBuilderCanvas.tsx`) — drag-and-drop интерфейс с выбором пресетов и вызовами к действиям по экспорту.
+- **Автоматизация** (`features/automation/PlaybookList.tsx`) — каталог плейбуков с заготовками для dry-run/launch и оценкой рисков.
+- **Product Passports** (`features/product-passport/ProductPassportWizard.tsx`) — мастер для заполнения данных об изделиях и жизненном цикле.
+- **DHCP-модули** (страницы `DhcpServerPage`, `LeasesPage`, `StaticLeasesPage`) — обзор состояния серверов, текущих арен и статических записей.
 
+Вспомогательные разделы (инциденты, предупреждения, executive dashboards, change calendar и т.д.) представлены плейсхолдерами `PagePlaceholder` и готовы к наполнению реальными данными.
 
-### Feature scaffolds
+## Наблюдаемость и UX-инструменты
+- **Notification Center** агрегирует некритичные уведомления, а критические события отображаются через тостер Sonner.
+- **Guided tour** и встроенные подсказки помогают онбордингу пользователей и содержат ссылки на документацию.
+- **Performance tooling** (`shared/lib/performance.ts`) предоставляет помощники `startMeasure/endMeasure` для измерения времени рендеринга тяжёлых таблиц и канвы.
 
-| Area | Highlights |
-| --- | --- |
-| Inventory (`features/inventory/InventoryTable.tsx`) | Virtualised TanStack Table with inline edit stub, export presets hooks, performance markers. |
+## Работа с данными и кэшированием
+Благодаря React Query интерфейс поддерживает локальный кэш запросов и оптимистичные обновления. Мок-слой можно отключить и переключиться на реальные API, заменив адаптеры в `services/` и изменив значения переменных окружения.
 
-| Topology (`features/topology/TopologyCanvas.tsx`) | Cytoscape canvas with layout switching placeholder and animated status badges. |
-| Reports (`features/reports/ReportsBuilderCanvas.tsx`) | Drag-and-drop ready form with preset selection and export CTAs. |
-| Automation (`features/automation/PlaybookList.tsx`) | Playbook list with dry-run/launch slots and risk scoring badges. |
-| Product Passports (`features/product-passport/ProductPassportWizard.tsx`) | Multi-step wizard capturing the data model required for enterprise passports. |
+## Тестирование и качество кода
+- ESLint и Prettier применяются для единых стандартов стиля.
+- Vitest покрывает модульную логику, Playwright — ключевые пользовательские сценарии.
+- TypeScript и Zod используются для валидации форм и строгой типизации данных, снижающей количество регрессий.
 
-Executive dashboards, incidents, alerts, and change calendars are stubbed as contextual `PagePlaceholder` blocks ready to be expanded with real data.
-
-### Observability & UX aids
-
-* **Notification Center** accumulates non-P1/P2 alerts, while critical ones can surface through the Sonner toaster.
-
-* **Guided tour** and inline hints accelerate onboarding with links to documentation stubs.
-* **Performance tooling** via `shared/lib/performance.ts` exposes `startMeasure/endMeasure` helpers to instrument heavy tables/topology renders.
-
-### Feature flags & caching
-
-
+Следуйте этим практикам при расширении приложения, чтобы сохранить согласованность и предсказуемость поведения.

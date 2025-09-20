@@ -9,24 +9,24 @@ function HelpPage() {
     return (
         <div>
             <header className="page-header">
-                <h1>Help & FAQ</h1>
+                <h1>Справка и ответы на вопросы</h1>
             </header>
             <Accordion>
-                <AccordionItem title="What is a DHCP Lease?">
-                    <p>A DHCP lease is a temporary assignment of an IP address to a device on the network. The DHCP server 'leases' the IP address for a specific period. This allows for efficient use of a limited pool of IP addresses.</p>
+                <AccordionItem title="Что такое аренда DHCP?">
+                    <p>Аренда DHCP — это временное назначение IP-адреса устройству в сети. Сервер выдаёт адрес на заданный период, после чего он может быть выдан другому устройству. Это помогает эффективно расходовать ограниченный пул адресов.</p>
                 </AccordionItem>
-                <AccordionItem title="What is the difference between a dynamic and a static lease?">
-                    <p><strong>Dynamic Leases</strong> are assigned automatically from a pool of available IPs and can change over time. They are managed on the 'Leases' page.</p>
-                    <p><strong>Static Leases (or Reservations)</strong> are permanent IP address assignments for specific devices, identified by their MAC address. This ensures a device like a server or printer always has the same IP. These are managed on the 'Static IPs' page.</p>
+                <AccordionItem title="Чем отличаются динамическая и статическая аренда?">
+                    <p><strong>Динамические аренды</strong> выдаются автоматически из пула свободных адресов и могут изменяться со временем. Управление доступно на странице «Аренды».</p>
+                    <p><strong>Статические аренды (резервации)</strong> закрепляют IP-адрес за конкретным устройством по MAC-адресу. Так можно гарантировать неизменный адрес для серверов или принтеров. Создаются и редактируются на странице «Статические IP».</p>
                 </AccordionItem>
-                <AccordionItem title="How do I manage the DHCP server?">
-                    <p>First, you must connect to the server via the 'Settings' page by entering its IP address. Once connected, you can navigate to the 'DHCP Server' page to view its status, configuration, and logs. You can also start, stop, or restart the service from this page.</p>
+                <AccordionItem title="Как управлять DHCP-сервером?">
+                    <p>Сначала подключитесь к серверу на странице «Настройки», указав его IP-адрес. После подключения переходите на страницу «DHCP-сервер», чтобы проверять статус, конфигурацию и журнал событий, а также запускать, останавливать или перезапускать службу.</p>
                 </AccordionItem>
-                <AccordionItem title="What are Roles and Permissions?">
-                    <p>Roles define a set of permissions that can be assigned to users. Permissions grant the ability to perform specific actions, like viewing leases, deleting users, or changing settings. An administrator can create custom roles and assign them to users in the 'Settings' page under User Management.</p>
+                <AccordionItem title="Что такое роли и права?">
+                    <p>Роль объединяет набор прав доступа, которыми можно наделить пользователя. Права определяют, какие действия доступны: просмотр аренды, удаление пользователей, изменение настроек и т.д. Администратор создаёт и назначает роли в разделе «Контроль доступа».</p>
                 </AccordionItem>
-                 <AccordionItem title="How do I generate a report?">
-                    <p>Navigate to the 'Reports' page. You can use the Custom Report Builder to generate a report based on all current lease data. In the future, predefined reports will be available for more specific insights.</p>
+                <AccordionItem title="Как сформировать отчёт?">
+                    <p>Перейдите на страницу «Отчёты». Используйте конструктор для формирования отчёта по актуальным данным аренды. Позже появятся готовые шаблоны для быстрого получения аналитики.</p>
                 </AccordionItem>
             </Accordion>
         </div>

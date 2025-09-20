@@ -3,12 +3,12 @@ import { PagePlaceholder } from '../../shared/ui/PagePlaceholder';
 
 const ExecutiveDashboardPage: React.FC = () => (
   <PagePlaceholder
-    title="Executive Dashboard"
-    description="Present uptime, MTTR, SLA adherence, incident trends, and risk scoring in a leadership-friendly view."
+    title="Дашборд для руководства"
+    description="Отображайте доступность, MTTR, соблюдение SLA, тренды инцидентов и оценку рисков в формате, понятном топ-менеджменту."
     actions={
       <div className="actions">
-        <button type="button" className="primary">Export 1-click report</button>
-        <button type="button" className="ghost">Schedule weekly email</button>
+        <button type="button" className="primary">Экспортировать отчёт</button>
+        <button type="button" className="ghost">Запланировать еженедельную рассылку</button>
       </div>
     }
   />

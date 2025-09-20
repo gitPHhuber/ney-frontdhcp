@@ -24,14 +24,13 @@ function DhcpServerPage() {
         return (
             <div>
                 <header className="page-header">
-                    <h1>DHCP Server</h1>
+                    <h1>DHCP-сервер</h1>
                 </header>
                 <div className="card">
-                    <h2>Server Not Connected</h2>
+                    <h2>Сервер не подключён</h2>
                     <p>
-                        Please connect to a DHCP server from the{' '}
-                        <NavLink to="/settings">Settings</NavLink>{' '}
-                        page to manage it.
+                        Подключите DHCP-сервер на странице{' '}
+                        <NavLink to="/settings">настроек</NavLink>, чтобы управлять им из интерфейса.
                     </p>
                 </div>
             </div>
@@ -43,7 +42,7 @@ function DhcpServerPage() {
     return (
         <div>
             <header className="page-header">
-                <h1>DHCP Server Management</h1>
+                <h1>Управление DHCP-сервером</h1>
             </header>
             <div className="dhcp-server-grid">
                 <div className="dhcp-summary-grid">
@@ -51,69 +50,69 @@ function DhcpServerPage() {
                         <div className="card-content">
                             <div className="card-icon"><FaServer /></div>
                             <div className="card-value"><StatusBadge status={status} /></div>
-                            <div className="card-title">Status</div>
+                            <div className="card-title">Статус</div>
                         </div>
                     </div>
                      <div className="card">
                         <div className="card-content">
                             <div className="card-icon"><FaNetworkWired /></div>
                             <div className="card-value">{config.ip_range_start} - {config.ip_range_end}</div>
-                            <div className="card-title">IP Range</div>
+                            <div className="card-title">Диапазон IP</div>
                         </div>
                     </div>
                      <div className="card">
                         <div className="card-content">
                             <div className="card-icon"><FaClock /></div>
                             <div className="card-value">{config.lease_time}</div>
-                            <div className="card-title">Lease Time</div>
+                            <div className="card-title">Время аренды</div>
                         </div>
                     </div>
                 </div>
 
                 <div className="card dhcp-controls">
-                    <h2>Server Controls</h2>
+                    <h2>Управление сервисом</h2>
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                        <button 
-                            className="btn btn-success" 
+                        <button
+                            className="btn btn-success"
                             onClick={() => controlServer('start')}
                             disabled={loading || status !== 'offline' || !canUpdate}
                         >
-                            <FaPowerOff /> Start
+                            <FaPowerOff /> Запустить
                         </button>
-                        <button 
+                        <button
                             className="btn btn-danger"
                             onClick={() => controlServer('stop')}
                             disabled={loading || status !== 'online' || !canUpdate}
                         >
-                            <FaStopCircle /> Stop
+                            <FaStopCircle /> Остановить
                         </button>
-                        <button 
+                        <button
                             className="btn btn-warning"
                             onClick={() => controlServer('restart')}
                             disabled={loading || status !== 'online' || !canUpdate}
                         >
-                            <FaSyncAlt /> Restart
+                            <FaSyncAlt /> Перезапустить
                         </button>
                     </div>
-                     {loading && <p style={{marginTop: '1rem'}}>Action in progress...</p>}
+                     {loading && <p style={{marginTop: '1rem'}}>Выполняется действие…</p>}
                 </div>
-                
+
                 <div className="card dhcp-config">
-                    <h2>Configuration</h2>
+                    <h2>Конфигурация</h2>
                     <ul className="dhcp-config-list">
-                        <li><strong>Server IP:</strong> <span>{config.server_ip}</span></li>
-                        <li><strong>Subnet Mask:</strong> <span>{config.subnet_mask}</span></li>
-                        <li><strong>Router:</strong> <span>{config.router}</span></li>
-                        <li><strong>DNS Server:</strong> <span>{config.dns_server}</span></li>
+                        <li><strong>IP сервера:</strong> <span>{config.server_ip}</span></li>
+                        <li><strong>Маска подсети:</strong> <span>{config.subnet_mask}</span></li>
+                        <li><strong>Шлюз:</strong> <span>{config.router}</span></li>
+                        <li><strong>DNS-сервер:</strong> <span>{config.dns_server}</span></li>
                     </ul>
                 </div>
 
                 <div className="card dhcp-logs">
-                    <h2>Server Logs</h2>
+                    <h2>Журнал сервера</h2>
                     <div className="server-logs-container">
                         {logs.map((log, index) => (
                              <div key={index} className="log-entry">
-                                <span className="timestamp">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                                <span className="timestamp">{new Date(log.timestamp).toLocaleTimeString('ru-RU')}</span>
                                 <span className={`level-${log.level}`}>{log.level}</span>
                                 <span>: {log.message}</span>
                             </div>

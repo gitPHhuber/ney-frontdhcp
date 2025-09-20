@@ -29,8 +29,8 @@ const EditLeaseForm = ({ lease, onSave, onCancel, isSaving }: EditLeaseFormProps
     return (
         <form onSubmit={handleSubmit}>
             <div className="form-group">
-                <label>IP Address</label>
-                <input type="text" className="form-control" value={formData.ip} disabled />
+                <label htmlFor="lease-ip">IP Address</label>
+                <input id="lease-ip" type="text" className="form-control" value={formData.ip} disabled />
             </div>
             <div className="form-group">
                 <label htmlFor="hostname">Hostname</label>

@@ -79,7 +79,7 @@ const UserManagementTable = () => {
     };
 
     if (isLoading) {
-        return <div style={{textAlign: 'center', padding: '2rem'}}>Loading users...</div>;
+        return <div style={{ textAlign: 'center', padding: '2rem' }}>Загружаем список пользователей…</div>;
     }
 
     return (
@@ -88,10 +88,10 @@ const UserManagementTable = () => {
                 <table>
                     <thead>
                         <tr>
-                            <th>Username</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th style={{textAlign: 'right'}}>Actions</th>
+                            <th>Имя пользователя</th>
+                            <th>Роль</th>
+                            <th>Статус</th>
+                            <th style={{ textAlign: 'right' }}>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -111,7 +111,7 @@ const UserManagementTable = () => {
                                             ))}
                                         </select>
                                     ) : (
-                                        roles.find(r => r.id === user.roleId)?.name || 'Unknown'
+                                        roles.find(r => r.id === user.roleId)?.name || 'Не назначена'
                                     )}
                                 </td>
                                 <td><StatusBadge status={user.status} /></td>
@@ -122,7 +122,13 @@ const UserManagementTable = () => {
                                             onClick={() => handleApprove(user.id)}
                                             disabled={isSubmitting === user.id}
                                         >
-                                            {isSubmitting === user.id ? <span className="spinner-inline" /> : <><FaCheck /> Approve</>}
+                                            {isSubmitting === user.id ? (
+                                                <span className="spinner-inline" />
+                                            ) : (
+                                                <>
+                                                    <FaCheck /> Одобрить
+                                                </>
+                                            )}
                                         </button>
                                     )}
                                     {user.username !== currentUser?.username && canDeleteUsers && (
@@ -132,7 +138,7 @@ const UserManagementTable = () => {
                                             onClick={() => setUserToDelete(user)}
                                             disabled={isSubmitting === user.id}
                                         >
-                                            <FaTrash /> Delete
+                                            <FaTrash /> Удалить
                                         </button>
                                     )}
                                 </td>
@@ -146,10 +152,11 @@ const UserManagementTable = () => {
                 isOpen={!!userToDelete}
                 onClose={() => setUserToDelete(null)}
                 onConfirm={handleConfirmDelete}
-                title="Confirm User Deletion"
+                title="Удалить пользователя?"
                 isConfirming={isSubmitting === userToDelete?.id}
             >
-                Are you sure you want to permanently delete the user <strong>{userToDelete?.username}</strong>? This action cannot be undone.
+                Подтвердите удаление пользователя <strong>{userToDelete?.username}</strong>. Действие необратимо и будет
+                зафиксировано в журнале аудита.
             </ConfirmationModal>
         </>
     );

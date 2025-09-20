@@ -1,10 +1,10 @@
 
+import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../context/AuthContext';
 import { isFeatureEnabled } from '../shared/config/featureFlags';
-import { useHotkeys } from '../shared/hotkeys/useHotkeys';
 import { CommandPalette } from '../widgets/command-palette/CommandPalette';
 import { NotificationCenter } from '../widgets/notification-center/NotificationCenter';
 
@@ -15,9 +15,19 @@ const AppShell: React.FC = () => {
   const { user, logout, hasPermission } = useAuth();
   const [isPaletteOpen, setPaletteOpen] = useState(false);
 
-  const togglePalette = useCallback((event: KeyboardEvent) => {
-    event.preventDefault();
-    setPaletteOpen(previous => !previous);
+  useEffect(() => {
+    const handleHotkey = (event: KeyboardEvent) => {
+      const isModKey = event.metaKey || event.ctrlKey;
+      if (!isModKey || event.key.toLowerCase() !== 'k') {
+        return;
+      }
+
+      event.preventDefault();
+      setPaletteOpen(previous => !previous);
+    };
+
+    window.addEventListener('keydown', handleHotkey);
+    return () => window.removeEventListener('keydown', handleHotkey);
   }, []);
 
   const renderItem = (item: NavigationItem) => {

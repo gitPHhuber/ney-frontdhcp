@@ -12,11 +12,23 @@ type View = 'login' | 'register' | 'forgotPassword' | 'registerSuccess' | 'forgo
 
 // --- View Components ---
 
+interface LoginViewProps {
+    onLogin: (event: React.FormEvent<HTMLFormElement>) => void;
+    onSsoLogin: (provider: string) => void;
+    onSwitchView: (view: View) => void;
+    username: string;
+    setUsername: React.Dispatch<React.SetStateAction<string>>;
+    password: string;
+    setPassword: React.Dispatch<React.SetStateAction<string>>;
+    error: string;
+    loading: boolean;
+}
+
 // Component for the main login form
-const LoginView = ({ onLogin, onSsoLogin, onSwitchView, username, setUsername, password, setPassword, error, loading }) => (
+const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSsoLogin, onSwitchView, username, setUsername, password, setPassword, error, loading }) => (
     <form onSubmit={onLogin}>
         <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">Имя пользователя</label>
             <input
                 id="username"
                 type="text"
@@ -27,7 +39,7 @@ const LoginView = ({ onLogin, onSsoLogin, onSwitchView, username, setUsername, p
             />
         </div>
         <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Пароль</label>
             <input
                 id="password"
                 type="password"
@@ -39,42 +51,46 @@ const LoginView = ({ onLogin, onSsoLogin, onSwitchView, username, setUsername, p
         </div>
         {error && <p style={{ color: 'var(--netgrip-danger)', marginBottom: '1rem' }}>{error}</p>}
         <p style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--netgrip-text-dark)', opacity: 0.7, margin: '-0.5rem 0 1.5rem' }}>
-            Hint: admin/admin, user/user, newuser/password (pending)
+            Подсказка: admin/admin, user/user, newuser/password (на подтверждении)
         </p>
         <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Выполняем вход…' : 'Войти'}
         </button>
         <div className="login-links">
-            <button type="button" onClick={() => onSwitchView('forgotPassword')}>Forgot Password?</button>
-            <button type="button" onClick={() => onSwitchView('register')}>Register a new account</button>
+            <button type="button" onClick={() => onSwitchView('forgotPassword')}>Забыли пароль?</button>
+            <button type="button" onClick={() => onSwitchView('register')}>Зарегистрировать учётную запись</button>
         </div>
-        <div className="sso-divider">OR</div>
+        <div className="sso-divider">или</div>
         <div className="sso-buttons">
-            <button type="button" className="btn" onClick={() => onSsoLogin('Google')} disabled={loading}><FaGoogle /> Sign in with Google</button>
-            <button type="button" className="btn" onClick={() => onSsoLogin('Microsoft')} disabled={loading}><FaMicrosoft /> Sign in with Microsoft</button>
+            <button type="button" className="btn" onClick={() => onSsoLogin('Google')} disabled={loading}><FaGoogle /> Войти через Google</button>
+            <button type="button" className="btn" onClick={() => onSsoLogin('Microsoft')} disabled={loading}><FaMicrosoft /> Войти через Microsoft</button>
         </div>
     </form>
 );
 
 // Component for registration success message
-const RegisterSuccessView = ({ onSwitchView }) => (
+interface SimpleViewProps {
+    onSwitchView: (view: View) => void;
+}
+
+const RegisterSuccessView: React.FC<SimpleViewProps> = ({ onSwitchView }) => (
      <div>
         <div className="success-message">
-            <strong>Registration Successful!</strong>
-            <p>Your account is now pending approval from an administrator.</p>
+            <strong>Регистрация прошла успешно!</strong>
+            <p>Учётная запись отправлена на подтверждение администратору.</p>
         </div>
-        <button className="btn btn-primary" style={{width: '100%'}} onClick={() => onSwitchView('login')}>Back to Login</button>
+        <button className="btn btn-primary" style={{width: '100%'}} onClick={() => onSwitchView('login')}>Вернуться ко входу</button>
     </div>
 );
 
 // Component for forgot password success message
-const ForgotSuccessView = ({ onSwitchView }) => (
+const ForgotSuccessView: React.FC<SimpleViewProps> = ({ onSwitchView }) => (
      <div>
         <div className="success-message">
-            <strong>Request Received</strong>
-            <p>If an account with that email exists, a password reset link has been sent.</p>
+            <strong>Запрос принят</strong>
+            <p>Если такая учётная запись существует, на неё отправлена ссылка для сброса пароля.</p>
         </div>
-        <button className="btn btn-primary" style={{width: '100%'}} onClick={() => onSwitchView('login')}>Back to Login</button>
+        <button className="btn btn-primary" style={{width: '100%'}} onClick={() => onSwitchView('login')}>Вернуться ко входу</button>
     </div>
 );
 
@@ -95,7 +111,7 @@ function LoginPage() {
         try {
             await login(username, password);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unknown error occurred');
+            setError(err instanceof Error ? err.message : 'Произошла неизвестная ошибка');
         } finally {
             setLoading(false);
         }
@@ -107,7 +123,7 @@ function LoginPage() {
         try {
             await ssoLogin(provider);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unknown error occurred');
+            setError(err instanceof Error ? err.message : 'Произошла неизвестная ошибка');
         } finally {
             setLoading(false);
         }

@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { appNavigation } from '../../app/navigation';
@@ -118,11 +118,23 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
       });
   }, [hasPermission, query, t]);
 
+  const handleOverlayKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.currentTarget !== event.target) {
+      return;
+    }
+
+    if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClose();
+    }
+  }, [onClose]);
+
   if (!isOpen) {
     return null;
   }
 
   const visibleShortcuts = shortcuts.filter(shortcut => Boolean(shortcut.description));
+  const overlayLabel = t('commandPalette.close', { defaultValue: 'Close command palette' });
 
   const formatCombo = (combo: string) =>
     combo
@@ -138,7 +150,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
       .join(' + ');
 
   return (
-    <div className="command-palette" role="presentation" onClick={onClose}>
+    <div
+      className="command-palette"
+      role="button"
+      tabIndex={0}
+      aria-label={overlayLabel}
+      onClick={event => {
+        if (event.currentTarget === event.target) {
+          onClose();
+        }
+      }}
+      onKeyDown={handleOverlayKeyDown}
+    >
       <div
         ref={dialogRef}
         className="command-palette__content"
@@ -148,7 +171,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        onClick={event => event.stopPropagation()}
       >
         <header className="command-palette__header">
           <div>
@@ -182,6 +204,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
           {options.map(option => (
             <li
               key={option.path}
+              role="option"
+              aria-selected={false}
             >
               <button
                 type="button"
@@ -196,7 +220,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
             </li>
           ))}
           {options.length === 0 && (
-            <li className="muted" role="option">
+            <li className="muted" role="option" aria-selected={false}>
               {t('commandPalette.noResults', { defaultValue: 'No matches' })}
             </li>
           )}

@@ -7,6 +7,20 @@ interface DragState {
   fromStatus: TaskStatus;
 }
 
+const priorityLabels: Record<string, string> = {
+  low: 'Низкий',
+  medium: 'Средний',
+  high: 'Высокий',
+  critical: 'Критический',
+};
+
+const entityTypeLabels: Record<string, string> = {
+  Task: 'Задача',
+  WorkOrder: 'Наряд',
+  ProductionOrder: 'Производственный заказ',
+  Incident: 'Инцидент',
+};
+
 export const TaskBoard: React.FC = () => {
   const { data: tasks = [] } = useTaskBoardQuery();
   const { data: columns = [] } = useTaskColumnsQuery();
@@ -35,12 +49,12 @@ export const TaskBoard: React.FC = () => {
     <section className="task-board">
       <header className="task-board__header">
         <div>
-          <h2>Task Board</h2>
-          <p className="muted">Kanban with sprint, WIP, and timesheet insights.</p>
+          <h2>Доска задач</h2>
+          <p className="muted">Канбан с учётом спринтов, WIP и журналом затраченного времени.</p>
         </div>
         <div className="task-board__meta">
-          <strong>Active sprint:</strong>
-          <span>{sprints[0]?.name ?? 'Unassigned'}</span>
+          <strong>Активный спринт:</strong>
+          <span>{sprints[0]?.name ?? 'Не назначен'}</span>
         </div>
       </header>
       <div className="task-board__grid">
@@ -53,7 +67,7 @@ export const TaskBoard: React.FC = () => {
               event.preventDefault();
               handleDrop(column.status);
             }}
-            aria-label={`${column.title} column with ${tasksByStatus[column.status]?.length ?? 0} tasks`}
+            aria-label={`Колонка «${column.title}» содержит ${tasksByStatus[column.status]?.length ?? 0} задач`}
           >
             <header className="task-column__header">
               <h3>{column.title}</h3>
@@ -72,12 +86,12 @@ export const TaskBoard: React.FC = () => {
                   <article className={`task-card priority-${task.priority}`}>
                     <header>
                       <h4>{task.title}</h4>
-                      <span className="status-badge">{task.priority}</span>
+                      <span className="status-badge">{priorityLabels[task.priority] ?? task.priority}</span>
                     </header>
                     <p>{task.description}</p>
                     <footer>
-                      <span>{task.assignee ?? 'Unassigned'}</span>
-                      {task.dueDate && <span>Due {new Date(task.dueDate).toLocaleDateString()}</span>}
+                      <span>{task.assignee ?? 'Не назначен'}</span>
+                      {task.dueDate && <span>Срок до {new Date(task.dueDate).toLocaleDateString('ru-RU')}</span>}
                     </footer>
                   </article>
                 </li>
@@ -86,13 +100,13 @@ export const TaskBoard: React.FC = () => {
           </div>
         ))}
         <aside className="task-board__aside">
-          <h3>Timesheets (24h)</h3>
+          <h3>Учёт времени (24ч)</h3>
           <ul className="timesheet-list">
             {timesheets.map(entry => (
               <li key={entry.id}>
                 <span>{entry.userId}</span>
-                <span>{entry.entityType} #{entry.entityId}</span>
-                <span>{entry.hours}h</span>
+                <span>{entityTypeLabels[entry.entityType] ?? entry.entityType} №{entry.entityId}</span>
+                <span>{entry.hours}ч</span>
               </li>
             ))}
           </ul>

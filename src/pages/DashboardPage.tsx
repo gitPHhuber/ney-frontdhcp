@@ -53,46 +53,51 @@ function DashboardPage() {
         {
             key: 'in-work',
             titleKey: 'dashboard.inWork',
-            fallback: 'In Work',
+            fallback: 'В работе',
             value: numberFormatter.format(stats.in_work),
             icon: <FaTasks />,
+            to: '/leases?status=in_work',
         },
         {
             key: 'broken',
             titleKey: 'dashboard.broken',
-            fallback: 'Broken',
+            fallback: 'Неисправно',
             value: numberFormatter.format(stats.broken),
             icon: <FaExclamationTriangle />,
+            to: '/leases?status=broken',
         },
         {
             key: 'pending',
             titleKey: 'dashboard.pending',
-            fallback: 'Pending',
+            fallback: 'Ожидают',
             value: numberFormatter.format(stats.pending),
             icon: <FaHourglassStart />,
+            to: '/leases?status=pending',
         },
         {
             key: 'total',
             titleKey: 'dashboard.totalLeases',
-            fallback: 'Total leases',
+            fallback: 'Всего аренды',
             value: numberFormatter.format(stats.total),
             icon: <FaList />,
+            to: '/leases',
         },
         {
             key: 'labels',
             titleKey: 'dashboard.topLabels',
-            fallback: 'Top labels',
+            fallback: 'Популярные метки',
             value:
                 popularLabels.length > 0
                     ? popularLabels[0].label
-                    : t('dashboard.noLabels', { defaultValue: 'No labels' }),
+                    : t('dashboard.noLabels', { defaultValue: 'Метки отсутствуют' }),
             helperText:
                 popularLabels.length > 0
                     ? labelsHelper
                     : t('dashboard.addLabelsHint', {
-                          defaultValue: 'Add labels to leases to see trends.',
+                          defaultValue: 'Добавьте метки к арендам, чтобы видеть тренды.',
                       }),
             icon: <FaTags />,
+            to: '/leases?filter=labels',
         },
     ];
 
@@ -100,19 +105,19 @@ function DashboardPage() {
         <div className="dashboard-page">
             <header className="page-header">
                 <div className="page-header__summary">
-                    <h1>{t('dashboard.title', { defaultValue: 'Dashboard' })}</h1>
+                    <h1>{t('dashboard.title', { defaultValue: 'Панель мониторинга' })}</h1>
                     {user && (
                         <p className="page-header__subtitle">
                             {t('dashboard.greeting', {
                                 name: user.username,
-                                defaultValue: `Welcome back, ${user.username}!`,
+                                defaultValue: `С возвращением, ${user.username}!`,
                             })}
                         </p>
                     )}
                 </div>
                 <div className="page-header__status" aria-live="polite">
                     <span className="page-header__status-label">
-                        {t('dashboard.serverStatus', { defaultValue: 'Server Status' })}
+                        {t('dashboard.serverStatus', { defaultValue: 'Статус сервера' })}
                     </span>
                     <StatusBadge status={serverStatus} />
                 </div>
@@ -121,12 +126,12 @@ function DashboardPage() {
             <section className="dashboard-section" aria-labelledby={metricsHeadingId}>
                 <div className="dashboard-section__header">
                     <h2 id={metricsHeadingId}>
-                        {t('dashboard.metricsHeading', { defaultValue: 'Key metrics' })}
+                        {t('dashboard.metricsHeading', { defaultValue: 'Ключевые метрики' })}
                     </h2>
                     <p className="dashboard-section__description">
                         {t('dashboard.metricsDescription', {
                             defaultValue:
-                                'Track overall lease load and hotspots across the estate in near real-time.',
+                                'Следите за нагрузкой и всплесками аренды в режиме, близком к реальному времени.',
                         })}
                     </p>
                 </div>
@@ -138,6 +143,7 @@ function DashboardPage() {
                             value={card.value}
                             icon={card.icon}
                             helperText={card.helperText}
+                            to={card.to}
                         />
                     ))}
                 </div>
@@ -146,20 +152,20 @@ function DashboardPage() {
             <section className="card dashboard-logs" aria-labelledby={logsHeadingId}>
                 <div className="dashboard-logs__header">
                     <h2 id={logsHeadingId}>
-                        {t('dashboard.recentActivity', { defaultValue: 'Recent Server Activity' })}
+                        {t('dashboard.recentActivity', { defaultValue: 'Последняя активность сервера' })}
                     </h2>
                     <p className="dashboard-logs__meta">
                         {t('dashboard.logsMeta', {
                             count: recentLogs.length,
                             defaultValue:
                                 recentLogs.length === 1
-                                    ? '1 log event captured in the latest snapshot'
-                                    : `${recentLogs.length} log events captured in the latest snapshot`,
+                                    ? '1 событие в последнем снимке'
+                                    : `${recentLogs.length} событий в последнем снимке`,
                         })}
                     </p>
                 </div>
                 {recentLogs.length > 0 ? (
-                    <ul className="server-logs" role="list">
+                    <ul className="server-logs">
                         {recentLogs.map((log, index) => {
                             const levelKey = log.level.toLowerCase();
                             const levelLabel = t(`dashboard.logLevel.${levelKey}`, {

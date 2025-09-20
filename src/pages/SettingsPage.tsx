@@ -3,14 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState } from 'react';
-import UserManagementTable from '../components/admin/UserManagementTable';
-import { useAuth } from '../context/AuthContext';
-import { FaArrowRight } from 'react-icons/fa';
-import { useDhcpServer } from '../context/DhcpServerContext';
-import { useTheme } from '../context/ThemeContext';
-import { Theme } from '../context/ThemeContext';
-import { GuidedTour } from '../widgets/guided-tour/GuidedTour';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useDhcpServer } from '../context/DhcpServerContext';
+import { Theme, useTheme } from '../context/ThemeContext';
+import { GuidedTour } from '../widgets/guided-tour/GuidedTour';
 
 function SettingsPage() {
     const { hasPermission } = useAuth();
@@ -21,12 +18,13 @@ function SettingsPage() {
 
     const canUpdate = hasPermission('settings:update');
 
-    const handleConnect = async (e) => {
+    const handleConnect = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             await connect(serverIp);
         } catch (error) {
-            alert(`Failed to connect: ${error.message}`);
+            const message = error instanceof Error ? error.message : 'неизвестная ошибка';
+            alert(`Не удалось подключиться: ${message}`);
         }
     };
 
@@ -43,24 +41,20 @@ function SettingsPage() {
     return (
         <>
             <header className="page-header">
-                <h1>Settings</h1>
+                <div className="page-header__summary">
+                    <h1>Настройки</h1>
+                    <p className="page-header__subtitle">
+                        Управляйте подключением к DHCP, визуальной темой интерфейса и вспомогательными инструментами. Раздел
+                        контроля доступа выделен в отдельное меню.
+                    </p>
+                </div>
             </header>
 
-            {hasPermission('roles:read') && (
-                 <div className="settings-card">
-                    <h2>Access Control</h2>
-                    <p>Define user roles and assign granular permissions.</p>
-                    <NavLink to="/roles" className="btn btn-primary">
-                        Manage Roles & Permissions <FaArrowRight />
-                    </NavLink>
-                </div>
-            )}
-           
             <div className="settings-card">
-                <h2>DHCP Connection</h2>
+                <h2>Подключение к DHCP</h2>
                 <form onSubmit={handleConnect} className="connection-form">
                     <div className="form-group">
-                        <label htmlFor="dhcp-ip">DHCP Server IP</label>
+                        <label htmlFor="dhcp-ip">IP-адрес DHCP-сервера</label>
                         <input
                             id="dhcp-ip"
                             type="text"
@@ -68,16 +62,25 @@ function SettingsPage() {
                             value={serverIp}
                             onChange={(e) => setServerIp(e.target.value)}
                             disabled={isConnected || loading || !canUpdate}
-                            placeholder="Enter server IP address"
+                            placeholder="Введите адрес сервера"
                         />
                     </div>
                     {isConnected ? (
-                         <button type="button" className="btn btn-danger" onClick={handleDisconnect} disabled={loading || !canUpdate}>
-                            Disconnect
+                        <button
+                            type="button"
+                            className="btn btn-danger"
+                            onClick={handleDisconnect}
+                            disabled={loading || !canUpdate}
+                        >
+                            Отключить
                         </button>
                     ) : (
-                        <button type="submit" className={`btn btn-primary ${loading ? 'is-loading' : ''}`} disabled={loading || !serverIp || !canUpdate}>
-                            <span className="btn-text-content">Connect</span>
+                        <button
+                            type="submit"
+                            className={`btn btn-primary ${loading ? 'is-loading' : ''}`}
+                            disabled={loading || !serverIp || !canUpdate}
+                        >
+                            <span className="btn-text-content">Подключить</span>
                             {loading && <span className="spinner-inline" />}
                         </button>
                     )}
@@ -85,33 +88,44 @@ function SettingsPage() {
                 <div className="connection-status">
                     <div className={`connection-status-indicator ${isConnected ? 'connected' : 'disconnected'}`}></div>
                     <span>
-                        {isConnected ? `Connected to ${serverState.config.server_ip}` : 'Not Connected'}
+                        {isConnected
+                            ? `Подключено к ${serverState.config.server_ip}`
+                            : 'Нет активного подключения'}
                     </span>
                 </div>
             </div>
 
             <div className="settings-card">
-                <h2>Theme</h2>
-                 <div className="form-group">
-                    <label>Interface Theme</label>
-                    <select 
+                <h2>Тема интерфейса</h2>
+                <div className="form-group">
+                    <label htmlFor="theme-select">Выберите оформление</label>
+                    <select
+                        id="theme-select"
                         className="form-control"
                         value={selectedTheme}
                         onChange={(e) => setSelectedTheme(e.target.value as Theme)}
                         disabled={!canUpdate}
                     >
-                        <option value="dark">NetGrip Dark</option>
-                        <option value="light">NetGrip Light</option>
-                        <option value="system">System Default</option>
+                        <option value="dark">NetGrip — тёмная</option>
+                        <option value="light">NetGrip — светлая</option>
+                        <option value="system">Использовать настройки системы</option>
                     </select>
                 </div>
-                <button className="btn btn-primary" onClick={handleThemeSave} disabled={!canUpdate}>Save Settings</button>
+                <button className="btn btn-primary" onClick={handleThemeSave} disabled={!canUpdate}>
+                    Сохранить оформление
+                </button>
             </div>
 
-            {hasPermission('users:read') && (
+            {hasPermission('access:read') && (
                 <div className="settings-card">
-                    <h2>User Management</h2>
-                    <UserManagementTable />
+                    <h2>Контроль доступа</h2>
+                    <p>
+                        Управление пользователями, ролями и заявками на доступ переместилось в отдельный раздел. Откройте новую
+                        вкладку, чтобы подтверждать запросы, назначать роли и просматривать журнал аудита.
+                    </p>
+                    <NavLink to="/access-control" className="btn btn-primary">
+                        Перейти в центр доступа
+                    </NavLink>
                 </div>
             )}
 
