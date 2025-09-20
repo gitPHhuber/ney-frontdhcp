@@ -69,7 +69,7 @@ const AppShell: FC = () => {
       to={item.path}
       className={({ isActive }) =>
         [
-
+          'nav-link',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80',
           isActive ? 'is-active' : '',
         ].join(' ')
@@ -85,7 +85,8 @@ const AppShell: FC = () => {
   );
 
   return (
-
+    <div className="app-shell grid min-h-screen grid-cols-[280px_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)]">
+      <aside className="app-shell__sidebar col-start-1 row-span-2 flex flex-col px-6 py-8">
         <div className="brand" aria-label={brandLabel}>
           <span className="brand__glow" aria-hidden />
           <span className="brand__label">{brandLabel}</span>

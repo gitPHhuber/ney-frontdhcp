@@ -14,8 +14,8 @@ body {
   line-height: 1.6;
   color: var(--netgrip-text-muted);
   background:
-    radial-gradient(1100px 700px at 70% 10%, rgba(255, 255, 255, 0.04), transparent),
-    linear-gradient(180deg, rgba(5, 9, 18, 0.96) 0%, rgba(5, 7, 13, 0.98) 48%, rgba(4, 6, 12, 0.96) 100%),
+    radial-gradient(1100px 700px at 70% 10%, rgba(255, 255, 255, 0.05), transparent),
+    linear-gradient(180deg, rgba(6, 10, 20, 0.96) 0%, rgba(5, 8, 15, 0.98) 45%, rgba(4, 6, 12, 0.96) 100%),
     var(--netgrip-bg-dark);
   overflow-x: hidden;
 }
@@ -58,7 +58,7 @@ h6 {
 
 p {
   margin: 0;
-  color: var(--netgrip-text-muted);
+  color: rgba(226, 232, 240, 0.9);
 }
 
 strong {
