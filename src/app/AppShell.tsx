@@ -161,15 +161,7 @@ const AppShell: FC = () => {
   );
 
   return (
-    <React.Fragment>
-      <a className="skip-nav" href="#app-content">
-        {t('navigation.skipToContent', { defaultValue: 'Перейти к содержимому' })}
-      </a>
-      <div
-        className="app-shell"
-        data-desktop={isDesktop}
-        data-sidebar-open={isSidebarOpen}
-      >
+
         <button
           type="button"
           className="app-shell__overlay"
