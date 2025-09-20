@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, type FC } from 'react';
+import React, { useEffect, useState, type FC } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -85,12 +85,10 @@ const AppShell: FC = () => {
     </NavLink>
   );
 
-  const sidebarWidth = useMemo(() => (isSidebarExpanded ? 320 : 280), [isSidebarExpanded]);
-
   return (
     <div
       className="app-shell grid min-h-screen grid-rows-[56px_1fr] text-neutral-100"
-      style={{ ['--sidebar-width' as string]: `${sidebarWidth}px` }}
+      style={{ ['--sidebar-width' as string]: isSidebarExpanded ? '320px' : '280px' }}
       data-sidebar-expanded={isSidebarExpanded}
     >
       <aside
