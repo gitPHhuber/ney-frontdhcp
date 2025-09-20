@@ -1,11 +1,15 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
-export interface HotkeyOptions {
+export interface HotkeyMetadata {
   description?: string;
   group?: string;
 }
 
-export interface RegisteredHotkey extends HotkeyOptions {
+export interface HotkeyOptions extends HotkeyMetadata {
+  preventDefault?: boolean;
+}
+
+export interface RegisteredHotkey extends HotkeyMetadata {
   combo: string;
 }
 
@@ -43,19 +47,32 @@ export const HotkeysProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const registerHotkey = useCallback<HotkeysContextValue['registerHotkey']>((combo, handler, options) => {
     const normalized = normalizeCombo(combo);
     const handlerSet = handlersRef.current.get(normalized) ?? new Set();
-    handlerSet.add(handler);
+    const wrappedHandler = options?.preventDefault
+      ? (event: KeyboardEvent) => {
+          event.preventDefault();
+          handler(event);
+        }
+      : handler;
+    handlerSet.add(wrappedHandler);
     handlersRef.current.set(normalized, handlerSet);
     setShortcuts(previous => {
-      if (previous.some(item => item.combo === normalized)) {
-        return previous;
+      const metadata: HotkeyMetadata = {
+        description: options?.description,
+        group: options?.group,
+      };
+      const existingIndex = previous.findIndex(item => item.combo === normalized);
+      if (existingIndex >= 0) {
+        const next = [...previous];
+        next[existingIndex] = { ...next[existingIndex], ...metadata };
+        return next;
       }
-      return [...previous, { combo: normalized, ...options }];
+      return [...previous, { combo: normalized, ...metadata }];
     });
 
     return () => {
       const set = handlersRef.current.get(normalized);
       if (!set) return;
-      set.delete(handler);
+      set.delete(wrappedHandler);
       if (set.size === 0) {
         handlersRef.current.delete(normalized);
         setShortcuts(previous => previous.filter(item => item.combo !== normalized));
