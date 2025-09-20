@@ -139,6 +139,21 @@
   color: var(--text-muted);
 }
 
+.status--low {
+  background: rgba(34, 197, 94, 0.16);
+  color: rgb(22 163 74);
+}
+
+.status--medium {
+  background: rgba(245, 158, 11, 0.2);
+  color: rgb(217 119 6);
+}
+
+.status--high {
+  background: rgba(239, 68, 68, 0.18);
+  color: rgb(185 28 28);
+}
+
 .erp-orders__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -163,6 +178,197 @@
   box-shadow: var(--shadow-md);
   display: grid;
   gap: 1rem;
+}
+
+.mes-command {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.mes-command__header,
+.quality-board__header,
+.test-lab__header,
+.workforce__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.mes-command__actions,
+.quality-board__actions,
+.test-lab__actions,
+.workforce__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.mes-command__grid,
+.quality-board__grid,
+.test-lab__grid,
+.workforce__grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.mes-command__grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.mes-command__card,
+.quality-card,
+.test-lab__card,
+.workforce__card {
+  background: var(--surface-card);
+  border-radius: 18px;
+  padding: 1.4rem;
+  box-shadow: var(--shadow-md);
+  display: grid;
+  gap: 1rem;
+}
+
+.mes-command__card--stretch {
+  grid-column: span 2;
+  min-width: 0;
+}
+
+.mes-command__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.mes-command__footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.mes-command__list,
+.mes-command__streams,
+.quality-card__list,
+.test-lab__cells,
+.test-lab__plans,
+.workforce__members,
+.workforce__assignments,
+.workforce__reports {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.mes-command__line-indicators,
+.test-lab__cell-stats,
+.workforce__member-metrics {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.mes-command__streams li,
+.quality-card__list li,
+.test-lab__cells li,
+.test-lab__plans li,
+.workforce__members li,
+.workforce__assignments li,
+.workforce__reports li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.mes-command__table,
+.workforce__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.mes-command__table th,
+.mes-command__table td,
+.workforce__table th,
+.workforce__table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  text-align: left;
+}
+
+.quality-board__grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.quality-card__body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.quality-card__body--runs {
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+.quality-card--tall {
+  align-self: stretch;
+}
+
+.test-lab__grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.test-lab__card--wide {
+  grid-column: span 2;
+  min-width: 0;
+}
+
+.test-lab__runs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.workforce__grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.workforce__card--wide {
+  grid-column: span 2;
+  min-width: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.18);
+  color: var(--accent);
+  font-size: 0.75rem;
+}
+
+.metric {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.metric__label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.metric__value {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.alert {
+  font-size: 0.8rem;
+  color: var(--warning-strong);
 }
 
 .timeline {
