@@ -2,16 +2,16 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import { api } from '../services/api';
-// Fix: Corrected import path for Role type
-import { Permission, Role } from '../types/index';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
+
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
+import type { Permission, Role } from '../types/index';
+import ConfirmationModal from '../components/ui/ConfirmationModal';
 import LoadingScreen from '../components/ui/LoadingScreen';
 import Modal from '../components/ui/Modal';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import RoleEditForm from '../components/admin/RoleEditForm';
-import ConfirmationModal from '../components/ui/ConfirmationModal';
 
 const permissionLabels: Record<Permission, string> = {
     'leases:read': 'Просмотр аренды',
@@ -42,8 +42,9 @@ function RolesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRole, setEditingRole] = useState<Role | null>(null);
     const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+
     const { hasPermission } = useAuth();
-    
+
     const canCreate = hasPermission('roles:create');
     const canUpdate = hasPermission('roles:update');
     const canDelete = hasPermission('roles:delete');
@@ -61,7 +62,7 @@ function RolesPage() {
     }, []);
 
     useEffect(() => {
-        fetchRoles();
+        void fetchRoles();
     }, [fetchRoles]);
 
     const handleOpenModal = (role: Role | null = null) => {
@@ -82,7 +83,7 @@ function RolesPage() {
             } else {
                 await api.createRole(roleData);
             }
-            await fetchRoles(); // Refresh the list
+            await fetchRoles();
             handleCloseModal();
         } catch (error) {
             console.error('Не удалось сохранить роль:', error);
@@ -94,11 +95,11 @@ function RolesPage() {
 
     const handleConfirmDeleteRole = async () => {
         if (!roleToDelete) return;
-        
+
         setIsActionLoading(true);
         try {
             await api.deleteRole(roleToDelete.id);
-            await fetchRoles(); // Refresh
+            await fetchRoles();
             setRoleToDelete(null);
         } catch (error) {
             console.error('Не удалось удалить роль:', error);
@@ -108,71 +109,131 @@ function RolesPage() {
         }
     };
 
-    if (isLoading) return <LoadingScreen />;
+    const metrics = useMemo(() => {
+        const permissionSet = new Set<Permission>();
+        roles.forEach(role => {
+            role.permissions.forEach(permission => {
+                permissionSet.add(permission);
+            });
+        });
+
+        const totalPermissions = roles.reduce((total, role) => total + role.permissions.length, 0);
+        const averageFootprint = roles.length === 0 ? 0 : Math.round(totalPermissions / roles.length);
+        const privilegedRoles = roles.filter(role => role.permissions.length >= 10).length;
+
+        return {
+            totalRoles: roles.length,
+            uniquePermissions: permissionSet.size,
+            averageFootprint,
+            privilegedRoles,
+        };
+    }, [roles]);
+
+    if (isLoading) {
+        return <LoadingScreen />;
+    }
 
     return (
-        <div>
-            <header className="page-header">
-                <div className="page-header__summary">
+        <div className="roles-page" data-busy={isActionLoading}>
+            <header className="roles-page__header">
+                <div className="roles-page__intro">
                     <h1>Роли и права</h1>
-                    <p className="page-header__subtitle">
-                        Управляйте шаблонами RBAC, пересматривайте наборы полномочий и поддерживайте единый каталог ролей для
-                        DHCP-команды.
+                    <p>
+                        Создавайте и развивайте RBAC-профили для NOC-команды. Карточки показывают состав разрешений и помогают
+                        отследить наиболее привилегированные роли.
                     </p>
                 </div>
                 {canCreate && (
-                    <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-                        <FaPlus /> Создать роль
+                    <button
+                        type="button"
+                        className="primary roles-page__create"
+                        onClick={() => handleOpenModal()}
+                        disabled={isActionLoading}
+                    >
+                        <FaPlus aria-hidden /> Создать роль
                     </button>
                 )}
             </header>
 
-            <div className="content-wrapper">
-                {isActionLoading && !roleToDelete && (
-                    <div className="loading-overlay">
-                        <div className="spinner"></div>
+            <section className="roles-page__summary" aria-label="Метрики каталога ролей">
+                <article className="roles-summary-card roles-summary-card--accent">
+                    <span className="roles-summary-card__label">Всего ролей</span>
+                    <strong className="roles-summary-card__value">{metrics.totalRoles}</strong>
+                    <span className="roles-summary-card__meta">Управляемые профили доступа</span>
+                </article>
+                <article className="roles-summary-card">
+                    <span className="roles-summary-card__label">Уникальных разрешений</span>
+                    <strong className="roles-summary-card__value">{metrics.uniquePermissions}</strong>
+                    <span className="roles-summary-card__meta">Доступных действий в каталоге</span>
+                </article>
+                <article className="roles-summary-card">
+                    <span className="roles-summary-card__label">Средний профиль</span>
+                    <strong className="roles-summary-card__value">{metrics.averageFootprint}</strong>
+                    <span className="roles-summary-card__meta">Прав на роль в среднем</span>
+                </article>
+                <article className="roles-summary-card">
+                    <span className="roles-summary-card__label">Привилегированных ролей</span>
+                    <strong className="roles-summary-card__value">{metrics.privilegedRoles}</strong>
+                    <span className="roles-summary-card__meta">≥ 10 разрешений</span>
+                </article>
+            </section>
+
+            <section className="roles-collection" aria-label="Каталог ролей">
+                <header className="roles-collection__header">
+                    <div>
+                        <h2>Каталог ролей</h2>
+                        <p>Наводите курсор на карточку, чтобы увидеть управление и состав разрешений.</p>
                     </div>
-                )}
-                <div className="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Название роли</th>
-                                <th>Права доступа</th>
-                                <th style={{ textAlign: 'right' }}>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {roles.map(role => (
-                                <tr key={role.id}>
-                                    <td>{role.name}</td>
-                                    <td style={{ maxWidth: '480px', whiteSpace: 'normal' }}>
-                                        <strong>{role.permissions.length}</strong>{' '}
-                                        {role.permissions.length === 1 ? 'право' : 'прав доступа'}:
-                                        <ul className="role-permission-list">
-                                            {role.permissions.map(permission => (
-                                                <li key={permission}>{permissionLabels[permission] ?? permission}</li>
-                                            ))}
-                                        </ul>
-                                    </td>
-                                    <td className="actions-cell" style={{ textAlign: 'right' }}>
-                                        {canUpdate && (
-                                            <button onClick={() => handleOpenModal(role)} className="btn btn-sm">
-                                                <FaEdit /> Редактировать
-                                            </button>
-                                        )}
-                                        {canDelete && role.id > 3 && ( // Prevent deletion of base roles
-                                            <button onClick={() => setRoleToDelete(role)} className="btn btn-danger btn-sm" style={{ marginLeft: '0.5rem' }}>
-                                                <FaTrash /> Удалить
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                    <span className="roles-collection__total">{roles.length} элементов</span>
+                </header>
+                <ul className="roles-collection__list">
+                    {roles.map(role => (
+                        <li key={role.id} className="role-card">
+                            <header className="role-card__header">
+                                <div>
+                                    <h3>{role.name}</h3>
+                                    <p>
+                                        {role.permissions.length}{' '}
+                                        {role.permissions.length === 1 ? 'право' : 'прав доступа'}
+                                    </p>
+                                </div>
+                                <span className="role-card__badge">RBAC</span>
+                            </header>
+                            <div className="role-card__body">
+                                <div className="role-card__permissions">
+                                    {role.permissions.map(permission => (
+                                        <span key={permission} className="role-chip">
+                                            {permissionLabels[permission] ?? permission}
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="role-card__actions">
+                                    {canUpdate && (
+                                        <button
+                                            type="button"
+                                            className="ghost"
+                                            onClick={() => handleOpenModal(role)}
+                                            disabled={isActionLoading}
+                                        >
+                                            <FaEdit aria-hidden /> Редактировать
+                                        </button>
+                                    )}
+                                    {canDelete && role.id > 3 && (
+                                        <button
+                                            type="button"
+                                            className="text-button role-card__remove"
+                                            onClick={() => setRoleToDelete(role)}
+                                            disabled={isActionLoading}
+                                        >
+                                            <FaTrash aria-hidden /> Удалить
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            </section>
 
             {isModalOpen && (
                 <Modal
@@ -180,25 +241,20 @@ function RolesPage() {
                     onClose={handleCloseModal}
                     title={editingRole ? `Редактирование роли: ${editingRole.name}` : 'Создание роли'}
                 >
-                    <RoleEditForm
-                        role={editingRole}
-                        onSave={handleSaveRole}
-                        onCancel={handleCloseModal}
-                        isSaving={isActionLoading}
-                    />
+                    <RoleEditForm role={editingRole} onSave={handleSaveRole} onCancel={handleCloseModal} isSaving={isActionLoading} />
                 </Modal>
             )}
 
             <ConfirmationModal
-                isOpen={!!roleToDelete}
+                isOpen={roleToDelete != null}
                 onClose={() => setRoleToDelete(null)}
                 onConfirm={handleConfirmDeleteRole}
                 title="Удалить роль?"
                 isConfirming={isActionLoading}
             >
                 <p>
-                    Вы действительно хотите удалить роль «{roleToDelete?.name}»? Назначенные пользователи потеряют права,
-                    связанные с этой ролью.
+                    Вы действительно хотите удалить роль «{roleToDelete?.name}»? Назначенные пользователи потеряют права, связанные с
+                    этой ролью.
                 </p>
             </ConfirmationModal>
         </div>
