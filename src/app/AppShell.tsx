@@ -1,5 +1,4 @@
 
-import React, { useCallback, useMemo, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -20,17 +19,6 @@ const AppShell: React.FC = () => {
     event.preventDefault();
     setPaletteOpen(previous => !previous);
   }, []);
-
-  const paletteHotkey = useMemo(
-    () => ({
-      preventDefault: true,
-      description: t('commandPalette.open', { defaultValue: 'Command palette' }),
-      group: t('hotkeys.navigation', { defaultValue: 'Navigation' }),
-    }),
-    [t],
-  );
-
-  useHotkeys('mod+k', togglePalette, paletteHotkey);
 
   const renderItem = (item: NavigationItem) => {
     const enabledByFlag = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;
