@@ -21,7 +21,7 @@ const AppShell: FC = () => {
     });
     return initial;
   });
-  const [isSidebarExpanded, setSidebarExpanded] = useState(false);
+
 
   const brandLabel = t('brand.name', { defaultValue: 'NETGRIP NOC' });
 
@@ -70,7 +70,7 @@ const AppShell: FC = () => {
       to={item.path}
       className={({ isActive }) =>
         [
-          'nav-link group relative flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-[0.72rem] font-semibold uppercase tracking-[0.12em] transition',
+
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80',
           isActive ? 'is-active' : '',
         ].join(' ')
@@ -86,23 +86,7 @@ const AppShell: FC = () => {
   );
 
   return (
-    <div
-      className="app-shell grid min-h-screen grid-rows-[56px_1fr] text-neutral-100"
-      style={{ ['--sidebar-width' as string]: isSidebarExpanded ? '320px' : '280px' }}
-      data-sidebar-expanded={isSidebarExpanded}
-    >
-      <aside
-        className="app-shell__sidebar col-start-1 row-span-2 flex min-h-0 flex-col px-5 py-8"
-        onMouseEnter={() => setSidebarExpanded(true)}
-        onMouseLeave={() => setSidebarExpanded(false)}
-        onFocus={() => setSidebarExpanded(true)}
-        onBlur={event => {
-          const nextFocus = (event.relatedTarget as Node | null) ?? null;
-          if (!event.currentTarget.contains(nextFocus)) {
-            setSidebarExpanded(false);
-          }
-        }}
-      >
+
         <div className="brand" aria-label={brandLabel}>
           <span className="brand__glow" aria-hidden />
           <span className="brand__label">{brandLabel}</span>

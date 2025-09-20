@@ -6,8 +6,7 @@
     #05070d;
   color: #e2e8f0;
   background: radial-gradient(1100px 700px at 70% 10%, rgba(255, 255, 255, 0.04), transparent), #02040a;
-  grid-template-columns: var(--sidebar-width, 280px) 1fr;
-  transition: grid-template-columns 0.35s ease;
+
 }
 
 .app-shell * {
@@ -16,11 +15,7 @@
 
 .app-shell__sidebar {
   position: relative;
-  width: var(--sidebar-width, 280px);
-  border-right: 1px solid rgba(148, 163, 184, 0.16);
-  background: var(--sidebar-surface);
-  overflow: hidden;
-  transition: width 0.35s ease;
+
 }
 
 .app-shell__sidebar::before,
@@ -240,10 +235,6 @@
   opacity: 0.95;
 }
 
-.app-shell[data-sidebar-expanded='true'] .nav-link .nav-link__label {
-  overflow: visible;
-  text-overflow: initial;
-}
 
 main ul {
   list-style: none;
