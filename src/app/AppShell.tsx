@@ -1,4 +1,6 @@
 
+import React, { useCallback, useState } from 'react';
+import { NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../context/AuthContext';
@@ -14,15 +16,12 @@ const AppShell: React.FC = () => {
   const { user, logout, hasPermission } = useAuth();
   const [isPaletteOpen, setPaletteOpen] = useState(false);
 
-  const togglePalette = useCallback(
-    (event: KeyboardEvent) => {
-      event.preventDefault();
-      setPaletteOpen(previous => !previous);
-    },
-    [],
-  );
+  const togglePalette = useCallback((event: KeyboardEvent) => {
+    event.preventDefault();
+    setPaletteOpen(previous => !previous);
+  }, []);
 
-
+  useHotkeys('mod+k', togglePalette, { preventDefault: true });
 
   const renderItem = (item: NavigationItem) => {
     const enabledByFlag = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;
