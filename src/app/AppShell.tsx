@@ -1,5 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../context/AuthContext';
@@ -23,17 +22,7 @@ const AppShell: React.FC = () => {
     [],
   );
 
-  const paletteHotkey = useMemo(
-    () => ({
-      description: t('commandPalette.shortcutDescription', {
-        defaultValue: 'Toggle command palette',
-      }),
-      group: t('navigation.primary', { defaultValue: 'Navigation' }),
-    }),
-    [t],
-  );
 
-  useHotkeys('mod+k', togglePalette, paletteHotkey);
 
   const renderItem = (item: NavigationItem) => {
     const enabledByFlag = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;

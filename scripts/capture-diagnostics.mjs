@@ -67,6 +67,7 @@ for (const route of routes) {
   finish();
 }
 
+
 await browser.close();
 
 await writeFile('docs/diagnostics/route-diagnostics.md', logLines.join('\n'), 'utf8');
