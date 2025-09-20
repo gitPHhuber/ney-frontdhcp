@@ -89,13 +89,19 @@ function SettingsPage() {
                     <div className={`connection-status-indicator ${isConnected ? 'connected' : 'disconnected'}`}></div>
                     <span>
                         {isConnected
-                            ? `Подключено к ${serverState.config.server_ip}`
+                            ? `Подключено к ${serverState?.config?.server_ip ?? 'неизвестному серверу'}`
                             : 'Нет активного подключения'}
                     </span>
                 </div>
             </div>
 
-
+            <div className="settings-card">
+                <h2>Оформление интерфейса</h2>
+                <p className="settings-card__description">
+                    Выберите тему оформления, соответствующую условиям работы или корпоративным стандартам.
+                </p>
+                <div className="form-group">
+                    <label htmlFor="theme-select">Тема интерфейса</label>
                     <select
                         id="theme-select"
                         className="form-control"
