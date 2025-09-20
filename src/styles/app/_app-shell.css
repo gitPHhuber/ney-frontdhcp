@@ -24,6 +24,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
 
 .brand {
   position: relative;
@@ -609,6 +610,7 @@ main > .container {
   margin: 0;
   font-size: 1rem;
   color: var(--netgrip-text-strong);
+}
 
 .dashboard-card header {
   display: flex;
@@ -657,6 +659,7 @@ main > .container {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
+}
 
 .dashboard-card__chart span:nth-child(3) {
   background: radial-gradient(circle at 50% 40%, rgba(59, 130, 246, 0.35), rgba(59, 130, 246, 0.08));
