@@ -1,11 +1,11 @@
 .app-shell {
-  --accent: #33f5ff;
-  --accent-soft: rgba(51, 245, 255, 0.35);
-  --sidebar-surface: radial-gradient(130% 140% at 80% -20%, rgba(51, 245, 255, 0.16), transparent 55%),
+  --accent: #2ff1ff;
+  --accent-soft: rgba(47, 241, 255, 0.35);
+  --sidebar-surface: radial-gradient(120% 120% at 80% -20%, rgba(47, 241, 255, 0.16), transparent 55%),
     radial-gradient(120% 90% at 10% 110%, rgba(168, 85, 247, 0.14), transparent 60%),
-    #04060b;
+    #05070d;
   color: #e2e8f0;
-  background: radial-gradient(1100px 700px at 70% 10%, rgba(255, 255, 255, 0.04), transparent), #01040a;
+  background: radial-gradient(1100px 700px at 70% 10%, rgba(255, 255, 255, 0.04), transparent), #02040a;
   grid-template-columns: var(--sidebar-width, 280px) 1fr;
   transition: grid-template-columns 0.35s ease;
 }
@@ -49,12 +49,12 @@
   display: inline-flex;
   align-items: center;
   font-family: 'Poppins', 'Inter', 'Segoe UI', sans-serif;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.38em;
   text-transform: uppercase;
   color: #f8fafc;
-  text-shadow: 0 0 18px rgba(51, 245, 255, 0.6);
+  text-shadow: 0 0 14px rgba(47, 241, 255, 0.5);
 }
 
 .brand__label {
@@ -149,11 +149,10 @@
 .nav-link {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  background: rgba(8, 12, 20, 0.55);
-  color: rgba(226, 232, 240, 0.76);
+  border: 1px solid transparent;
+  background: rgba(148, 163, 184, 0.08);
+  color: rgba(226, 232, 240, 0.7);
   text-shadow: 0 0 0 rgba(0, 0, 0, 0);
-  backdrop-filter: blur(6px);
 }
 
 .nav-link .nav-link__label {
@@ -162,7 +161,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: 'Poppins', 'Inter', 'Segoe UI', sans-serif;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.22em;
 }
 
 .nav-icon {
@@ -172,7 +171,7 @@
 .nav-link .nav-link__icon {
   width: 1.4rem;
   height: 1.4rem;
-  color: rgba(148, 163, 184, 0.78);
+  color: rgba(148, 163, 184, 0.75);
   transition: color 0.28s ease;
 }
 
@@ -199,9 +198,9 @@
 
 .nav-link:hover,
 .nav-link:focus-visible {
-  border-color: rgba(51, 245, 255, 0.45);
-  background: rgba(15, 23, 42, 0.82);
-  color: rgba(248, 250, 252, 0.96);
+  border-color: rgba(47, 241, 255, 0.35);
+  background: rgba(15, 23, 42, 0.75);
+  color: rgba(248, 250, 252, 0.95);
 }
 
 .nav-link:hover .nav-link__icon,
@@ -221,10 +220,10 @@
 }
 
 .nav-link.is-active {
-  border-color: rgba(51, 245, 255, 0.65);
-  background: rgba(15, 23, 42, 0.94);
+  border-color: rgba(47, 241, 255, 0.55);
+  background: rgba(15, 23, 42, 0.92);
   color: #f8fafc;
-  text-shadow: 0 0 14px rgba(51, 245, 255, 0.45);
+  text-shadow: 0 0 12px rgba(47, 241, 255, 0.4);
 }
 
 .nav-link.is-active .nav-link__icon {
