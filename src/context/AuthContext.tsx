@@ -46,6 +46,10 @@ const ADMIN_PERMISSIONS: Permission[] = [
   'roles:delete',
   'settings:read',
   'settings:update',
+  'mes:production',
+  'mes:quality',
+  'mes:labs',
+  'mes:workforce',
 ];
 
 const shouldBypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === '1';

@@ -39,6 +39,11 @@ const loadSettingsPage = () => import('../pages/SettingsPage');
 const loadAccessControlPage = () => import('../pages/access-control/AccessControlPage');
 const loadRolesPage = () => import('../pages/RolesPage');
 const loadLeasesPage = () => import('../pages/LeasesPage');
+const loadMesCommandCenterPage = () => import('../pages/mes/CommandCenterPage');
+const loadMesProductionPage = () => import('../pages/mes/ProductionPage');
+const loadMesQualityPage = () => import('../pages/mes/QualityPage');
+const loadMesTestLabPage = () => import('../pages/mes/TestLabPage');
+const loadWorkforceAnalyticsPage = () => import('../pages/workforce/WorkforceAnalyticsPage');
 
 const DashboardPage = lazy(loadDashboardPage);
 const NavigationDiagnosticsPage = lazy(loadNavigationDiagnosticsPage);
@@ -54,8 +59,74 @@ const SettingsPage = lazy(loadSettingsPage);
 const AccessControlPage = lazy(loadAccessControlPage);
 const RolesPage = lazy(loadRolesPage);
 const LeasesPage = lazy(loadLeasesPage);
+const MesCommandCenterPage = lazy(loadMesCommandCenterPage);
+const MesProductionPage = lazy(loadMesProductionPage);
+const MesQualityPage = lazy(loadMesQualityPage);
+const MesTestLabPage = lazy(loadMesTestLabPage);
+const WorkforceAnalyticsPage = lazy(loadWorkforceAnalyticsPage);
 
 export const appNavigation: NavigationSection[] = [
+  {
+    title: 'Производство',
+    translationKey: 'navigation.sections.mes',
+    items: [
+      {
+        path: '/mes/command-center',
+        title: 'Командный центр',
+        icon: 'factory',
+        element: MesCommandCenterPage,
+        loader: loadMesCommandCenterPage,
+        group: 'Производство',
+        groupKey: 'navigation.sections.mes',
+        featureFlag: 'mes-command-center',
+        permission: 'mes:production',
+      },
+      {
+        path: '/mes/operations',
+        title: 'Операции и заказы',
+        icon: 'dashboard',
+        element: MesProductionPage,
+        loader: loadMesProductionPage,
+        group: 'Производство',
+        groupKey: 'navigation.sections.mes',
+        featureFlag: 'mes-production-operations',
+        permission: 'mes:production',
+      },
+      {
+        path: '/mes/quality',
+        title: 'Качество и аудит',
+        icon: 'quality',
+        element: MesQualityPage,
+        loader: loadMesQualityPage,
+        group: 'Производство',
+        groupKey: 'navigation.sections.mes',
+        featureFlag: 'mes-quality-operations',
+        permission: 'mes:quality',
+      },
+      {
+        path: '/mes/test-lab',
+        title: 'Тестовая лаборатория',
+        icon: 'lab',
+        element: MesTestLabPage,
+        loader: loadMesTestLabPage,
+        group: 'Производство',
+        groupKey: 'navigation.sections.mes',
+        featureFlag: 'mes-test-lab-control',
+        permission: 'mes:labs',
+      },
+      {
+        path: '/workforce/analytics',
+        title: 'Персонал и KPI',
+        icon: 'people',
+        element: WorkforceAnalyticsPage,
+        loader: loadWorkforceAnalyticsPage,
+        group: 'Производство',
+        groupKey: 'navigation.sections.mes',
+        featureFlag: 'mes-workforce-analytics',
+        permission: 'mes:workforce',
+      },
+    ],
+  },
   {
     title: 'Операции',
     translationKey: 'navigation.sections.operations',

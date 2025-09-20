@@ -19,6 +19,11 @@ export const queryKeys = {
     qualityChecks: ['mes', 'quality-checks'] as const,
     nonconformances: ['mes', 'nonconformances'] as const,
     maintenance: ['mes', 'maintenance'] as const,
+    productionLines: ['mes', 'production-lines'] as const,
+    valueStreams: ['mes', 'value-streams'] as const,
+    testCells: ['mes', 'test-cells'] as const,
+    testPlans: ['mes', 'test-plans'] as const,
+    testRuns: ['mes', 'test-runs'] as const,
   },
   metrics: {
     all: ['metrics'] as const,
@@ -42,5 +47,14 @@ export const queryKeys = {
   productPassports: {
     all: ['product-passports'] as const,
     byId: (id: string) => [...queryKeys.productPassports.all, id] as const,
+  },
+  workforce: {
+    all: ['workforce'] as const,
+    teams: ['workforce', 'teams'] as const,
+    members: ['workforce', 'members'] as const,
+    assignments: ['workforce', 'assignments'] as const,
+    utilization: ['workforce', 'utilization'] as const,
+    performance: ['workforce', 'performance'] as const,
+    reports: ['workforce', 'reports'] as const,
   },
 };

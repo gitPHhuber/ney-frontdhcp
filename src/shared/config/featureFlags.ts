@@ -5,7 +5,12 @@ export type FeatureFlag =
   | 'executive-dashboard-insights'
   | 'automation-playbooks'
   | 'product-passport-autofill'
-  | 'navigation-diagnostics-export';
+  | 'navigation-diagnostics-export'
+  | 'mes-command-center'
+  | 'mes-production-operations'
+  | 'mes-quality-operations'
+  | 'mes-test-lab-control'
+  | 'mes-workforce-analytics';
 
 const activeFlags: Record<FeatureFlag, boolean> = {
   'inventory-presets': true,
@@ -15,6 +20,11 @@ const activeFlags: Record<FeatureFlag, boolean> = {
   'automation-playbooks': true,
   'product-passport-autofill': true,
   'navigation-diagnostics-export': true,
+  'mes-command-center': true,
+  'mes-production-operations': true,
+  'mes-quality-operations': true,
+  'mes-test-lab-control': true,
+  'mes-workforce-analytics': true,
 
 };
 
