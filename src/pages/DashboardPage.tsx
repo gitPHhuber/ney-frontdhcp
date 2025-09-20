@@ -2,11 +2,13 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { FaTasks, FaExclamationTriangle, FaHourglassStart, FaList, FaTags } from 'react-icons/fa';
+
 import { api } from '../services/api';
 import Card from '../components/ui/Card';
 import LoadingScreen from '../components/ui/LoadingScreen';
-import { FaTasks, FaExclamationTriangle, FaHourglassStart, FaList, FaServer, FaTags } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useDhcpServer } from '../context/DhcpServerContext';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -17,6 +19,21 @@ function DashboardPage() {
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const { user } = useAuth();
     const { serverState } = useDhcpServer();
+    const { t, i18n } = useTranslation();
+
+    const metricsHeadingId = React.useId();
+    const logsHeadingId = React.useId();
+
+    const numberFormatter = useMemo(() => new Intl.NumberFormat(i18n.language), [i18n.language]);
+    const logTimeFormatter = useMemo(
+        () =>
+            new Intl.DateTimeFormat(i18n.language, {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+            }),
+        [i18n.language],
+    );
 
     useEffect(() => {
         api.getDashboardStats().then(setStats);
@@ -27,48 +44,152 @@ function DashboardPage() {
     const serverStatus = serverState?.isConnected ? serverState.status : 'offline';
     const recentLogs = serverState?.logs?.slice(0, 3) || [];
 
-    return (
-        <div className="dashboard-container">
-            <header className="page-header">
-                <h1>Dashboard</h1>
-                {user && <p className="greeting">Welcome back, {user.username}!</p>}
-            </header>
-            <div className="dashboard-grid">
-                <div data-status={serverStatus}>
-                    <Card title="Server Status" value={<StatusBadge status={serverStatus} />} icon={<FaServer />} />
-                </div>
-                <Card title="In Work" value={stats.in_work} icon={<FaTasks />} />
-                <Card title="Broken" value={stats.broken} icon={<FaExclamationTriangle />} />
-                <Card title="Pending" value={stats.pending} icon={<FaHourglassStart />} />
-                <Card title="Total Leases" value={stats.total} icon={<FaList />} />
-                <Card
-                    title="Top Labels"
-                    value={stats.popularLabels.length > 0 ? stats.popularLabels[0].label : 'No labels'}
-                    helperText={
-                        stats.popularLabels.length > 0
-                            ? stats.popularLabels.map(({ label, count }) => `${label} (${count})`).join(', ')
-                            : 'Add labels to leases to see trends.'
-                    }
-                    icon={<FaTags />}
-                />
-            </div>
+    const popularLabels = stats.popularLabels;
+    const labelsHelper = popularLabels
+        .map(({ label, count }) => `${label} (${numberFormatter.format(count)})`)
+        .join(' • ');
 
-            <div className="card" style={{marginTop: '2rem'}}>
-                <h2 style={{marginBottom: '1rem'}}>Recent Server Activity</h2>
+    const metricsCards = [
+        {
+            key: 'in-work',
+            titleKey: 'dashboard.inWork',
+            fallback: 'In Work',
+            value: numberFormatter.format(stats.in_work),
+            icon: <FaTasks />,
+        },
+        {
+            key: 'broken',
+            titleKey: 'dashboard.broken',
+            fallback: 'Broken',
+            value: numberFormatter.format(stats.broken),
+            icon: <FaExclamationTriangle />,
+        },
+        {
+            key: 'pending',
+            titleKey: 'dashboard.pending',
+            fallback: 'Pending',
+            value: numberFormatter.format(stats.pending),
+            icon: <FaHourglassStart />,
+        },
+        {
+            key: 'total',
+            titleKey: 'dashboard.totalLeases',
+            fallback: 'Total leases',
+            value: numberFormatter.format(stats.total),
+            icon: <FaList />,
+        },
+        {
+            key: 'labels',
+            titleKey: 'dashboard.topLabels',
+            fallback: 'Top labels',
+            value:
+                popularLabels.length > 0
+                    ? popularLabels[0].label
+                    : t('dashboard.noLabels', { defaultValue: 'No labels' }),
+            helperText:
+                popularLabels.length > 0
+                    ? labelsHelper
+                    : t('dashboard.addLabelsHint', {
+                          defaultValue: 'Add labels to leases to see trends.',
+                      }),
+            icon: <FaTags />,
+        },
+    ];
+
+    return (
+        <div className="dashboard-page">
+            <header className="page-header">
+                <div className="page-header__summary">
+                    <h1>{t('dashboard.title', { defaultValue: 'Dashboard' })}</h1>
+                    {user && (
+                        <p className="page-header__subtitle">
+                            {t('dashboard.greeting', {
+                                name: user.username,
+                                defaultValue: `Welcome back, ${user.username}!`,
+                            })}
+                        </p>
+                    )}
+                </div>
+                <div className="page-header__status" aria-live="polite">
+                    <span className="page-header__status-label">
+                        {t('dashboard.serverStatus', { defaultValue: 'Server Status' })}
+                    </span>
+                    <StatusBadge status={serverStatus} />
+                </div>
+            </header>
+
+            <section className="dashboard-section" aria-labelledby={metricsHeadingId}>
+                <div className="dashboard-section__header">
+                    <h2 id={metricsHeadingId}>
+                        {t('dashboard.metricsHeading', { defaultValue: 'Key metrics' })}
+                    </h2>
+                    <p className="dashboard-section__description">
+                        {t('dashboard.metricsDescription', {
+                            defaultValue:
+                                'Track overall lease load and hotspots across the estate in near real-time.',
+                        })}
+                    </p>
+                </div>
+                <div className="dashboard-grid">
+                    {metricsCards.map(card => (
+                        <Card
+                            key={card.key}
+                            title={t(card.titleKey, { defaultValue: card.fallback })}
+                            value={card.value}
+                            icon={card.icon}
+                            helperText={card.helperText}
+                        />
+                    ))}
+                </div>
+            </section>
+
+            <section className="card dashboard-logs" aria-labelledby={logsHeadingId}>
+                <div className="dashboard-logs__header">
+                    <h2 id={logsHeadingId}>
+                        {t('dashboard.recentActivity', { defaultValue: 'Recent Server Activity' })}
+                    </h2>
+                    <p className="dashboard-logs__meta">
+                        {t('dashboard.logsMeta', {
+                            count: recentLogs.length,
+                            defaultValue:
+                                recentLogs.length === 1
+                                    ? '1 log event captured in the latest snapshot'
+                                    : `${recentLogs.length} log events captured in the latest snapshot`,
+                        })}
+                    </p>
+                </div>
                 {recentLogs.length > 0 ? (
-                    <div className="server-logs-container" style={{height: '150px', backgroundColor: 'var(--netgrip-component-bg-dark)'}}>
-                        {recentLogs.map((log, index) => (
-                             <div key={index} className="log-entry">
-                                <span className="timestamp">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                                <span className={`level-${log.level}`}>{log.level}</span>
-                                <span>: {log.message}</span>
-                            </div>
-                        ))}
-                    </div>
+                    <ul className="server-logs" role="list">
+                        {recentLogs.map((log, index) => {
+                            const levelKey = log.level.toLowerCase();
+                            const levelLabel = t(`dashboard.logLevel.${levelKey}`, {
+                                defaultValue: levelKey.toUpperCase(),
+                            });
+                            return (
+                                <li
+                                    key={`${log.timestamp}-${index}`}
+                                    className="log-entry"
+                                    data-level={levelKey}
+                                >
+                                    <div className="log-entry__meta">
+                                        <span className="log-entry__time">
+                                            {logTimeFormatter.format(new Date(log.timestamp))}
+                                        </span>
+                                        <span className="log-entry__level">{levelLabel}</span>
+                                    </div>
+                                    <p className="log-entry__message">{log.message}</p>
+                                </li>
+                            );
+                        })}
+                    </ul>
                 ) : (
-                    <p>No recent server activity to display. Connect to a server to see logs.</p>
+                    <p className="dashboard-logs__empty">
+                        {t('dashboard.noActivity', {
+                            defaultValue: 'No recent server activity to display. Connect to a server to see logs.',
+                        })}
+                    </p>
                 )}
-            </div>
+            </section>
         </div>
     );
 }

@@ -1,23 +1,28 @@
 
 /* --- Light Theme Overrides --- */
 body[data-theme="light"] {
-  --netgrip-text-dark: #24292f;
-  --netgrip-bg-dark: #f6f8fa;
-  --netgrip-border-dark: #d0d7de;
-  --netgrip-component-bg-dark: #ffffff;
-  --netgrip-component-bg-glass: rgba(255, 255, 255, 0.7);
-  --netgrip-sidebar-bg-glass: rgba(255, 255, 255, 0.6);
+  --netgrip-text-dark: #1f2937;
+  --netgrip-text-strong: #0f172a;
+  --netgrip-text-muted: rgba(71, 85, 105, 0.78);
+  --netgrip-bg-dark: #f8fafc;
+  --netgrip-bg-elevated: #ffffff;
+  --netgrip-border-dark: rgba(15, 23, 42, 0.1);
+  --netgrip-border-strong: rgba(15, 23, 42, 0.16);
+  --netgrip-component-bg-dark: rgba(255, 255, 255, 0.92);
+  --netgrip-component-bg-glass: rgba(255, 255, 255, 0.85);
+  --netgrip-sidebar-bg-glass: rgba(255, 255, 255, 0.74);
+  --netgrip-surface-shadow: rgba(15, 23, 42, 0.08);
   --netgrip-link-hover: #0969da;
   --netgrip-circuit-opacity: 0.1;
 }
 
-body[data-theme="light"] h1, 
-body[data-theme="light"] h2, 
-body[data-theme="light"] h3, 
-body[data-theme="light"] h4, 
-body[data-theme="light"] h5, 
+body[data-theme="light"] h1,
+body[data-theme="light"] h2,
+body[data-theme="light"] h3,
+body[data-theme="light"] h4,
+body[data-theme="light"] h5,
 body[data-theme="light"] h6 {
-  color: #0969da;
+  color: var(--netgrip-text-strong);
 }
 
 body[data-theme="light"] .form-control {

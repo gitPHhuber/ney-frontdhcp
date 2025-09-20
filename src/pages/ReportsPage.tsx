@@ -39,7 +39,14 @@ const ReportsPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     
     const initialColumns: Record<ReportColumn, boolean> = {
-        id: false, ip: true, mac: true, hostname: true, status: true, taken_by: true, priority: true
+        id: false,
+        ip: true,
+        mac: true,
+        hostname: true,
+        status: true,
+        taken_by: true,
+        priority: true,
+        labels: false,
     };
     const [columns, setColumns] = useState(initialColumns);
     const availableColumns = Object.keys(initialColumns) as ReportColumn[];

@@ -3,19 +3,24 @@
 /* --- Dark Theme (Default) --- */
 :root {
   --netgrip-text-dark: #e6edf3;
+  --netgrip-text-strong: #f8fafc;
+  --netgrip-text-muted: rgba(226, 232, 240, 0.7);
   --netgrip-bg-dark: #0d1117;
+  --netgrip-bg-elevated: #111827;
   --netgrip-primary-accent: #58a6ff;
   --netgrip-primary-accent-rgb: 88, 166, 255;
   --netgrip-secondary-accent: #b87eff;
-  --netgrip-border-dark: #30363d;
-  --netgrip-component-bg-dark: #161b22;
-  --netgrip-component-bg-glass: rgba(22, 27, 34, 0.7);
-  --netgrip-sidebar-bg-glass: rgba(22, 27, 34, 0.6);
-  --netgrip-success: #28a745;
-  --netgrip-danger: #f85149;
-  --netgrip-warning: #ffc107;
-  --netgrip-info: #0dcaf0;
+  --netgrip-border-dark: rgba(148, 163, 184, 0.24);
+  --netgrip-border-strong: rgba(148, 163, 184, 0.32);
+  --netgrip-component-bg-dark: rgba(15, 23, 42, 0.72);
+  --netgrip-component-bg-glass: rgba(15, 23, 42, 0.65);
+  --netgrip-sidebar-bg-glass: rgba(15, 23, 42, 0.8);
+  --netgrip-surface-shadow: rgba(2, 6, 23, 0.4);
+  --netgrip-success: #10b981;
+  --netgrip-danger: #f97316;
+  --netgrip-warning: #facc15;
+  --netgrip-info: #38bdf8;
   --netgrip-link-hover: #8bb9fe;
   --netgrip-circuit-color-rgba: rgba(var(--netgrip-primary-accent-rgb), 0.05);
-  --netgrip-circuit-opacity: 0.5;
+  --netgrip-circuit-opacity: 0.4;
 }

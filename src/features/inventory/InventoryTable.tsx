@@ -4,6 +4,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { startMeasure, endMeasure } from '../../shared/lib/performance';
+import { useTranslation } from 'react-i18next';
 
 const inlineEditSchema = z.object({
   owner: z.string().min(1),
@@ -18,6 +19,7 @@ type InventoryRow = {
 };
 
 export const InventoryTable: React.FC = () => {
+  const { t } = useTranslation();
   const [rows, setRows] = useState<InventoryRow[]>(() =>
     Array.from({ length: 250 }, (_, index) => ({
       id: `asset-${index + 1}`,
@@ -40,18 +42,18 @@ export const InventoryTable: React.FC = () => {
 
   const columns = useMemo<ColumnDef<InventoryRow>[]>(
     () => [
-      { header: 'Asset tag', accessorKey: 'assetTag' },
-      { header: 'Model', accessorKey: 'model' },
-      { header: 'Location', accessorKey: 'location' },
+      { header: t('inventory.columns.assetTag', { defaultValue: 'Asset tag' }), accessorKey: 'assetTag' },
+      { header: t('inventory.columns.model', { defaultValue: 'Model' }), accessorKey: 'model' },
+      { header: t('inventory.columns.location', { defaultValue: 'Location' }), accessorKey: 'location' },
       {
-        header: 'Owner',
+        header: t('inventory.columns.owner', { defaultValue: 'Owner' }),
         accessorKey: 'owner',
         cell: ({ row }) => {
           const isEditing = editingRowId === row.original.id;
           if (!isEditing) {
             return (
               <button type="button" className="link" onClick={() => handleEdit(row.original)}>
-                Edit owner
+                {t('inventory.editOwner', { defaultValue: 'Edit owner' })}
               </button>
             );
           }
@@ -71,17 +73,20 @@ export const InventoryTable: React.FC = () => {
               <input
                 {...form.register('owner')}
                 defaultValue={row.original.owner}
-                aria-label={`Owner for ${row.original.assetTag}`}
+                aria-label={t('inventory.ownerLabel', {
+                  asset: row.original.assetTag,
+                  defaultValue: `Owner for ${row.original.assetTag}`,
+                })}
               />
               <button type="submit" className="primary">
-                Save
+                {t('inventory.save', { defaultValue: 'Save' })}
               </button>
             </form>
           );
         },
       },
     ],
-    [editingRowId, handleEdit, form],
+    [editingRowId, handleEdit, form, t],
   );
 
   const table = useReactTable({ columns, data: rows, getCoreRowModel: getCoreRowModel() });
@@ -103,11 +108,17 @@ export const InventoryTable: React.FC = () => {
   return (
     <div className="inventory-table">
       <div className="inventory-table__header">
-        <h2>Inventory</h2>
+        <h2>{t('inventory.title', { defaultValue: 'Inventory' })}</h2>
         <div className="actions">
-          <button type="button" className="ghost">Presets</button>
-          <button type="button" className="ghost">Export CSV</button>
-          <button type="button" className="primary">Add asset</button>
+          <button type="button" className="ghost">
+            {t('inventory.presets', { defaultValue: 'Presets' })}
+          </button>
+          <button type="button" className="ghost">
+            {t('inventory.exportCsv', { defaultValue: 'Export CSV' })}
+          </button>
+          <button type="button" className="primary">
+            {t('inventory.addAsset', { defaultValue: 'Add asset' })}
+          </button>
         </div>
       </div>
       <div ref={parentRef} className="inventory-table__viewport">

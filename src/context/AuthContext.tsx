@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import LoadingScreen from '../components/ui/LoadingScreen';
 import { api } from '../services/api';
@@ -22,6 +22,33 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_USER_KEY = 'authUser';
 const AUTH_PERMISSIONS_KEY = 'authPermissions';
+const ADMIN_USER: User = {
+  id: 0,
+  username: 'dev-admin',
+  roleId: 0,
+  status: 'active',
+};
+
+const ADMIN_PERMISSIONS: Permission[] = [
+  'leases:read',
+  'leases:update',
+  'leases:delete',
+  'static_ips:read',
+  'static_ips:create',
+  'static_ips:delete',
+  'reports:read',
+  'users:read',
+  'users:update',
+  'users:delete',
+  'roles:read',
+  'roles:create',
+  'roles:update',
+  'roles:delete',
+  'settings:read',
+  'settings:update',
+];
+
+const shouldBypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === '1';
 
 const getStoredValue = <T,>(key: string): T | null => {
   const storedValue = localStorage.getItem(key);
@@ -38,6 +65,13 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (shouldBypassAuth) {
+      setUser(ADMIN_USER);
+      setPermissions(ADMIN_PERMISSIONS);
+      setLoading(false);
+      return;
+    }
+
     const storedUser = getStoredValue<User>(AUTH_USER_KEY);
     const storedPermissions = getStoredValue<Permission[]>(AUTH_PERMISSIONS_KEY);
 
@@ -56,34 +90,59 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     setPermissions(userPermissions);
   };
 
-  const login = async (username: string, password: string) => {
-    const { user: loggedInUser, permissions: userPermissions } = await api.login(username, password);
-    handleSuccessfulLogin(loggedInUser, userPermissions);
-  };
+  const login = useCallback(
+    async (username: string, password: string) => {
+      if (shouldBypassAuth) {
+        setUser(ADMIN_USER);
+        setPermissions(ADMIN_PERMISSIONS);
+        return;
+      }
+      const { user: loggedInUser, permissions: userPermissions } = await api.login(username, password);
+      handleSuccessfulLogin(loggedInUser, userPermissions);
+    },
+    [],
+  );
 
-  const ssoLogin = async (provider: string) => {
-    const { user: loggedInUser, permissions: userPermissions } = await api.ssoLogin(provider);
-    handleSuccessfulLogin(loggedInUser, userPermissions);
-  };
+  const ssoLogin = useCallback(
+    async (provider: string) => {
+      if (shouldBypassAuth) {
+        setUser(ADMIN_USER);
+        setPermissions(ADMIN_PERMISSIONS);
+        return;
+      }
+      const { user: loggedInUser, permissions: userPermissions } = await api.ssoLogin(provider);
+      handleSuccessfulLogin(loggedInUser, userPermissions);
+    },
+    [],
+  );
 
-  const logout = () => {
+  const logout = useCallback(() => {
+    if (shouldBypassAuth) {
+      return;
+    }
     localStorage.removeItem(AUTH_USER_KEY);
     localStorage.removeItem(AUTH_PERMISSIONS_KEY);
     setUser(null);
     setPermissions([]);
-  };
+  }, []);
 
-  const hasPermission = (permission: Permission) => permissions.includes(permission);
+  const hasPermission = useCallback(
+    (permission: Permission) => (shouldBypassAuth ? true : permissions.includes(permission)),
+    [permissions],
+  );
 
-  const value: AuthContextType = {
-    user,
-    permissions,
-    login,
-    ssoLogin,
-    logout,
-    isAuthenticated: Boolean(user),
-    hasPermission,
-  };
+  const value: AuthContextType = useMemo(
+    () => ({
+      user,
+      permissions,
+      login,
+      ssoLogin,
+      logout,
+      isAuthenticated: shouldBypassAuth ? true : Boolean(user),
+      hasPermission,
+    }),
+    [hasPermission, login, logout, permissions, ssoLogin, user],
+  );
 
   if (loading) {
     return <LoadingScreen />;
