@@ -180,7 +180,7 @@ function RolesPage() {
                     onClose={handleCloseModal}
                     title={editingRole ? `Редактирование роли: ${editingRole.name}` : 'Создание роли'}
                 >
-                   <RoleEditForm
+                    <RoleEditForm
                         role={editingRole}
                         onSave={handleSaveRole}
                         onCancel={handleCloseModal}
@@ -196,7 +196,10 @@ function RolesPage() {
                 title="Удалить роль?"
                 isConfirming={isActionLoading}
             >
-
+                <p>
+                    Вы действительно хотите удалить роль «{roleToDelete?.name}»? Назначенные пользователи потеряют права,
+                    связанные с этой ролью.
+                </p>
             </ConfirmationModal>
         </div>
     );

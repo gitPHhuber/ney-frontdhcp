@@ -454,7 +454,7 @@ const AccessControlPage: React.FC = () => {
                 <div className="permissions-catalog">
                     <h3>Категории полномочий</h3>
                     <dl>
-                        {Object.entries(permissionsCatalog).map(([category, permissions]) => (
+                        {(Object.entries(permissionsCatalog) as Array<[string, string[]]>).map(([category, permissions]) => (
                             <div key={category} className="permissions-catalog__group">
                                 <dt>{category}</dt>
                                 <dd>{permissions.join(', ')}</dd>
