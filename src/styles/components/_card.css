@@ -6,12 +6,11 @@
   flex-direction: column;
   gap: 1rem;
   border-radius: 1rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(15, 23, 42, 0.6))
-      border-box,
-    var(--netgrip-component-bg-dark);
-  border: 1px solid var(--netgrip-border-dark);
-  box-shadow: 0 22px 48px var(--netgrip-surface-shadow);
+  padding: 1.65rem;
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.12), rgba(15, 23, 42, 0.48)) border-box,
+    var(--netgrip-surface-card);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 24px 52px rgba(2, 6, 23, 0.45);
   color: var(--netgrip-text-muted);
   backdrop-filter: blur(18px);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
@@ -20,8 +19,8 @@
 .card:hover,
 .card:focus-within {
   transform: translateY(-4px);
-  border-color: var(--netgrip-border-strong);
-  box-shadow: 0 28px 56px rgba(2, 6, 23, 0.55);
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.45);
+  box-shadow: 0 32px 64px rgba(2, 6, 23, 0.58);
 }
 
 .card::after {
@@ -30,7 +29,7 @@
   inset: 1px;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(135deg, rgba(88, 166, 255, 0.12), rgba(184, 126, 255, 0.08));
+  background: linear-gradient(135deg, rgba(var(--netgrip-primary-accent-rgb), 0.18), rgba(124, 58, 237, 0.14));
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 0;

@@ -1,43 +1,134 @@
 
 /* --- Forms --- */
+
+.form-field,
 .form-group {
-  margin-bottom: 1.5rem;
+  display: grid;
+  gap: 0.55rem;
+  margin-bottom: 1.25rem;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+.form-field:last-child,
+.form-group:last-child {
+  margin-bottom: 0;
 }
 
-.form-control {
+.form-field label,
+.form-group label,
+label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.82);
+}
+
+input,
+select,
+textarea {
   width: 100%;
-  padding: 0.8rem 1rem;
-  background-color: var(--netgrip-bg-dark);
-  border: 1px solid var(--netgrip-border-dark);
-  border-radius: 6px;
-  color: var(--netgrip-text-dark);
-  font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  padding: 0.75rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(145deg, rgba(11, 16, 26, 0.92), rgba(8, 12, 20, 0.86));
+  color: var(--netgrip-text-strong);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.form-control:focus {
+input::placeholder,
+textarea::placeholder {
+  color: rgba(148, 163, 184, 0.55);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
-  border-color: var(--netgrip-primary-accent);
-  box-shadow: 0 0 0 3px rgba(var(--netgrip-primary-accent-rgb), 0.3);
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.65);
+  box-shadow: 0 0 0 3px rgba(var(--netgrip-primary-accent-rgb), 0.25), 0 0 16px rgba(var(--netgrip-primary-accent-rgb), 0.18);
+  background: linear-gradient(145deg, rgba(12, 21, 32, 0.96), rgba(6, 12, 20, 0.92));
 }
 
-.form-control:disabled {
-    background-color: var(--netgrip-component-bg-dark);
-    opacity: 0.7;
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: rgba(12, 16, 24, 0.72);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+select {
+  appearance: none;
+  background-image: linear-gradient(145deg, rgba(11, 16, 26, 0.92), rgba(8, 12, 20, 0.86)),
+    url('data:image/svg+xml,%3Csvg width="20" height="12" viewBox="0 0 20 12" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M2 2.5L10 9.5L18 2.5" stroke="%23a5f6ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, calc(100% - 1rem) 50%;
+  background-size: auto, 20px 12px;
+  padding-right: 3rem;
+}
+
+fieldset {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 1rem;
+  padding: 1.2rem 1.25rem 1.35rem;
+  background: rgba(8, 12, 20, 0.65);
+}
+
+legend {
+  padding: 0 0.5rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.78);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  appearance: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(11, 16, 26, 0.85);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type='checkbox']:checked,
+input[type='radio']:checked {
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.65);
+  background: radial-gradient(circle at 50% 50%, rgba(var(--netgrip-primary-accent-rgb), 0.95) 0%, rgba(12, 20, 30, 0.95) 68%);
+  box-shadow: 0 0 0 3px rgba(var(--netgrip-primary-accent-rgb), 0.2);
+}
+
+input[type='checkbox']::after,
+input[type='radio']::after {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 0.2rem;
+  background: #010409;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+input[type='checkbox']:checked::after,
+input[type='radio']:checked::after {
+  opacity: 1;
 }
 
 .connection-form {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
+
 .connection-form .form-group {
-    flex-grow: 1;
-    margin-bottom: 0;
+  flex-grow: 1;
+  margin-bottom: 0;
 }
