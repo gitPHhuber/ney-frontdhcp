@@ -20,11 +20,11 @@ const RegisterForm = ({ onRegisterSuccess, onSwitchToLogin }: RegisterFormProps)
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!username || !password) {
-            setError('Username and password are required.');
+            setError('Необходимо заполнить имя пользователя и пароль.');
             return;
         }
         if (password !== confirmPassword) {
-            setError('Passwords do not match.');
+            setError('Пароли не совпадают.');
             return;
         }
         setError('');
@@ -33,7 +33,7 @@ const RegisterForm = ({ onRegisterSuccess, onSwitchToLogin }: RegisterFormProps)
             await api.register(username, password);
             onRegisterSuccess();
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unknown error occurred');
+            setError(err instanceof Error ? err.message : 'Произошла неизвестная ошибка');
         } finally {
             setLoading(false);
         }
@@ -41,9 +41,9 @@ const RegisterForm = ({ onRegisterSuccess, onSwitchToLogin }: RegisterFormProps)
 
     return (
         <form onSubmit={handleSubmit}>
-            <h2 style={{ textAlign: 'center' }}>Create Account</h2>
+            <h2 style={{ textAlign: 'center' }}>Создать учётную запись</h2>
              <div className="form-group">
-                <label htmlFor="username-reg">Username</label>
+                <label htmlFor="username-reg">Имя пользователя</label>
                 <input
                     id="username-reg"
                     type="text"
@@ -53,7 +53,7 @@ const RegisterForm = ({ onRegisterSuccess, onSwitchToLogin }: RegisterFormProps)
                 />
             </div>
             <div className="form-group">
-                <label htmlFor="password-reg">Password</label>
+                <label htmlFor="password-reg">Пароль</label>
                 <input
                     id="password-reg"
                     type="password"
@@ -63,7 +63,7 @@ const RegisterForm = ({ onRegisterSuccess, onSwitchToLogin }: RegisterFormProps)
                 />
             </div>
              <div className="form-group">
-                <label htmlFor="confirm-password-reg">Confirm Password</label>
+                <label htmlFor="confirm-password-reg">Повторите пароль</label>
                 <input
                     id="confirm-password-reg"
                     type="password"
@@ -74,10 +74,10 @@ const RegisterForm = ({ onRegisterSuccess, onSwitchToLogin }: RegisterFormProps)
             </div>
             {error && <p style={{ color: 'var(--netgrip-danger)', marginBottom: '1rem' }}>{error}</p>}
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-                {loading ? 'Registering...' : 'Register'}
+                {loading ? 'Отправляем заявку…' : 'Зарегистрироваться'}
             </button>
             <div className="login-links" style={{justifyContent: 'center'}}>
-                <button type="button" onClick={onSwitchToLogin}>Back to Login</button>
+                <button type="button" onClick={onSwitchToLogin}>Вернуться ко входу</button>
             </div>
         </form>
     );

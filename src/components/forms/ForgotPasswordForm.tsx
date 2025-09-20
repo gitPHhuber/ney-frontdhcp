@@ -18,7 +18,7 @@ const ForgotPasswordForm = ({ onForgotPasswordSuccess, onSwitchToLogin }: Forgot
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!username) {
-            setError('Please enter your username.');
+            setError('Введите имя пользователя.');
             return;
         }
         setError('');
@@ -29,7 +29,7 @@ const ForgotPasswordForm = ({ onForgotPasswordSuccess, onSwitchToLogin }: Forgot
         } catch (err) {
             // In a real app, you might not want to show a specific error
             // to prevent username enumeration, but for this mock it's fine.
-            setError(err instanceof Error ? err.message : 'An unknown error occurred');
+            setError(err instanceof Error ? err.message : 'Произошла неизвестная ошибка');
         } finally {
             setLoading(false);
         }
@@ -37,12 +37,12 @@ const ForgotPasswordForm = ({ onForgotPasswordSuccess, onSwitchToLogin }: Forgot
 
     return (
         <form onSubmit={handleSubmit}>
-            <h2 style={{ textAlign: 'center' }}>Forgot Password</h2>
+            <h2 style={{ textAlign: 'center' }}>Сброс пароля</h2>
             <p style={{ textAlign: 'center', color: 'var(--netgrip-text-dark)', opacity: 0.8, marginTop: '-0.5rem', marginBottom: '1.5rem' }}>
-                Enter your username to request a password reset.
+                Укажите имя пользователя, чтобы запросить сброс пароля.
             </p>
             <div className="form-group">
-                <label htmlFor="username-forgot">Username</label>
+                <label htmlFor="username-forgot">Имя пользователя</label>
                 <input
                     id="username-forgot"
                     type="text"
@@ -53,10 +53,10 @@ const ForgotPasswordForm = ({ onForgotPasswordSuccess, onSwitchToLogin }: Forgot
             </div>
             {error && <p style={{ color: 'var(--netgrip-danger)', marginBottom: '1rem' }}>{error}</p>}
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-                {loading ? 'Submitting...' : 'Submit Request'}
+                {loading ? 'Отправляем…' : 'Отправить запрос'}
             </button>
             <div className="login-links" style={{justifyContent: 'center'}}>
-                <button type="button" onClick={onSwitchToLogin}>Back to Login</button>
+                <button type="button" onClick={onSwitchToLogin}>Вернуться ко входу</button>
             </div>
         </form>
     );

@@ -150,13 +150,21 @@ function LeasesPage() {
     }, [totalPages]);
 
     const TABS = ['all', 'active', 'in_work', 'completed', 'broken', 'pending'];
+    const TAB_LABELS: Record<string, string> = {
+        all: 'Все',
+        active: 'Активные',
+        in_work: 'В работе',
+        completed: 'Завершённые',
+        broken: 'Неисправные',
+        pending: 'Ожидают',
+    };
 
     if (pageLoading) return <LoadingScreen />;
 
     return (
         <div>
             <header className="page-header">
-                <h1>Lease Management</h1>
+                <h1>Управление арендами</h1>
             </header>
             <div className="content-wrapper">
                 {isActionLoading && !leaseToDelete && (
@@ -172,14 +180,14 @@ function LeasesPage() {
                                 className={`tab-button ${statusFilter === tab ? 'active' : ''}`}
                                 onClick={() => { setStatusFilter(tab); setCurrentPage(1); }}
                             >
-                                {tab.charAt(0).toUpperCase() + tab.slice(1).replace('_', ' ')}
+                                {TAB_LABELS[tab] ?? tab}
                             </button>
                         ))}
                     </div>
                     <div className="search-box">
                         <input
                             type="text"
-                            placeholder="Search IP or Hostname..."
+                            placeholder="Поиск по IP или имени хоста…"
                             className="form-control"
                             value={searchQuery}
                             onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
@@ -199,7 +207,7 @@ function LeasesPage() {
             </div>
 
             {editingLease && (
-                <Modal isOpen={!!editingLease} onClose={handleCloseEditModal} title={`Edit Lease: ${editingLease.ip}`}>
+                <Modal isOpen={!!editingLease} onClose={handleCloseEditModal} title={`Редактирование аренды: ${editingLease.ip}`}>
                     <EditLeaseForm
                         lease={editingLease}
                         onSave={handleSaveLease}
@@ -213,10 +221,10 @@ function LeasesPage() {
                 isOpen={!!leaseToDelete}
                 onClose={() => setLeaseToDelete(null)}
                 onConfirm={handleConfirmDeleteLease}
-                title="Confirm Lease Deletion"
+                title="Удалить аренду?"
                 isConfirming={isActionLoading}
             >
-                Are you sure you want to delete the lease for IP <strong>{leaseToDelete?.ip}</strong>? This action cannot be undone.
+                Подтвердите удаление аренды для IP <strong>{leaseToDelete?.ip}</strong>. Действие необратимо.
             </ConfirmationModal>
         </div>
     );

@@ -23,22 +23,22 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, children, isConf
                 {children}
             </div>
             <div className="modal-footer">
-                <button 
-                    type="button" 
-                    className="btn" 
-                    onClick={onClose} 
+                <button
+                    type="button"
+                    className="btn"
+                    onClick={onClose}
                     disabled={isConfirming}
                     style={{ backgroundColor: 'var(--netgrip-border-dark)' }}
                 >
-                    Cancel
+                    Отмена
                 </button>
-                <button 
-                    type="button" 
+                <button
+                    type="button"
                     className={`btn btn-danger ${isConfirming ? 'is-loading' : ''}`}
                     onClick={onConfirm}
                     disabled={isConfirming}
                 >
-                    <span className="btn-text-content">Confirm</span>
+                    <span className="btn-text-content">Подтвердить</span>
                     {isConfirming && <span className="spinner-inline" />}
                 </button>
             </div>

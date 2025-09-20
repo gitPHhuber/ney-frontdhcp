@@ -6,8 +6,8 @@ const AutomationPage: React.FC = () => (
   <div className="stacked-page">
     <PlaybookList />
     <PagePlaceholder
-      title="Schedulers & triggers"
-      description="Configure cron-like schedules and metric/log-based triggers to launch playbooks."
+      title="Планировщики и триггеры"
+      description="Настраивайте расписания и триггеры по метрикам или логам, чтобы запускать плейбуки автоматически."
     />
   </div>
 );

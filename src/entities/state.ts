@@ -272,8 +272,8 @@ const seedState: EnterpriseState = {
     tasks: [
       {
         id: 'task-001',
-        title: 'Validate PO-2024-1045 delivery',
-        description: 'Confirm quantities and trigger quality intake for incoming components.',
+        title: 'Проверить поставку PO-2024-1045',
+        description: 'Подтвердить количество и инициировать входной контроль комплектующих.',
         status: 'in-progress',
         priority: 'high',
         assignee: 'olga',
@@ -284,8 +284,8 @@ const seedState: EnterpriseState = {
       },
       {
         id: 'task-002',
-        title: 'Schedule maintenance window',
-        description: 'Coordinate downtime for Assembly Line 1 preventive maintenance.',
+        title: 'Запланировать окно обслуживания',
+        description: 'Согласовать простой линии сборки №1 для профилактического обслуживания.',
         status: 'todo',
         priority: 'medium',
         tags: ['maintenance'],
@@ -294,8 +294,8 @@ const seedState: EnterpriseState = {
       },
       {
         id: 'task-003',
-        title: 'Prepare executive KPI brief',
-        description: 'Summarise production throughput vs. demand for leadership report.',
+        title: 'Подготовить сводку KPI для руководства',
+        description: 'Сопоставить производительность и спрос для отчёта руководству.',
         status: 'review',
         priority: 'high',
         assignee: 'irina',
@@ -318,11 +318,11 @@ const seedState: EnterpriseState = {
       },
     ],
     columns: [
-      { id: 'col-backlog', title: 'Backlog', status: 'backlog', wipLimit: 30 },
-      { id: 'col-todo', title: 'Todo', status: 'todo', wipLimit: 10 },
-      { id: 'col-progress', title: 'In progress', status: 'in-progress', wipLimit: 8 },
-      { id: 'col-review', title: 'Review', status: 'review', wipLimit: 5 },
-      { id: 'col-done', title: 'Done', status: 'done' },
+      { id: 'col-backlog', title: 'Бэклог', status: 'backlog', wipLimit: 30 },
+      { id: 'col-todo', title: 'К выполнению', status: 'todo', wipLimit: 10 },
+      { id: 'col-progress', title: 'В работе', status: 'in-progress', wipLimit: 8 },
+      { id: 'col-review', title: 'Проверка', status: 'review', wipLimit: 5 },
+      { id: 'col-done', title: 'Готово', status: 'done' },
     ],
     timesheets: [
       {

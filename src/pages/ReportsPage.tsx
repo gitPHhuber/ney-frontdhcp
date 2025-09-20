@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState } from 'react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, type ChartData } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import { api } from '../services/api';
 // Fix: Corrected import path for Lease type
@@ -11,6 +11,7 @@ import { Lease } from '../types/index';
 import PriorityIcon from '../components/ui/PriorityIcon';
 import StatusBadge from '../components/ui/StatusBadge';
 import { FaFileAlt, FaNetworkWired, FaCalendarWeek } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -25,16 +26,19 @@ const statusColors = {
 type ReportColumn = keyof Lease;
 
 // Fix: Improved typing for predefined report data.
+type PredefinedReportRow = Record<string, string | number>;
+
 type PredefinedReport = {
     title: string;
-    data: Record<string, any>[];
+    data: PredefinedReportRow[];
     summary: string;
-    headers: string[];
+    columns: { key: string; label: string }[];
 } | null;
 
 const ReportsPage = () => {
+    const { t } = useTranslation();
     const [reportData, setReportData] = useState<Lease[] | null>(null);
-    const [chartData, setChartData] = useState<any | null>(null);
+    const [chartData, setChartData] = useState<ChartData<'pie', number[], string> | null>(null);
     const [predefinedReport, setPredefinedReport] = useState<PredefinedReport>(null);
     const [isLoading, setIsLoading] = useState(false);
     
@@ -60,15 +64,35 @@ const ReportsPage = () => {
         try {
             if (reportType === 'weekly') {
                 const { report, summary } = await api.getWeeklyLeaseActivityReport();
-                setPredefinedReport({ title: 'Weekly Lease Activity', data: report, summary, headers: ['Status', 'Count'] });
+                setPredefinedReport({
+                    title: 'Еженедельная активность аренды',
+                    data: report,
+                    summary,
+                    columns: [
+                        { key: 'status', label: 'Статус' },
+                        { key: 'count', label: 'Количество' },
+                    ],
+                });
             } else if (reportType === 'utilization') {
                 const { report, summary } = await api.getNetworkUtilizationReport();
-                setPredefinedReport({ title: 'Network Utilization', data: report, summary, headers: ['Category', 'Value'] });
+                setPredefinedReport({
+                    title: 'Использование сети',
+                    data: report,
+                    summary,
+                    columns: [
+                        { key: 'category', label: 'Категория' },
+                        { key: 'value', label: 'Значение' },
+                    ],
+                });
             } else {
-                 alert(`Generating '${reportType}' report... (feature coming soon)`);
+                alert(`Отчёт «${reportType}» появится позже.`);
             }
-        } catch (error) {
-             console.error("Failed to generate predefined report:", error);
+        } catch (error: unknown) {
+             if (error instanceof Error) {
+                 console.error('Не удалось сформировать готовый отчёт:', error.message);
+             } else {
+                 console.error('Не удалось сформировать готовый отчёт: неизвестная ошибка');
+             }
         } finally {
             setIsLoading(false);
         }
@@ -87,7 +111,7 @@ const ReportsPage = () => {
         setPredefinedReport(null);
         try {
             const leases = await api.getLeases();
-            
+
             const statusCounts = leases.reduce((acc, lease) => {
                 acc[lease.status] = (acc[lease.status] || 0) + 1;
                 return acc;
@@ -98,9 +122,9 @@ const ReportsPage = () => {
             const backgroundColors = labels.map(label => statusColors[label] || '#cccccc');
 
             setChartData({
-                labels,
+                labels: labels.map(label => t(`status.${label}`, { defaultValue: label })),
                 datasets: [{
-                    label: 'Lease Status Distribution',
+                    label: 'Распределение по статусам',
                     data,
                     backgroundColor: backgroundColors,
                     borderColor: '#1a1d2e',
@@ -110,52 +134,66 @@ const ReportsPage = () => {
 
             setReportData(leases);
 
-        } catch (error) {
-            console.error("Failed to generate report:", error);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error('Не удалось сформировать отчёт:', error.message);
+            } else {
+                console.error('Не удалось сформировать отчёт: неизвестная ошибка');
+            }
         } finally {
             setIsLoading(false);
         }
     };
 
     const selectedColumns = availableColumns.filter(col => columns[col]);
+    const columnLabels: Record<ReportColumn, string> = {
+        id: 'ID',
+        ip: 'IP-адрес',
+        mac: 'MAC-адрес',
+        hostname: 'Имя хоста',
+        status: 'Статус',
+        taken_by: 'Назначено',
+        priority: 'Приоритет',
+        labels: 'Метки',
+    };
 
     return (
         <div>
             <header className="page-header">
-                <h1>Reports</h1>
+                <h1>Отчёты</h1>
             </header>
 
             <div className="reports-grid">
                 <div className="card">
-                    <h2 style={{marginBottom: '1.5rem'}}>Pre-defined Reports</h2>
+                    <h2 style={{marginBottom: '1.5rem'}}>Готовые отчёты</h2>
                     <div className='predefined-reports-list'>
                         <button className="btn" onClick={() => handlePredefinedReport('weekly')} style={{ justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                           <FaCalendarWeek /> Weekly Lease Activity
+                           <FaCalendarWeek /> Еженедельная активность аренды
                         </button>
                          <button className="btn" onClick={() => handlePredefinedReport('utilization')} style={{ justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                           <FaNetworkWired /> Network Utilization
+                           <FaNetworkWired /> Использование сети
                         </button>
-                         <button className="btn" onClick={() => alert('Device Audit Log report coming soon!')} style={{ justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                           <FaFileAlt /> Device Audit Log
+                         <button className="btn" onClick={() => alert('Отчёт по аудиту устройств появится позже!')} style={{ justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                           <FaFileAlt /> Журнал аудита устройств
                         </button>
                     </div>
                 </div>
 
                 <div className="card">
-                     <h2 style={{marginBottom: '1.5rem'}}>Custom Report Builder</h2>
+                     <h2 style={{marginBottom: '1.5rem'}}>Конструктор отчётов</h2>
                      <form onSubmit={generateCustomReport} className="report-builder-form">
                         <div className="form-row">
                             <div className="form-group">
-                                <label htmlFor="start-date">Start Date</label>
+                                <label htmlFor="start-date">Дата начала</label>
                                 <input id="start-date" type="date" className="form-control" />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="end-date">End Date</label>
+                                <label htmlFor="end-date">Дата окончания</label>
                                 <input id="end-date" type="date" className="form-control" />
                             </div>
                         </div>
                         <div className="columns-selector">
-                            <h4>Select Columns</h4>
+                            <h4>Выберите столбцы</h4>
                              <div className="columns-grid">
                                 {availableColumns.map(col => (
                                     // Fix: Use String(col) for key, name, and string operations to handle potential non-string keys.
@@ -166,13 +204,13 @@ const ReportsPage = () => {
                                             checked={columns[col]}
                                             onChange={handleColumnChange}
                                         />
-                                        {String(col).charAt(0).toUpperCase() + String(col).slice(1).replace('_', ' ')}
+                                        {columnLabels[col]}
                                     </label>
                                 ))}
                             </div>
                         </div>
                         <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                            {isLoading ? 'Generating...' : 'Generate Report'}
+                            {isLoading ? 'Формирование…' : 'Сформировать отчёт'}
                         </button>
                      </form>
                 </div>
@@ -192,14 +230,14 @@ const ReportsPage = () => {
                         <table>
                             <thead>
                                 <tr>
-                                    {predefinedReport.headers.map(header => <th key={header}>{header}</th>)}
+                                    {predefinedReport.columns.map(column => <th key={column.key}>{column.label}</th>)}
                                 </tr>
                             </thead>
                             <tbody>
                                 {predefinedReport.data.map((row, index) => (
                                     <tr key={index}>
-                                        {predefinedReport.headers.map(header => (
-                                            <td key={header}>{row[header.toLowerCase()]}</td>
+                                        {predefinedReport.columns.map(column => (
+                                            <td key={column.key}>{row[column.key]}</td>
                                         ))}
                                     </tr>
                                 ))}
@@ -211,7 +249,7 @@ const ReportsPage = () => {
 
             {reportData && chartData && (
                 <div className="card report-output-section">
-                    <h2>Report Results</h2>
+                    <h2>Результаты отчёта</h2>
                     <div className="report-output-grid">
                         <div className="chart-container">
                              <Pie data={chartData} options={{
@@ -224,7 +262,7 @@ const ReportsPage = () => {
                                 <thead>
                                     <tr>
                                         {/* Fix: Use String(col) for key and string operations. */}
-                                        {selectedColumns.map(col => <th key={String(col)}>{String(col).replace('_', ' ')}</th>)}
+                                        {selectedColumns.map(col => <th key={String(col)}>{columnLabels[col]}</th>)}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -235,7 +273,7 @@ const ReportsPage = () => {
                                                 <td key={`${lease.id}-${String(col)}`}>
                                                     {col === 'status' ? <StatusBadge status={lease[col]} /> :
                                                      col === 'priority' ? <PriorityIcon priority={lease[col]} /> :
-                                                     lease[col] ?? 'N/A'}
+                                                     lease[col] ?? '—'}
                                                 </td>
                                             ))}
                                         </tr>

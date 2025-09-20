@@ -7,6 +7,28 @@ import { api } from '../../services/api';
 // Fix: Corrected import path for Role and Permission types
 import type { Role, Permission } from '../../types';
 
+const permissionLabels: Record<Permission, string> = {
+    'leases:read': 'Просмотр аренды',
+    'leases:update': 'Редактирование аренды',
+    'leases:delete': 'Удаление аренды',
+    'static_ips:read': 'Просмотр статических IP',
+    'static_ips:create': 'Создание статических IP',
+    'static_ips:delete': 'Удаление статических IP',
+    'reports:read': 'Просмотр отчётов',
+    'users:read': 'Просмотр пользователей',
+    'users:update': 'Редактирование пользователей',
+    'users:delete': 'Удаление пользователей',
+    'roles:read': 'Просмотр ролей',
+    'roles:create': 'Создание ролей',
+    'roles:update': 'Редактирование ролей',
+    'roles:delete': 'Удаление ролей',
+    'settings:read': 'Просмотр настроек',
+    'settings:update': 'Изменение настроек',
+    'access:read': 'Просмотр центра доступа',
+    'access:approve': 'Одобрение заявок',
+    'audit:read': 'Просмотр журнала аудита',
+};
+
 interface RoleEditFormProps {
     role: Role | null;
     onSave: (role: Omit<Role, 'id'> | Role) => void;
@@ -39,7 +61,7 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!name) {
-            setError('Role name is required.');
+            setError('Укажите название роли.');
             return;
         }
         setError('');
@@ -54,7 +76,7 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
         <form onSubmit={handleSubmit}>
             {error && <p style={{ color: 'var(--netgrip-danger)', marginBottom: '1rem' }}>{error}</p>}
             <div className="form-group">
-                <label htmlFor="role-name">Role Name</label>
+                <label htmlFor="role-name">Название роли</label>
                 <input
                     id="role-name"
                     type="text"
@@ -64,7 +86,7 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
                 />
             </div>
             <fieldset className="form-group">
-                <legend>Permissions</legend>
+
                 <div className="permissions-grid">
                     {(Object.entries(allPermissions) as Array<[string, Permission[]]>).map(([category, perms]) => (
                         <div key={category} className="permission-category">
@@ -77,7 +99,7 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
                                             checked={permissions.has(p)}
                                             onChange={() => handlePermissionChange(p)}
                                         />
-                                        {p.split(':')[1]}
+                                        {permissionLabels[p] ?? p}
                                     </label>
                                 ))}
                             </div>
@@ -86,9 +108,9 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
                 </div>
             </fieldset>
              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
-                <button type="button" className="btn" onClick={onCancel} style={{backgroundColor: 'var(--netgrip-border-dark)'}}>Cancel</button>
+                <button type="button" className="btn" onClick={onCancel} style={{backgroundColor: 'var(--netgrip-border-dark)'}}>Отмена</button>
                 <button type="submit" className="btn btn-primary" disabled={isSaving}>
-                    {isSaving ? <span className="spinner-inline" /> : 'Save Role' }
+                    {isSaving ? <span className="spinner-inline" /> : 'Сохранить роль' }
                 </button>
             </div>
         </form>
