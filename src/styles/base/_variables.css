@@ -4,7 +4,7 @@
 :root {
   --netgrip-text-dark: #e6edf3;
   --netgrip-text-strong: #f8fafc;
-  --netgrip-text-muted: rgba(226, 232, 240, 0.72);
+  --netgrip-text-muted: rgba(226, 232, 240, 0.86);
   --netgrip-bg-dark: #05070d;
   --netgrip-bg-elevated: #0c111d;
   --netgrip-surface-card: rgba(10, 16, 26, 0.86);
@@ -12,19 +12,19 @@
   --netgrip-primary-accent: #33f5ff;
   --netgrip-primary-accent-rgb: 51, 245, 255;
   --netgrip-secondary-accent: #7c3aed;
-  --netgrip-border-dark: rgba(148, 163, 184, 0.22);
-  --netgrip-border-strong: rgba(148, 163, 184, 0.35);
-  --netgrip-component-bg-dark: rgba(8, 12, 20, 0.78);
-  --netgrip-component-bg-glass: rgba(11, 18, 30, 0.7);
-  --netgrip-sidebar-bg-glass: rgba(6, 10, 18, 0.88);
+  --netgrip-border-dark: rgba(148, 163, 184, 0.3);
+  --netgrip-border-strong: rgba(148, 163, 184, 0.46);
+  --netgrip-component-bg-dark: rgba(9, 13, 22, 0.82);
+  --netgrip-component-bg-glass: rgba(11, 18, 30, 0.72);
+  --netgrip-sidebar-bg-glass: rgba(7, 11, 20, 0.9);
   --netgrip-surface-shadow: rgba(2, 6, 23, 0.46);
   --netgrip-success: #34d399;
   --netgrip-danger: #f97316;
   --netgrip-warning: #facc15;
   --netgrip-info: #38bdf8;
   --netgrip-link-hover: #8df6ff;
-  --netgrip-focus-ring: rgba(51, 245, 255, 0.55);
-  --netgrip-focus-ring-soft: rgba(51, 245, 255, 0.22);
+  --netgrip-focus-ring: rgba(51, 245, 255, 0.45);
+  --netgrip-focus-ring-soft: rgba(51, 245, 255, 0.16);
   --netgrip-circuit-color-rgba: rgba(var(--netgrip-primary-accent-rgb), 0.05);
   --netgrip-circuit-opacity: 0.42;
 }
