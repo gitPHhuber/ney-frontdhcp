@@ -27,15 +27,6 @@
   pointer-events: none;
 }
 
-.app-shell__sidebar::before {
-  background: radial-gradient(140% 120% at 90% -20%, rgba(51, 245, 255, 0.12), transparent 55%),
-    radial-gradient(140% 140% at 10% 120%, rgba(124, 58, 237, 0.1), transparent 60%);
-  opacity: 0.75;
-}
-
-.app-shell__sidebar::after {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.4), transparent 55%);
-}
 
 .brand {
   position: relative;
