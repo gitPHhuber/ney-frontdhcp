@@ -16,11 +16,11 @@
 .form-field label,
 .form-group label,
 label {
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(248, 250, 252, 0.96);
+  color: rgba(244, 247, 252, 0.98);
 }
 
 input,
@@ -29,9 +29,9 @@ textarea {
   width: 100%;
   padding: 0.85rem 1.05rem;
   border-radius: 1rem;
-  border: 1px solid rgba(148, 163, 184, 0.32);
-  background: linear-gradient(150deg, rgba(12, 18, 30, 0.96), rgba(7, 12, 22, 0.9));
-  color: rgba(248, 250, 252, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.42);
+  background: linear-gradient(150deg, rgba(12, 18, 30, 0.96), rgba(7, 12, 22, 0.92));
+  color: rgba(248, 250, 252, 0.99);
   font-family: 'Inter', 'Segoe UI', sans-serif;
   font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -39,16 +39,16 @@ textarea {
 
 input::placeholder,
 textarea::placeholder {
-  color: rgba(226, 232, 240, 0.88);
+  color: rgba(226, 232, 240, 0.95);
 }
 
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.6);
-  box-shadow: 0 0 0 2px rgba(var(--netgrip-primary-accent-rgb), 0.2);
-  background: linear-gradient(145deg, rgba(13, 23, 38, 0.98), rgba(8, 14, 26, 0.94));
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.7);
+  box-shadow: 0 0 0 3px rgba(var(--netgrip-primary-accent-rgb), 0.22);
+  background: linear-gradient(145deg, rgba(13, 23, 38, 0.98), rgba(8, 14, 26, 0.96));
 }
 
 input:disabled,
@@ -91,7 +91,7 @@ input[type='radio'] {
   width: 1.1rem;
   height: 1.1rem;
   border-radius: 0.35rem;
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.45);
   background: rgba(11, 16, 26, 0.85);
   display: grid;
   place-items: center;
@@ -101,9 +101,9 @@ input[type='radio'] {
 
 input[type='checkbox']:checked,
 input[type='radio']:checked {
-  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.65);
-  background: radial-gradient(circle at 50% 50%, rgba(var(--netgrip-primary-accent-rgb), 0.95) 0%, rgba(12, 20, 30, 0.95) 68%);
-  box-shadow: 0 0 0 3px rgba(var(--netgrip-primary-accent-rgb), 0.2);
+  border-color: rgba(var(--netgrip-primary-accent-rgb), 0.7);
+  background: radial-gradient(circle at 50% 50%, rgba(var(--netgrip-primary-accent-rgb), 0.92) 0%, rgba(12, 20, 30, 0.95) 68%);
+  box-shadow: 0 0 0 3px rgba(var(--netgrip-primary-accent-rgb), 0.24);
 }
 
 input[type='checkbox']::after,

@@ -2,9 +2,9 @@
 /* --- NetGrip Modern Theme --- */
 /* --- Dark Theme (Default) --- */
 :root {
-  --netgrip-text-dark: #e6edf3;
+  --netgrip-text-dark: #f1f5fb;
   --netgrip-text-strong: #f8fafc;
-  --netgrip-text-muted: rgba(226, 232, 240, 0.86);
+  --netgrip-text-muted: #d5ddec;
   --netgrip-bg-dark: #05070d;
   --netgrip-bg-elevated: #0c111d;
   --netgrip-surface-card: rgba(10, 16, 26, 0.86);
@@ -12,8 +12,8 @@
   --netgrip-primary-accent: #38bdf8;
   --netgrip-primary-accent-rgb: 56, 189, 248;
   --netgrip-secondary-accent: #7c3aed;
-  --netgrip-border-dark: rgba(148, 163, 184, 0.32);
-  --netgrip-border-strong: rgba(148, 163, 184, 0.5);
+  --netgrip-border-dark: rgba(148, 163, 184, 0.36);
+  --netgrip-border-strong: rgba(148, 163, 184, 0.55);
   --netgrip-component-bg-dark: rgba(11, 16, 27, 0.82);
   --netgrip-component-bg-glass: rgba(12, 18, 30, 0.74);
   --netgrip-sidebar-bg-glass: rgba(8, 13, 22, 0.92);
@@ -23,8 +23,8 @@
   --netgrip-warning: #facc15;
   --netgrip-info: #38bdf8;
   --netgrip-link-hover: #a5e9ff;
-  --netgrip-focus-ring: rgba(56, 189, 248, 0.4);
-  --netgrip-focus-ring-soft: rgba(56, 189, 248, 0.18);
+  --netgrip-focus-ring: rgba(56, 189, 248, 0.45);
+  --netgrip-focus-ring-soft: rgba(56, 189, 248, 0.22);
   --netgrip-circuit-color-rgba: rgba(var(--netgrip-primary-accent-rgb), 0.05);
   --netgrip-circuit-opacity: 0.42;
 }

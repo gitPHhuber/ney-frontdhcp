@@ -63,6 +63,9 @@ const AppShell: FC = () => {
     return () => window.removeEventListener('keydown', handleHotkey);
   }, []);
 
+  const focusVisibleClasses =
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80';
+
   const renderItem = (item: NavigationItem) => (
     <NavLink
       key={item.path}
@@ -70,9 +73,11 @@ const AppShell: FC = () => {
       className={({ isActive }) =>
         [
           'nav-link',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80',
+          focusVisibleClasses,
           isActive ? 'is-active' : '',
-        ].join(' ')
+        ]
+          .filter(Boolean)
+          .join(' ')
       }
     >
       <span className="nav-link__highlight" aria-hidden />
@@ -134,41 +139,41 @@ const AppShell: FC = () => {
             })}
           </nav>
         </aside>
-      <header className="app-shell__header sticky top-0 col-start-2 row-start-1 flex h-14 items-center justify-between gap-4 border-b border-white/10 px-6">
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-neutral-100 transition hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
-          onClick={() => setPaletteOpen(true)}
-        >
-          ⌘K
-          <span className="hidden sm:inline">
-            {t('commandPalette.open', { defaultValue: 'Command palette' })}
-          </span>
-        </button>
-        <div className="flex items-center gap-4">
-          <NotificationCenter />
-          <div className="user-menu inline-flex items-center gap-3 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-neutral-100">
-            <span className="font-medium leading-none">
-              {user?.username ?? t('auth.userFallback', { defaultValue: 'guest' })}
+        <header className="app-shell__header sticky top-0 col-start-2 row-start-1 flex h-14 items-center justify-between gap-4 border-b border-white/10 px-6">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-neutral-100 transition hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
+            onClick={() => setPaletteOpen(true)}
+          >
+            ⌘K
+            <span className="hidden sm:inline">
+              {t('commandPalette.open', { defaultValue: 'Command palette' })}
             </span>
-            <button
-              type="button"
-              className="ghost inline-flex items-center gap-1 text-sm text-neutral-300 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
-              onClick={logout}
-            >
-              {t('auth.logout', { defaultValue: 'Logout' })}
-            </button>
+          </button>
+          <div className="flex items-center gap-4">
+            <NotificationCenter />
+            <div className="user-menu inline-flex items-center gap-3 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-neutral-100">
+              <span className="font-medium leading-none">
+                {user?.username ?? t('auth.userFallback', { defaultValue: 'guest' })}
+              </span>
+              <button
+                type="button"
+                className="ghost inline-flex items-center gap-1 text-sm text-neutral-300 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
+                onClick={logout}
+              >
+                {t('auth.logout', { defaultValue: 'Logout' })}
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
-      <main className="app-shell__content col-start-2 row-start-2 min-h-0 overflow-auto p-6 md:p-10">
-        <div className="container w-full">
-          <Outlet />
-        </div>
-      </main>
-    </div>
-    <CommandPalette isOpen={isPaletteOpen} onClose={() => setPaletteOpen(false)} />
-  </>
+        </header>
+        <main className="app-shell__content col-start-2 row-start-2 min-h-0 overflow-auto p-6 md:p-10">
+          <div className="container w-full">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+      <CommandPalette isOpen={isPaletteOpen} onClose={() => setPaletteOpen(false)} />
+    </>
   );
 };
 
