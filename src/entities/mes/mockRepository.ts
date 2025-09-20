@@ -6,8 +6,13 @@ import type {
   MaintenanceOrder,
   MesState,
   Nonconformance,
+  ProductionLine,
   ProductionOrder,
   QualityCheck,
+  TestCell,
+  TestPlan,
+  TestRun,
+  ValueStream,
   WorkCenter,
   WorkOrder,
 } from './types';
@@ -50,6 +55,21 @@ export const mesRepository = {
   },
   async listMaintenanceOrders(): Promise<MaintenanceOrder[]> {
     return deepClone(getState().maintenanceOrders);
+  },
+  async listProductionLines(): Promise<ProductionLine[]> {
+    return deepClone(getState().productionLines);
+  },
+  async listValueStreams(): Promise<ValueStream[]> {
+    return deepClone(getState().valueStreams);
+  },
+  async listTestCells(): Promise<TestCell[]> {
+    return deepClone(getState().testCells);
+  },
+  async listTestPlans(): Promise<TestPlan[]> {
+    return deepClone(getState().testPlans);
+  },
+  async listTestRuns(): Promise<TestRun[]> {
+    return deepClone(getState().testRuns);
   },
   async generateWorkOrders(prodOrderId: string): Promise<WorkOrder[]> {
     const state = getState();
