@@ -3,25 +3,13 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const blockOptions = [
-
-  'Обложка паспорта изделия',
-  'Входной контроль и бригада',
-  'HDD диски',
-  'SSD накопители',
-  'Backplane и плата управления',
-  'Память',
-  'Питание и охлаждение',
-  'Контроллеры расширения',
-] as const;
-
-const presetOptions = ['rack-server', 'blade-server', 'storage-node'] as const;
-
   'Сводка KPI',
   'Временной ряд',
   'Таблица пропускной способности',
   'Хронология инцидентов',
 ] as const;
 
+const presetOptions = ['day', 'week', 'month'] as const;
 
 type BlockOption = (typeof blockOptions)[number];
 type PresetOption = (typeof presetOptions)[number];
@@ -34,215 +22,124 @@ const builderSchema = z.object({
 
 type ReportsBuilderForm = z.infer<typeof builderSchema>;
 
-interface PassportRow {
-  name: string;
-  details: string;
-  serial: string;
-}
-
 interface BlockMeta {
   subtitle: string;
   preview: React.ReactNode;
 }
 
-const PassportTable: React.FC<{ caption: string; rows: PassportRow[] }> = ({ caption, rows }) => (
-  <table className="passport-table">
-    <caption>{caption}</caption>
-    <thead>
-      <tr>
-        <th scope="col">Наименование</th>
-        <th scope="col">Тип / ревизия / производитель</th>
-        <th scope="col">Серийный номер</th>
-      </tr>
-    </thead>
-    <tbody>
-      {rows.map(row => (
-        <tr key={`${row.name}-${row.details}-${row.serial}`}>
-          <td>{row.name}</td>
-          <td>{row.details}</td>
-          <td>{row.serial}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-);
-
 const blockLibrary: Record<BlockOption, BlockMeta> = {
-  'Обложка паспорта изделия': {
-    subtitle: 'Титульный блок паспорта с ключевыми идентификаторами и датой проверки.',
+  'Сводка KPI': {
+    subtitle: 'Компактный блок для ключевых метрик, SLA и статусов выполнения задач.',
     preview: (
-      <dl className="passport-meta">
+      <dl className="kpi-grid">
         <div>
-          <dt>Наименование</dt>
-          <dd>Сервер 020524027B</dd>
+          <dt>Уровень арен</dt>
+          <dd>73%</dd>
         </div>
         <div>
-          <dt>Тип / ревизия / производитель</dt>
-          <dd>Стоечный 2U / Rev. 1E / NeyTech Manufacturing</dd>
+          <dt>Отказы DHCP</dt>
+          <dd>4 за сутки</dd>
         </div>
         <div>
-          <dt>Серийный номер</dt>
-          <dd>020524027B</dd>
+          <dt>Устранено</dt>
+          <dd>92%</dd>
         </div>
         <div>
-          <dt>Дата входного контроля</dt>
-          <dd>05.02.2024</dd>
+          <dt>Среднее TTR</dt>
+          <dd>31 мин</dd>
         </div>
       </dl>
     ),
   },
-  'Входной контроль и бригада': {
-    subtitle: 'Фиксация ответственных сотрудников и подтверждение результатов входного контроля.',
+  'Временной ряд': {
+    subtitle: 'График активности арен с выделением пиков и провалов.',
     preview: (
-      <div className="passport-meta">
-        <p>
-          Проверку прошёл 05.02.2024. Бригада: Честнов Алексей (контроль) и Болышев Никита (сборка).
-          Рекомендуется добавить фотоотчёт и подписи.
-        </p>
-        <ul>
-          <li>Проверяющий: Честнов Алексей</li>
-          <li>Сборщик: Болышев Никита</li>
-          <li>Синхронизация с ServiceNow и фотоархивом включена</li>
-        </ul>
-      </div>
+      <svg viewBox="0 0 160 72" className="chart-spark" aria-hidden>
+        <rect x="1" y="1" width="158" height="70" rx="8" fill="rgba(148, 163, 184, 0.12)" />
+        <polyline
+          fill="none"
+          stroke="rgba(51, 245, 255, 0.75)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          points="4,60 28,44 52,46 76,30 100,38 124,18 148,26"
+        />
+      </svg>
     ),
   },
-  'HDD диски': {
-    subtitle: 'Полная раскладка по дискам с серийными номерами ядра и производителя.',
+  'Таблица пропускной способности': {
+    subtitle: 'Сравнение загрузки пулов IP-адресов по площадкам и сегментам.',
     preview: (
-      <PassportTable
-        caption="Образец паспорта для HDD массива"
-        rows={[
-          { name: 'HDD диски', details: 'S/N ядро · Seagate STL015', serial: 'Y1P6A0GMO7021' },
-          { name: '', details: 'S/N производитель', serial: 'ZRT1QSF9' },
-          { name: '', details: 'S/N ядро · Seagate STL015', serial: 'Y1P6A0GMO7020' },
-          { name: '', details: 'S/N производитель', serial: 'ZRT1QSLH' },
-          { name: '', details: 'S/N ядро · Seagate STL015', serial: 'Y1P6A0GMO701Z' },
-          { name: '', details: 'S/N производитель', serial: 'ZRT1NEE3' },
-        ]}
-      />
+      <table className="capacity-table">
+        <caption>Сводка по пулам</caption>
+        <thead>
+          <tr>
+            <th scope="col">Пул</th>
+            <th scope="col">Занято</th>
+            <th scope="col">Доступно</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DC-1 / Prod</td>
+            <td>582 из 768</td>
+            <td>186</td>
+          </tr>
+          <tr>
+            <td>DC-2 / Test</td>
+            <td>130 из 256</td>
+            <td>126</td>
+          </tr>
+          <tr>
+            <td>Edge / IoT</td>
+            <td>912 из 1024</td>
+            <td>112</td>
+          </tr>
+        </tbody>
+      </table>
     ),
   },
-  'SSD накопители': {
-    subtitle: 'Заполнение по NVMe и SATA SSD, включая кэш и журнальные устройства.',
+  'Хронология инцидентов': {
+    subtitle: 'Список значимых событий с уровнем влияния и ответственными.',
     preview: (
-      <PassportTable
-        caption="Пример секции по SSD"
-        rows={[
-          { name: 'SSD (sn)', details: 'S/N ядро · Micron MTFDDAK960TDS', serial: 'Y0IDA0KHTZ00W' },
-          { name: '', details: 'S/N производитель', serial: '220534A667C3' },
-          { name: '', details: 'S/N ядро · Samsung MZ-WLR7T60', serial: 'Y1DAA08O7B01S' },
-          { name: '', details: 'S/N производитель', serial: 'S6EWNE0R708721' },
-        ]}
-      />
-    ),
-  },
-  'Backplane и плата управления': {
-    subtitle: 'Backplane, BMC и материнская плата с указанием ревизий.',
-    preview: (
-      <PassportTable
-        caption="Узел управления"
-        rows={[
-          { name: 'Backplane HDD', details: 'BPLSAS780002C', serial: 'Y2GZC017PI01G' },
-          { name: 'Материнская плата', details: 'MBDX86780001E · Rev. 1E', serial: 'Y1JOA302VA1VO' },
-          { name: 'BMC', details: 'IOBBMC740001C', serial: 'Y0SOC01NEU0MD' },
-          { name: 'Backplane SSD', details: 'Разъём +', serial: 'Y0UIE01A2U12F' },
-        ]}
-      />
-    ),
-  },
-  'Память': {
-    subtitle: 'Опись планок памяти с серийниками ядра и производителя.',
-    preview: (
-      <PassportTable
-        caption="Вставки памяти (образец)"
-        rows={[
-          {
-            name: 'Планки памяти',
-            details: 'S/N ядро · 2316 Samsung KR M393A8G40AB2-CWEС0',
-            serial: 'Y1YMA08A1313I',
-          },
-          { name: '', details: 'S/N производитель', serial: 'Y0S402031624B25747' },
-          {
-            name: '',
-            details: 'S/N ядро · 2316 Samsung KR M393A8G40AB2-CWEС0',
-            serial: 'Y1YMA08A1313G',
-          },
-          { name: '', details: 'S/N производитель', serial: 'Y0S402031624B25591' },
-        ]}
-      />
-    ),
-  },
-  'Питание и охлаждение': {
-    subtitle: 'Блоки питания, кулеры и связанные серийные номера.',
-    preview: (
-      <PassportTable
-        caption="Питание и охлаждение"
-        rows={[
-          { name: 'Кулеры CPU', details: 'Тип 1', serial: '—' },
-          { name: 'Блок питания', details: 'S/N ядро · ASP U1A-D11200-DRB', serial: 'Y09OA0XDVR03Q' },
-          { name: '', details: 'S/N производитель', serial: 'D041200K6B0241' },
-          { name: 'Блок питания', details: 'S/N ядро · ASP U1A-D11200-DRB', serial: 'Y09OA0XDVR03P' },
-          { name: '', details: 'S/N производитель', serial: 'D041200K6B0314' },
-        ]}
-      />
-    ),
-  },
-  'Контроллеры расширения': {
-    subtitle: 'RAID и сетевые адаптеры с полным перечнем ревизий.',
-    preview: (
-      <PassportTable
-        caption="Контроллеры"
-        rows={[
-          {
-            name: 'RAID-контроллер',
-            details: 'S/N ядро · Тип 1',
-            serial: 'Y0TEA0ABK706B',
-          },
-          {
-            name: '',
-            details: 'S/N производитель',
-            serial: '03-50077-00004 / SKC2211958',
-          },
-          {
-            name: 'Сетевая карта',
-            details: 'S/N ядро · Rev. 20',
-            serial: 'Y01CA0AGAT0LT',
-          },
-          { name: '', details: 'S/N производитель', serial: 'A41422213001O1FV' },
-        ]}
-      />
+      <ol className="timeline">
+        <li>
+          <span className="timeline__time">08:42</span>
+          <div>
+            <strong>Перегружен DHCP01</strong>
+            <p className="muted">Автоматический рестарт завершился успешно, SLA не нарушен.</p>
+          </div>
+        </li>
+        <li>
+          <span className="timeline__time">12:15</span>
+          <div>
+            <strong>Сбой авторизации PXE</strong>
+            <p className="muted">На согласовании фикса конфигурации. Ответственный: Н. Болышев.</p>
+          </div>
+        </li>
+        <li>
+          <span className="timeline__time">16:20</span>
+          <div>
+            <strong>Пиковая нагрузка сегмента IoT</strong>
+            <p className="muted">Рекомендовано расширение пула и пересмотр политики арен.</p>
+          </div>
+        </li>
+      </ol>
     ),
   },
 };
 
 const presetLabels: Record<PresetOption, string> = {
-  'rack-server': 'Стоечный сервер',
-  'blade-server': 'Блейд-сервер',
-  'storage-node': 'Узел системы хранения',
+  day: 'Ежедневный срез',
+  week: 'Недельный обзор',
+  month: 'Месячный отчёт',
 };
 
 export const ReportsBuilderCanvas: React.FC = () => {
   const { control, handleSubmit, watch } = useForm<ReportsBuilderForm>({
     defaultValues: {
-
-      name: 'Паспорт сервера №020524027B',
-      preset: 'rack-server',
-      blocks: [
-        'Обложка паспорта изделия',
-        'Входной контроль и бригада',
-        'HDD диски',
-        'SSD накопители',
-        'Backplane и плата управления',
-        'Память',
-        'Питание и охлаждение',
-        'Контроллеры расширения',
-      ],
-
       name: 'Еженедельный обзор для руководства',
       preset: 'week',
-      blocks: ['Сводка KPI'],
-
+      blocks: ['Сводка KPI', 'Временной ряд', 'Хронология инцидентов'],
     },
   });
 
@@ -293,37 +190,25 @@ export const ReportsBuilderCanvas: React.FC = () => {
       return;
     }
 
-    console.log('Экспорт паспорта', parseResult.data);
+    console.log('Экспорт отчёта', parseResult.data);
   });
 
   return (
     <section className="reports-builder">
       <header className="reports-builder__header">
         <div>
-
-          <h2>Конструктор паспорта изделия</h2>
+          <h2>Конструктор отчётов</h2>
           <p className="muted">
-            Соберите структурированный паспорт серверного изделия: фиксируйте конфигурацию оборудования,
-            результаты входного контроля и готовьте документы к выгрузке.
+            Соберите интерактивный отчёт из готовых блоков, настройте пресет периода и выгрузите данные в нужном формате.
           </p>
         </div>
-        <span className="status-badge status-active">Синхронизировано с CMDB</span>
-
-          <h2>Конструктор отчётов</h2>
-          <p className="muted">Создавайте макеты методом перетаскивания и экспортируйте их в PDF/CSV/XLSX.</p>
-        </div>
         <span className="status-badge status-active">Предпросмотр в реальном времени</span>
-
       </header>
 
       <form className="reports-builder__form" onSubmit={onSubmit}>
         <div className="form-controls">
           <div className="form-field">
-
-            <label htmlFor={`${idPrefix}-name`}>Название паспорта</label>
-
             <label htmlFor={`${idPrefix}-name`}>Название отчёта</label>
-
             <Controller
               control={control}
               name="name"
@@ -331,11 +216,7 @@ export const ReportsBuilderCanvas: React.FC = () => {
                 <input
                   {...field}
                   id={`${idPrefix}-name`}
-
-                  placeholder="Паспорт изделия"
-
                   placeholder="Сводка для руководства"
-
                   required
                 />
               )}
@@ -343,27 +224,17 @@ export const ReportsBuilderCanvas: React.FC = () => {
           </div>
 
           <div className="form-field">
-
-            <label htmlFor={`${idPrefix}-preset`}>Тип конфигурации</label>
-
             <label htmlFor={`${idPrefix}-preset`}>Предустановка</label>
-
             <Controller
               control={control}
               name="preset"
               render={({ field }) => (
                 <select {...field} id={`${idPrefix}-preset`}>
-
                   {presetOptions.map(option => (
                     <option key={option} value={option}>
                       {presetLabels[option]}
                     </option>
                   ))}
-
-                  <option value="day">День</option>
-                  <option value="week">Неделя</option>
-                  <option value="month">Месяц</option>
-
                 </select>
               )}
             />
@@ -371,36 +242,35 @@ export const ReportsBuilderCanvas: React.FC = () => {
         </div>
 
         <fieldset>
-
-          <legend>Разделы паспорта</legend>
-
           <legend>Блоки</legend>
-
           <Controller
             control={control}
             name="blocks"
-            render={({ field }) => (
-              <div className="chip-group">
-                {blockOptions.map(option => {
-                  const isSelected = field.value.includes(option);
-                  return (
-                    <button
-                      type="button"
-                      key={option}
-                      className={isSelected ? 'chip chip--selected' : 'chip'}
-                      onClick={() => {
-                        const next = isSelected
-                          ? field.value.filter(value => value !== option)
-                          : [...field.value, option];
-                        field.onChange(next as BlockOption[]);
-                      }}
-                    >
-                      {option}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            render={({ field }) => {
+              const value = field.value ?? [];
+              return (
+                <div className="chip-group">
+                  {blockOptions.map(option => {
+                    const isSelected = value.includes(option);
+                    return (
+                      <button
+                        type="button"
+                        key={option}
+                        className={isSelected ? 'chip chip--selected' : 'chip'}
+                        onClick={() => {
+                          const next = isSelected
+                            ? (value.filter(current => current !== option) as BlockOption[])
+                            : ([...value, option] as BlockOption[]);
+                          field.onChange(next);
+                        }}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            }}
           />
         </fieldset>
 
@@ -425,8 +295,7 @@ export const ReportsBuilderCanvas: React.FC = () => {
                   strokeLinejoin="round"
                 />
               </svg>
-
-              <p>Выберите разделы паспорта, чтобы увидеть структуру документа.</p>
+              <p>Выберите блоки отчёта, чтобы увидеть структуру документа.</p>
             </div>
           ) : (
             <div className="preview-grid">
@@ -455,49 +324,13 @@ export const ReportsBuilderCanvas: React.FC = () => {
                   </article>
                 );
               })}
-
-              <p>Предпросмотр отчёта будет отображаться здесь</p>
-            </div>
-          ) : (
-            <div className="preview-grid">
-              {blocks.map(block => (
-                <article key={block} className="builder-block">
-                  <div className="builder-block__icon" aria-hidden>
-                    <svg viewBox="0 0 48 48">
-                      <rect x="6" y="10" width="36" height="28" rx="6" fill="rgba(148, 163, 184, 0.14)" />
-                      <path
-                        d="M12 30c4-6 8-10 12-10s8 4 12 10"
-                        stroke="rgba(51, 245, 255, 0.75)"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        fill="none"
-                      />
-                    </svg>
-                  </div>
-                  <div className="builder-block__body">
-                    <h3>{block}</h3>
-                    <p className="muted">Предпросмотр отчёта будет отображаться здесь</p>
-                  </div>
-                </article>
-              ))}
             </div>
           )}
         </div>
+
         <footer className="reports-builder__actions">
           <button type="submit" className="primary">
             <FormatIcon variant="pdf" />
-
-            Сформировать PDF паспорт
-          </button>
-          <button type="button" className="secondary">
-            <FormatIcon variant="csv" />
-            Выгрузить CSV реестр
-          </button>
-          <button type="button" className="ghost">
-            <FormatIcon variant="xlsx" />
-            Экспорт XLSX спецификации
-
             Экспорт в PDF
           </button>
           <button type="button" className="secondary">
