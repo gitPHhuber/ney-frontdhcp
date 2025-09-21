@@ -188,7 +188,7 @@ export const appNavigation: NavigationSection[] = [
     ],
   },
   {
-    title: 'Наблюдаемость',
+    title: 'Мониторинг',
     translationKey: 'navigation.sections.observability',
     items: [
       {
@@ -198,7 +198,7 @@ export const appNavigation: NavigationSection[] = [
         translationKey: 'navigation.alerts',
         element: AlertsPage,
         loader: loadAlertsPage,
-        group: 'Наблюдаемость',
+        group: 'Мониторинг',
         groupKey: 'navigation.sections.observability',
       },
       {
@@ -208,7 +208,7 @@ export const appNavigation: NavigationSection[] = [
         translationKey: 'navigation.incidents',
         element: IncidentsPage,
         loader: loadIncidentsPage,
-        group: 'Наблюдаемость',
+        group: 'Мониторинг',
         groupKey: 'navigation.sections.observability',
       },
       {
@@ -218,18 +218,18 @@ export const appNavigation: NavigationSection[] = [
         translationKey: 'navigation.reports',
         element: ReportsBuilderPage,
         loader: loadReportsBuilderPage,
-        group: 'Наблюдаемость',
+        group: 'Мониторинг',
         groupKey: 'navigation.sections.observability',
         featureFlag: 'reports-builder',
       },
       {
         path: '/executive-dashboard',
-        title: 'Исполнительный дашборд',
+        title: 'Дашборд для руководства',
         icon: 'leader',
         translationKey: 'navigation.executiveDashboard',
         element: ExecutiveDashboardPage,
         loader: loadExecutiveDashboardPage,
-        group: 'Наблюдаемость',
+        group: 'Мониторинг',
         groupKey: 'navigation.sections.observability',
         featureFlag: 'executive-dashboard-insights',
       },

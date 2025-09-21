@@ -17,7 +17,7 @@ const ExecutiveDashboardPage: React.FC = () => (
     <div className="executive-dashboard__grid">
       <article className="dashboard-card">
         <header>
-          <span className="dashboard-card__title">SLA Compliance</span>
+          <span className="dashboard-card__title">Соблюдение SLA</span>
           <span className="dashboard-card__loader" aria-hidden>
             <svg viewBox="0 0 32 32">
               <circle cx="16" cy="16" r="12" stroke="rgba(51, 245, 255, 0.35)" strokeWidth="2" fill="none" />
@@ -38,7 +38,7 @@ const ExecutiveDashboardPage: React.FC = () => (
       </article>
       <article className="dashboard-card">
         <header>
-          <span className="dashboard-card__title">MTTR Trend</span>
+          <span className="dashboard-card__title">Динамика MTTR</span>
           <span className="dashboard-card__loader" aria-hidden>
             <svg viewBox="0 0 32 32">
               <circle cx="16" cy="16" r="12" stroke="rgba(124, 58, 237, 0.35)" strokeWidth="2" fill="none" />
@@ -65,7 +65,7 @@ const ExecutiveDashboardPage: React.FC = () => (
       </article>
       <article className="dashboard-card">
         <header>
-          <span className="dashboard-card__title">Incident Severity Mix</span>
+          <span className="dashboard-card__title">Распределение серьёзности инцидентов</span>
           <span className="dashboard-card__loader" aria-hidden>
             <svg viewBox="0 0 32 32">
               <circle cx="16" cy="16" r="12" stroke="rgba(248, 113, 113, 0.45)" strokeWidth="2" fill="none" />
@@ -91,7 +91,7 @@ const ExecutiveDashboardPage: React.FC = () => (
       </article>
       <article className="dashboard-card dashboard-card--wide">
         <header>
-          <span className="dashboard-card__title">Executive Summary</span>
+          <span className="dashboard-card__title">Сводка для руководства</span>
           <span className="dashboard-card__loader" aria-hidden>
             <svg viewBox="0 0 32 32">
               <circle cx="16" cy="16" r="12" stroke="rgba(148, 163, 184, 0.35)" strokeWidth="2" fill="none" />
