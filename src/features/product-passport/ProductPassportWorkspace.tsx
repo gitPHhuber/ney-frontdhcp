@@ -2,11 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-
-
-import { jsPDF } from 'jspdf';
-
-import * as XLSX from 'xlsx';
+type XlsxModule = typeof import('xlsx');
 
 import Modal from '../../components/ui/Modal';
 import {
@@ -20,6 +16,25 @@ import {
   type ProductPassport,
 } from '../../entities';
 import { queryKeys } from '../../shared/api/queryKeys';
+
+type JsPdfConstructor = typeof import('jspdf')['jsPDF'];
+
+let jsPdfCtorPromise: Promise<JsPdfConstructor> | null = null;
+let xlsxModulePromise: Promise<XlsxModule> | null = null;
+
+const getJsPdfConstructor = () => {
+  if (!jsPdfCtorPromise) {
+    jsPdfCtorPromise = import('jspdf').then(mod => (mod.jsPDF ?? mod.default) as JsPdfConstructor);
+  }
+  return jsPdfCtorPromise;
+};
+
+const getXlsxModule = () => {
+  if (!xlsxModulePromise) {
+    xlsxModulePromise = import('xlsx').then(mod => (mod.default ?? mod) as XlsxModule);
+  }
+  return xlsxModulePromise;
+};
 
 const deviceStatusLabels: Record<DeviceStatus, string> = {
   in_service: 'В эксплуатации',
@@ -110,7 +125,8 @@ const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[
   return rows;
 };
 
-const downloadWorkbook = (rows: Array<[string, string]>, filename: string) => {
+const downloadWorkbook = async (rows: Array<[string, string]>, filename: string) => {
+  const XLSX = await getXlsxModule();
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
@@ -127,8 +143,9 @@ const downloadWorkbook = (rows: Array<[string, string]>, filename: string) => {
   setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 };
 
-const downloadPdf = (rows: Array<[string, string]>, filename: string) => {
-  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+const downloadPdf = async (rows: Array<[string, string]>, filename: string) => {
+  const JsPdf = await getJsPdfConstructor();
+  const doc = new JsPdf({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;
   const marginTop = 56;
   let cursorY = marginTop;
@@ -1342,9 +1359,9 @@ const PassportWizardTab: React.FC<{
       const rows = buildExportRows(passport, history);
       const filename = `${passport.metadata.assetTag}-паспорт-v${passport.version}`;
       if (type === 'excel') {
-        downloadWorkbook(rows, filename);
+        await downloadWorkbook(rows, filename);
       } else {
-        downloadPdf(rows, filename);
+        await downloadPdf(rows, filename);
       }
       toast.success(type === 'excel' ? 'Экспортирован Excel-файл.' : 'PDF сформирован.');
     } finally {
