@@ -22,7 +22,9 @@
 
 ### Автоматизация и поддерживающие процессы
 - Каталог плейбуков отображает риск каждого сценария, меню запуска и подсказки по готовности к аудиту. 【F:src/features/automation/PlaybookList.tsx†L1-L61】
+
 - Конструктор плейбуков включает форму целей, выбор устройств, хранение токена Ollama в браузере и чат с локальной моделью для подготовки сценариев. 【F:src/features/automation/PlaybookBuilder.tsx†L1-L293】
+
 - Страница «Navigation health check» прогоняет ленивые маршруты через `ErrorBoundary`, фиксируя успешные и проблемные участки. 【F:src/pages/navigation-check/NavigationCheckPage.tsx†L5-L146】
 - Скрипт `scripts/capture-diagnostics.mjs` собирает диагностические логи и сетевые ошибки по ключевым маршрутам и сохраняет отчёт в `docs/diagnostics`. 【F:scripts/capture-diagnostics.mjs†L1-L56】
 
@@ -88,6 +90,7 @@ src/
 
 Дополнительная документация и чеклисты лежат в `docs/`, включая результаты диагностики и отчёт по исправлениям. 【F:docs/diagnostics/console-dump.md†L1-L23】【F:docs/fix-report.md†L1-L48】
 
+
 ## Тестирование и качество
 - ESLint и Prettier обеспечивают единые правила оформления. 【F:package.json†L9-L32】
 - Vitest покрывает модульную логику, Playwright — базовые пользовательские сценарии (`tests/e2e/app-shell.spec.ts`). 【F:tests/e2e/app-shell.spec.ts†L1-L120】
@@ -96,3 +99,4 @@ src/
 ## Последние обновления интерфейса
 - Добавлен скролл внутри модальных окон и ограничение высоты контента, чтобы не блокировать доступ к фону и действиям. 【F:src/styles/components/_modal.css†L37-L81】
 - Конструктор плейбуков получил поле для токена Ollama и мини-чат с ассистентом, который готовит подсказки по сценариям. 【F:src/features/automation/PlaybookBuilder.tsx†L65-L293】
+

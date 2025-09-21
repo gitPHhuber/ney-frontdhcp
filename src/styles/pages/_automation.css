@@ -1,5 +1,8 @@
 .playbook-builder {
+
+
   position: relative;
+
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -8,7 +11,11 @@
   background: linear-gradient(160deg, rgba(14, 24, 38, 0.92) 0%, rgba(10, 16, 26, 0.88) 100%);
   border: 1px solid rgba(148, 163, 184, 0.18);
   box-shadow: 0 22px 44px rgba(2, 6, 23, 0.35);
+
+
   overflow: hidden;
+
+
 }
 
 .playbook-builder__header {
@@ -289,6 +296,7 @@
   min-width: 14rem;
 }
 
+
 .playbook-builder__chat-launcher {
   position: absolute;
   right: 1.5rem;
@@ -420,13 +428,17 @@
   padding-inline: 1.1rem;
 }
 
+
 @media (max-width: 1024px) {
   .playbook-builder__form {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
 
   .playbook-builder__assistant,
+
   .playbook-builder__token,
+
+
   .playbook-builder__targets,
   .playbook-builder__actions,
   .playbook-builder__field-group--full {
@@ -437,7 +449,11 @@
 @media (max-width: 640px) {
   .playbook-builder {
     padding: 1.1rem;
+
+
     overflow: visible;
+
+
   }
 
   .playbook-builder__actions-row {
@@ -455,4 +471,5 @@
     width: 100%;
     margin-top: 0.75rem;
   }
+
 }
