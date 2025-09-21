@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import JsPdfConstructor from 'jspdf';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 import Modal from '../../components/ui/Modal';
 import {
   productPassportRepository,
@@ -39,7 +41,135 @@ const createSlug = (value: string) =>
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9а-яё]+/gi, '-');
-// helper and modal components will be appended below
+
+
+const formatDateTime = (value: string) => new Date(value).toLocaleString('ru-RU', { hour12: false });
+
+const formatFieldValue = (value: TemplateFieldValue | undefined) => {
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  }
+  if (typeof value === 'boolean') {
+    return value ? 'Да' : 'Нет';
+  }
+  if (value === undefined || value === '') {
+    return '—';
+  }
+  return String(value);
+};
+
+type ExportRow = [string, string];
+
+const createPassportSummary = (passport: ProductPassport): ExportRow[] => [
+  ['Паспорт изделия', `${passport.metadata.assetTag} (версия ${passport.version})`],
+  ['Статус', passport.status === 'ready' ? 'Готов' : 'Черновик'],
+  ['Дата обновления', formatDateTime(passport.updatedAt)],
+];
+
+const createDeviceMetadataRows = (passport: ProductPassport): ExportRow[] => [
+  ['Инвентарный номер', passport.metadata.assetTag],
+  ['Модель', passport.metadata.modelName],
+  ['Производитель', passport.metadata.vendor ?? '—'],
+  ['Серийный номер', passport.metadata.serialNumber],
+  ['IP-адрес', passport.metadata.ipAddress],
+  ['Расположение', passport.metadata.location],
+  ['Ответственный', passport.metadata.owner],
+];
+
+const createSchemaRows = (passport: ProductPassport): ExportRow[] =>
+  passport.schema.map(field => [field.label, formatFieldValue(passport.fieldValues[field.key])]);
+
+const createHistoryRows = (history: DeviceHistoryEntry[]): ExportRow[] =>
+  history.map(entry => [formatDateTime(entry.ts), `${entry.action}: ${entry.details} (${entry.actor})`]);
+
+const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[]) => {
+  const rows: ExportRow[] = [
+    ...createPassportSummary(passport),
+    ['', ''],
+    ...createDeviceMetadataRows(passport),
+    ['', ''],
+    ['Поля шаблона', ''],
+    ...createSchemaRows(passport),
+    ['', ''],
+    ['История устройства', ''],
+    ...createHistoryRows(history),
+  ];
+  return rows;
+};
+
+
+
+const createExcelBlob = (rows: ExportRow[]) => {
+
+  const worksheet = XLSX.utils.aoa_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
+  const arrayBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  return new Blob([arrayBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+};
+
+const triggerFileDownload = (blob: Blob, filename: string) => {
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 5000);
+};
+
+
+
+
+const exportRowsToPdf = (rows: ExportRow[], filename: string) => {
+
+  const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
+  const marginLeft = 48;
+  const marginTop = 56;
+  let cursorY = marginTop;
+
+  doc.setFontSize(16);
+  doc.text(`Паспорт изделия ${filename}`, marginLeft, cursorY);
+  cursorY += 24;
+
+  const writeRow = (left: string, right: string) => {
+    const text = right ? `${left}: ${right}` : left;
+    const splitted = doc.splitTextToSize(text, 500);
+    if (cursorY + splitted.length * 14 > 780) {
+      doc.addPage();
+      cursorY = marginTop;
+    }
+    doc.text(splitted, marginLeft, cursorY);
+    cursorY += splitted.length * 14;
+  };
+
+  const addSpacing = (value: number) => {
+    cursorY += value;
+  };
+
+  doc.setFontSize(11);
+  rows.forEach(([left, right]) => {
+    if (!left && !right) {
+      addSpacing(12);
+      return;
+    }
+    writeRow(left, right);
+  });
+
+  doc.save(`${filename}.pdf`);
+};
+
+
+const downloadWorkbook = (rows: ExportRow[], filename: string) => {
+  const blob = createExcelBlob(rows);
+  triggerFileDownload(blob, `${filename}.xlsx`);
+};
+
+const downloadPdf = (rows: ExportRow[], filename: string) => {
+  exportRowsToPdf(rows, filename);
+};
 
 const getMissingRequired = (schema: PassportTemplateField[], values: Record<string, TemplateFieldValue>) =>
   schema
