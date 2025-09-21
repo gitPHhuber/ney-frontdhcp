@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 // Fix: Corrected import path for Role and Permission types
 import type { Permission, Role } from '../../types';
+import { Tooltip } from '../../shared/ui/Tooltip';
 
 const permissionLabels: Record<Permission, string> = {
     'leases:read': 'Просмотр аренды',
@@ -90,7 +91,13 @@ const RoleEditForm = ({ role, onSave, onCancel, isSaving }: RoleEditFormProps) =
             )}
 
             <div className="role-editor__field">
-                <label htmlFor="role-name">Название роли</label>
+                <div className="form-label-with-hint">
+                    <label htmlFor="role-name">Название роли</label>
+                    <Tooltip
+                        id="role-name-hint"
+                        text="Опишите ответственность, например «Дежурный инженер сети» или «Администратор DHCP»"
+                    />
+                </div>
                 <input
                     id="role-name"
                     type="text"
