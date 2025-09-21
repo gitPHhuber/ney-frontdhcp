@@ -839,6 +839,21 @@ main > .container {
   transition: background 0.2s ease, color 0.2s ease;
 }
 
+.playbook-actions__option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.playbook-actions__option .tooltip {
+  flex-shrink: 0;
+}
+
+.playbook-actions__option button {
+  flex: 1 1 auto;
+}
+
 .playbook-actions__menu button:hover,
 .playbook-actions__menu button:focus-visible {
   background: rgba(var(--netgrip-primary-accent-rgb), 0.18);
