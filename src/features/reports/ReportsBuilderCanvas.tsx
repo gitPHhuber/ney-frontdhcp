@@ -3,6 +3,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const blockOptions = [
+
   'Обложка паспорта изделия',
   'Входной контроль и бригада',
   'HDD диски',
@@ -14,6 +15,13 @@ const blockOptions = [
 ] as const;
 
 const presetOptions = ['rack-server', 'blade-server', 'storage-node'] as const;
+
+  'Сводка KPI',
+  'Временной ряд',
+  'Таблица пропускной способности',
+  'Хронология инцидентов',
+] as const;
+
 
 type BlockOption = (typeof blockOptions)[number];
 type PresetOption = (typeof presetOptions)[number];
@@ -217,6 +225,7 @@ const presetLabels: Record<PresetOption, string> = {
 export const ReportsBuilderCanvas: React.FC = () => {
   const { control, handleSubmit, watch } = useForm<ReportsBuilderForm>({
     defaultValues: {
+
       name: 'Паспорт сервера №020524027B',
       preset: 'rack-server',
       blocks: [
@@ -229,6 +238,11 @@ export const ReportsBuilderCanvas: React.FC = () => {
         'Питание и охлаждение',
         'Контроллеры расширения',
       ],
+
+      name: 'Еженедельный обзор для руководства',
+      preset: 'week',
+      blocks: ['Сводка KPI'],
+
     },
   });
 
@@ -286,6 +300,7 @@ export const ReportsBuilderCanvas: React.FC = () => {
     <section className="reports-builder">
       <header className="reports-builder__header">
         <div>
+
           <h2>Конструктор паспорта изделия</h2>
           <p className="muted">
             Соберите структурированный паспорт серверного изделия: фиксируйте конфигурацию оборудования,
@@ -293,12 +308,22 @@ export const ReportsBuilderCanvas: React.FC = () => {
           </p>
         </div>
         <span className="status-badge status-active">Синхронизировано с CMDB</span>
+
+          <h2>Конструктор отчётов</h2>
+          <p className="muted">Создавайте макеты методом перетаскивания и экспортируйте их в PDF/CSV/XLSX.</p>
+        </div>
+        <span className="status-badge status-active">Предпросмотр в реальном времени</span>
+
       </header>
 
       <form className="reports-builder__form" onSubmit={onSubmit}>
         <div className="form-controls">
           <div className="form-field">
+
             <label htmlFor={`${idPrefix}-name`}>Название паспорта</label>
+
+            <label htmlFor={`${idPrefix}-name`}>Название отчёта</label>
+
             <Controller
               control={control}
               name="name"
@@ -306,7 +331,11 @@ export const ReportsBuilderCanvas: React.FC = () => {
                 <input
                   {...field}
                   id={`${idPrefix}-name`}
+
                   placeholder="Паспорт изделия"
+
+                  placeholder="Сводка для руководства"
+
                   required
                 />
               )}
@@ -314,17 +343,27 @@ export const ReportsBuilderCanvas: React.FC = () => {
           </div>
 
           <div className="form-field">
+
             <label htmlFor={`${idPrefix}-preset`}>Тип конфигурации</label>
+
+            <label htmlFor={`${idPrefix}-preset`}>Предустановка</label>
+
             <Controller
               control={control}
               name="preset"
               render={({ field }) => (
                 <select {...field} id={`${idPrefix}-preset`}>
+
                   {presetOptions.map(option => (
                     <option key={option} value={option}>
                       {presetLabels[option]}
                     </option>
                   ))}
+
+                  <option value="day">День</option>
+                  <option value="week">Неделя</option>
+                  <option value="month">Месяц</option>
+
                 </select>
               )}
             />
@@ -332,7 +371,11 @@ export const ReportsBuilderCanvas: React.FC = () => {
         </div>
 
         <fieldset>
+
           <legend>Разделы паспорта</legend>
+
+          <legend>Блоки</legend>
+
           <Controller
             control={control}
             name="blocks"
@@ -382,6 +425,7 @@ export const ReportsBuilderCanvas: React.FC = () => {
                   strokeLinejoin="round"
                 />
               </svg>
+
               <p>Выберите разделы паспорта, чтобы увидеть структуру документа.</p>
             </div>
           ) : (
@@ -411,12 +455,39 @@ export const ReportsBuilderCanvas: React.FC = () => {
                   </article>
                 );
               })}
+
+              <p>Предпросмотр отчёта будет отображаться здесь</p>
+            </div>
+          ) : (
+            <div className="preview-grid">
+              {blocks.map(block => (
+                <article key={block} className="builder-block">
+                  <div className="builder-block__icon" aria-hidden>
+                    <svg viewBox="0 0 48 48">
+                      <rect x="6" y="10" width="36" height="28" rx="6" fill="rgba(148, 163, 184, 0.14)" />
+                      <path
+                        d="M12 30c4-6 8-10 12-10s8 4 12 10"
+                        stroke="rgba(51, 245, 255, 0.75)"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                      />
+                    </svg>
+                  </div>
+                  <div className="builder-block__body">
+                    <h3>{block}</h3>
+                    <p className="muted">Предпросмотр отчёта будет отображаться здесь</p>
+                  </div>
+                </article>
+              ))}
             </div>
           )}
         </div>
         <footer className="reports-builder__actions">
           <button type="submit" className="primary">
             <FormatIcon variant="pdf" />
+
             Сформировать PDF паспорт
           </button>
           <button type="button" className="secondary">
@@ -426,6 +497,16 @@ export const ReportsBuilderCanvas: React.FC = () => {
           <button type="button" className="ghost">
             <FormatIcon variant="xlsx" />
             Экспорт XLSX спецификации
+
+            Экспорт в PDF
+          </button>
+          <button type="button" className="secondary">
+            <FormatIcon variant="csv" />
+            Экспорт в CSV
+          </button>
+          <button type="button" className="ghost">
+            <FormatIcon variant="xlsx" />
+            Экспорт в XLSX
           </button>
         </footer>
       </form>
