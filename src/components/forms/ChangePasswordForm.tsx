@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState } from 'react';
+import { Tooltip } from '../../shared/ui/Tooltip';
 
 interface ChangePasswordFormProps {
     onSave: (password: string) => void;
@@ -34,7 +35,10 @@ const ChangePasswordForm = ({ onSave, onCancel, isSaving }: ChangePasswordFormPr
         <form onSubmit={handleSubmit}>
             {error && <p style={{ color: 'var(--netgrip-danger)', marginBottom: '1rem' }}>{error}</p>}
             <div className="form-group">
-                <label htmlFor="current-password">Current Password</label>
+                <div className="form-label-with-hint">
+                    <label htmlFor="current-password">Current Password</label>
+                    <Tooltip id="current-password-hint" text="Введите действующий пароль от панели, например тот, что используете при входе." />
+                </div>
                 <input
                     id="current-password"
                     type="password"
@@ -45,7 +49,10 @@ const ChangePasswordForm = ({ onSave, onCancel, isSaving }: ChangePasswordFormPr
                 />
             </div>
             <div className="form-group">
-                <label htmlFor="new-password">New Password</label>
+                <div className="form-label-with-hint">
+                    <label htmlFor="new-password">New Password</label>
+                    <Tooltip id="new-password-hint" text="Используйте не менее 12 символов и символы разных типов, например N3tDHCP!2024." />
+                </div>
                 <input
                     id="new-password"
                     type="password"
@@ -55,8 +62,11 @@ const ChangePasswordForm = ({ onSave, onCancel, isSaving }: ChangePasswordFormPr
                     autoComplete="new-password"
                 />
             </div>
-             <div className="form-group">
-                <label htmlFor="confirm-password">Confirm New Password</label>
+            <div className="form-group">
+                <div className="form-label-with-hint">
+                    <label htmlFor="confirm-password">Confirm New Password</label>
+                    <Tooltip id="confirm-password-hint" text="Повторите новый пароль символ в символ, например N3tDHCP!2024." />
+                </div>
                 <input
                     id="confirm-password"
                     type="password"

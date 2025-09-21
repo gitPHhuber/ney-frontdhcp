@@ -18,6 +18,7 @@
 @import './components/_modal.css';
 @import './components/_pagination.css';
 @import './components/_permissions.css';
+@import './components/_tooltip.css';
 @import './components/_spinner.css';
 @import './components/_status-badge.css';
 @import './components/_table.css';
@@ -30,6 +31,7 @@
 /* 5. Page-Specific Styles */
 @import './pages/_dashboard.css';
 @import './pages/_dhcp-server.css';
+@import './pages/_automation.css';
 @import './pages/_error.css';
 @import './pages/_login.css';
 @import './pages/_reports.css';

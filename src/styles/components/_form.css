@@ -8,6 +8,12 @@
   margin-bottom: 1.25rem;
 }
 
+.form-label-with-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .form-field:last-child,
 .form-group:last-child {
   margin-bottom: 0;
