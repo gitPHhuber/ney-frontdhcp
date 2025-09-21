@@ -1,11 +1,9 @@
 import React from 'react';
-import { ProductPassportWizard } from '../../features/product-passport/ProductPassportWizard';
-import { ProductPassportConstructor } from '../../features/product-passport/ProductPassportConstructor';
+import { ProductPassportWorkspace } from '../../features/product-passport/ProductPassportWorkspace';
 
 const ProductPassportPage: React.FC = () => (
   <div className="stacked-page">
-    <ProductPassportWizard />
-    <ProductPassportConstructor />
+    <ProductPassportWorkspace />
   </div>
 );
 
