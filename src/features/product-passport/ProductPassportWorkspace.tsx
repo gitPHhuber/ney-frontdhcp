@@ -123,7 +123,6 @@ const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[
 
 const createExcelBlob = (rows: ExportRow[]) => {
 
-
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
@@ -145,8 +144,8 @@ const triggerFileDownload = (blob: Blob, filename: string) => {
 
 
 
-const exportRowsToPdf = (rows: ExportRow[], filename: string) => {
 
+const exportRowsToPdf = (rows: ExportRow[], filename: string) => {
 
   const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;
@@ -1355,11 +1354,14 @@ const PassportWizardTab: React.FC<{
       const rows = buildExportRows(passport, history);
       const filename = `${passport.metadata.assetTag}-паспорт-v${passport.version}`;
       if (type === 'excel') {
-        downloadWorkbook(rows, filename);
+        downloadPassportWorkbook(rows, filename);
       } else {
-        downloadPdf(rows, filename);
+        await downloadPassportPdf(rows, filename);
       }
       toast.success(type === 'excel' ? 'Экспортирован Excel-файл.' : 'PDF сформирован.');
+    } catch (error) {
+      console.error(error);
+      toast.error('Не удалось сформировать файл.');
     } finally {
       setExporting(false);
     }
