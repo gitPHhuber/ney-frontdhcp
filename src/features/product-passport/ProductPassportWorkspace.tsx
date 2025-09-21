@@ -108,7 +108,8 @@ const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[
   return rows;
 };
 
-const downloadWorkbook = (rows: Array<[string, string]>, filename: string) => {
+const downloadWorkbook = async (rows: Array<[string, string]>, filename: string) => {
+
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
@@ -125,7 +126,9 @@ const downloadWorkbook = (rows: Array<[string, string]>, filename: string) => {
   setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 };
 
-const downloadPdf = (rows: Array<[string, string]>, filename: string) => {
+
+const downloadPdf = async (rows: Array<[string, string]>, filename: string) => {
+
   const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;
   const marginTop = 56;
