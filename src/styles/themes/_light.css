@@ -1,6 +1,26 @@
 
 /* --- Light Theme Overrides --- */
 body[data-theme="light"] {
+  --bg-base: #f8fafc;
+  --bg-subtle: #edf2f8;
+  --surface-sidebar: rgba(255, 255, 255, 0.96);
+  --surface-header: rgba(255, 255, 255, 0.92);
+  --surface-card: #ffffff;
+  --surface-panel: rgba(255, 255, 255, 0.94);
+  --surface-glass: rgba(255, 255, 255, 0.88);
+  --surface-contrast: rgba(226, 232, 240, 0.68);
+  --text-primary: #0f172a;
+  --text-secondary: #1f2937;
+  --text-muted: rgba(71, 85, 105, 0.76);
+  --accent-muted: rgba(14, 165, 233, 0.18);
+  --accent-foreground: #075985;
+  --border-soft: rgba(15, 23, 42, 0.12);
+  --border-strong: rgba(15, 23, 42, 0.18);
+  --shadow-sm: 0 6px 16px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 18px 36px rgba(15, 23, 42, 0.12);
+  --shadow-lg: 0 30px 60px rgba(15, 23, 42, 0.16);
+  --surface-card-strong: #ffffff;
+  --surface-card-soft: #f8fafc;
   --netgrip-text-dark: #1f2937;
   --netgrip-text-strong: #0f172a;
   --netgrip-text-muted: rgba(71, 85, 105, 0.78);
