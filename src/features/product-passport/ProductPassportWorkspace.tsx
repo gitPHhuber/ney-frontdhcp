@@ -3,6 +3,8 @@ import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 type XlsxModule = typeof import('xlsx');
+type JsPdfModule = typeof import('jspdf');
+type JsPdfConstructor = typeof import('jspdf')['jsPDF'];
 
 import Modal from '../../components/ui/Modal';
 import {
@@ -17,19 +19,25 @@ import {
 } from '../../entities';
 import { queryKeys } from '../../shared/api/queryKeys';
 
-type JsPdfConstructor = typeof import('jspdf')['jsPDF'];
-
-let jsPdfCtorPromise: Promise<JsPdfConstructor> | null = null;
+let jsPdfModulePromise: Promise<JsPdfModule> | null = null;
 let xlsxModulePromise: Promise<XlsxModule> | null = null;
 
-const getJsPdfConstructor = () => {
-  if (!jsPdfCtorPromise) {
-    jsPdfCtorPromise = import('jspdf').then(mod => (mod.jsPDF ?? mod.default) as JsPdfConstructor);
+const getJsPdfConstructor = async (): Promise<JsPdfConstructor> => {
+  if (!jsPdfModulePromise) {
+    jsPdfModulePromise = import('jspdf');
   }
-  return jsPdfCtorPromise;
+  const mod = await jsPdfModulePromise;
+  if ('jsPDF' in mod && mod.jsPDF) {
+    return mod.jsPDF;
+  }
+  const fallback = (mod as { default?: JsPdfConstructor }).default;
+  if (fallback) {
+    return fallback;
+  }
+  throw new Error('jsPDF export is unavailable');
 };
 
-const getXlsxModule = () => {
+const getXlsxModule = async (): Promise<XlsxModule> => {
   if (!xlsxModulePromise) {
     xlsxModulePromise = import('xlsx').then(mod => (mod.default ?? mod) as XlsxModule);
   }
