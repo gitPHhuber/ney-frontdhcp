@@ -46,7 +46,15 @@ export const queryKeys = {
 
   productPassports: {
     all: ['product-passports'] as const,
+    devices: ['product-passports', 'devices'] as const,
+    deviceModels: ['product-passports', 'device-models'] as const,
+    templates: (deviceModelId?: string) =>
+      deviceModelId
+        ? (['product-passports', 'templates', deviceModelId] as const)
+        : (['product-passports', 'templates', 'all'] as const),
     byId: (id: string) => [...queryKeys.productPassports.all, id] as const,
+    draftsByDevice: (deviceId: string) =>
+      [...queryKeys.productPassports.all, 'draft', deviceId] as const,
   },
   workforce: {
     all: ['workforce'] as const,
