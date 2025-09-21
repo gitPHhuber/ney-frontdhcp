@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 
-import { jsPDF } from 'jspdf';
+import jsPDF from 'jspdf';
 
 import * as XLSX from 'xlsx';
 
