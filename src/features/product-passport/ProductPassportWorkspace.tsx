@@ -16,6 +16,18 @@ import {
   type ProductPassport,
 } from '../../entities';
 import { queryKeys } from '../../shared/api/queryKeys';
+import {
+  buildExportRows,
+  downloadPassportPdf,
+  downloadPassportWorkbook,
+} from './export';
+import { formatDateTime } from './utils/formatDateTime';
+import type {
+  DeviceFormValues,
+  TemplateCreationPayload,
+  TemplateFieldDraft,
+  TemplateFieldValue,
+} from './workspace/types';
 
 const deviceStatusLabels: Record<DeviceStatus, string> = {
   in_service: 'В эксплуатации',
@@ -24,46 +36,12 @@ const deviceStatusLabels: Record<DeviceStatus, string> = {
   decommissioned: 'Списано',
 };
 
-// helper and modal components will be appended below
-
-type TemplateFieldValue = string | number | boolean | string[];
-
-type DeviceFormValues = {
-  assetTag: string;
-  deviceModelId: string;
-  serialNumber: string;
-  ipAddress: string;
-  location: string;
-  owner: string;
-  status: DeviceStatus;
-  historyNote?: string;
-};
-
-type TemplateFieldDraft = {
-  id: string;
-  label: string;
-  key: string;
-  type: PassportTemplateField['type'];
-  required: boolean;
-  options: string;
-  placeholder?: string;
-  defaultValue?: string;
-};
-
-type TemplateCreationPayload = {
-  name: string;
-  description?: string;
-  deviceModelId: string;
-  setActive: boolean;
-  isActive?: boolean;
-  fields: PassportTemplateField[];
-};
-
 const createSlug = (value: string) =>
   value
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9а-яё]+/gi, '-');
+
 
 const formatDateTime = (value: string) => new Date(value).toLocaleString('ru-RU', { hour12: false });
 
@@ -182,6 +160,7 @@ const exportRowsToPdf = (rows: ExportRow[], filename: string) => {
 
   doc.save(`${filename}.pdf`);
 };
+
 
 const downloadWorkbook = (rows: ExportRow[], filename: string) => {
   const blob = createExcelBlob(rows);
