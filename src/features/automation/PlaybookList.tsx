@@ -1,4 +1,5 @@
 import React from 'react';
+import { Tooltip } from '../../shared/ui/Tooltip';
 
 const SAMPLE_PLAYBOOKS = [
   { id: 'plbk-01', name: 'Перезапуск службы DHCP', risk: 'low' },
@@ -12,6 +13,11 @@ const riskLabels: Record<string, string> = {
   high: 'Высокий риск',
 };
 
+const ACTION_DESCRIPTIONS = {
+  trial: 'Пробный прогон выполняет все шаги без внесения изменений в инфраструктуру и фиксирует вывод в аудите.',
+  production: 'Боевой запуск применяет сценарий на выбранных устройствах. Проверьте права и список целей перед стартом.',
+};
+
 export const PlaybookList: React.FC = () => (
   <section className="playbook-list">
     <header className="playbook-list__header">
@@ -19,7 +25,7 @@ export const PlaybookList: React.FC = () => (
         <h2>Автоматизация</h2>
         <p className="muted">Запускайте готовые сценарии с учётом прав доступа и фиксируйте все действия в аудите.</p>
       </div>
-      <span className="status-badge status-completed">Audit-ready</span>
+      <span className="status-badge status-completed">Готово к аудиту</span>
     </header>
     <ul className="playbook-list__items">
       {SAMPLE_PLAYBOOKS.map(playbook => (
@@ -49,8 +55,14 @@ export const PlaybookList: React.FC = () => (
               </svg>
             </button>
             <div className="playbook-actions__menu" role="menu">
-              <button type="button" role="menuitem">Пробный запуск</button>
-              <button type="button" role="menuitem">Боевой запуск</button>
+              <div className="playbook-actions__option">
+                <button type="button" role="menuitem">Пробный запуск</button>
+                <Tooltip id={`${playbook.id}-trial`} text={ACTION_DESCRIPTIONS.trial} />
+              </div>
+              <div className="playbook-actions__option">
+                <button type="button" role="menuitem">Боевой запуск</button>
+                <Tooltip id={`${playbook.id}-production`} text={ACTION_DESCRIPTIONS.production} />
+              </div>
             </div>
           </div>
         </li>

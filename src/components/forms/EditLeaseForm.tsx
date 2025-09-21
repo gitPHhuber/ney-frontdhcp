@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 // Fix: Corrected import path for Lease type
 import { Lease } from '../../types/index';
+import { Tooltip } from '../../shared/ui/Tooltip';
 
 interface EditLeaseFormProps {
     lease: Lease;
@@ -33,7 +34,10 @@ const EditLeaseForm = ({ lease, onSave, onCancel, isSaving }: EditLeaseFormProps
                 <input id="lease-ip" type="text" className="form-control" value={formData.ip} disabled />
             </div>
             <div className="form-group">
-                <label htmlFor="hostname">Hostname</label>
+                <div className="form-label-with-hint">
+                    <label htmlFor="hostname">Hostname</label>
+                    <Tooltip id="edit-lease-hostname" text="Введите имя устройства, например floor2-core-switch." />
+                </div>
                 <input
                     id="hostname"
                     type="text"
@@ -44,7 +48,10 @@ const EditLeaseForm = ({ lease, onSave, onCancel, isSaving }: EditLeaseFormProps
                 />
             </div>
             <div className="form-group">
-                <label htmlFor="mac">MAC Address</label>
+                <div className="form-label-with-hint">
+                    <label htmlFor="mac">MAC Address</label>
+                    <Tooltip id="edit-lease-mac" text="Используйте формат XX:XX:XX:XX:XX:XX, например 0A:1B:2C:3D:4E:5F." />
+                </div>
                 <input
                     id="mac"
                     type="text"
