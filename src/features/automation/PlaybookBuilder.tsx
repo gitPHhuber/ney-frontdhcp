@@ -41,7 +41,7 @@ interface ChatMessage {
 
 const STORAGE_KEY = 'automation:ollamaToken';
 
-const PlaybookBuilder: React.FC = () => {
+const PlaybookBuilderComponent: React.FC = () => {
   const [ollamaToken, setOllamaToken] = React.useState('');
   const [isTokenVisible, setIsTokenVisible] = React.useState(false);
   const [isChatOpen, setIsChatOpen] = React.useState(false);
@@ -332,4 +332,6 @@ const PlaybookBuilder: React.FC = () => {
   );
 };
 
-export default PlaybookBuilder;
+export const PlaybookBuilder = PlaybookBuilderComponent;
+
+export default PlaybookBuilderComponent;
