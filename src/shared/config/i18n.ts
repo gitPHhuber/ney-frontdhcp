@@ -232,7 +232,7 @@ const resources = {
         alerts: 'Оповещения',
         automation: 'Плейбуки автоматизации',
         reports: 'Конструктор отчётов',
-        executiveDashboard: 'Исполнительный дашборд',
+        executiveDashboard: 'Дашборд для руководства',
         productPassports: 'Паспорта изделий',
         navigationCheck: 'Диагностика навигации',
         settings: 'Общие настройки',
