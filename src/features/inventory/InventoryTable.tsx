@@ -5,42 +5,39 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { startMeasure, endMeasure } from '../../shared/lib/performance';
 import { useTranslation } from 'react-i18next';
+import { useProductPassport } from '../product-passport/ProductPassportContext';
 
 const inlineEditSchema = z.object({
   owner: z.string().min(1),
 });
 
-type InventoryRow = {
-  id: string;
-  assetTag: string;
-  model: string;
-  location: string;
-  owner: string;
-};
-
 export const InventoryTable: React.FC = () => {
   const { t } = useTranslation();
-  const [rows, setRows] = useState<InventoryRow[]>(() =>
-    Array.from({ length: 250 }, (_, index) => ({
-      id: `asset-${index + 1}`,
-      assetTag: `AST-${1000 + index}`,
-      model: index % 2 === 0 ? 'Dell R650' : 'Cisco C9500',
-      location: index % 3 === 0 ? 'DC-West / Row A' : 'DC-East / Row C',
-      owner: index % 4 === 0 ? 'Platform Team' : 'Network Team',
-    })),
-  );
+  const { inventory, updateInventoryOwner } = useProductPassport();
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
   const form = useForm({ defaultValues: { owner: '' } });
 
   const handleEdit = useCallback(
-    (rowData: InventoryRow) => {
+    (rowData: { id: string; owner: string }) => {
       setEditingRowId(rowData.id);
       form.reset({ owner: rowData.owner });
     },
     [form],
   );
 
-  const columns = useMemo<ColumnDef<InventoryRow>[]>(
+  const rows = useMemo(
+    () =>
+      inventory.map(device => ({
+        id: device.id,
+        assetTag: device.assetTag,
+        model: device.modelName,
+        location: device.location,
+        owner: device.owner,
+      })),
+    [inventory],
+  );
+
+  const columns = useMemo<ColumnDef<(typeof rows)[number]>[]>(
     () => [
       { header: t('inventory.columns.assetTag', { defaultValue: 'Asset tag' }), accessorKey: 'assetTag' },
       { header: t('inventory.columns.model', { defaultValue: 'Model' }), accessorKey: 'model' },
@@ -58,20 +55,16 @@ export const InventoryTable: React.FC = () => {
             );
           }
 
-          return (
-            <form
-              onSubmit={form.handleSubmit(value => {
-                inlineEditSchema.parse(value);
-                setRows(current =>
-                  current.map(item =>
-                    item.id === row.original.id ? { ...item, owner: value.owner } : item,
-                  ),
-                );
-                setEditingRowId(null);
-              })}
-            >
-              <input
-                {...form.register('owner')}
+            return (
+              <form
+                onSubmit={form.handleSubmit(value => {
+                  inlineEditSchema.parse(value);
+                  updateInventoryOwner(row.original.id, value.owner, 'Инвентаризация');
+                  setEditingRowId(null);
+                })}
+              >
+                <input
+                  {...form.register('owner')}
                 defaultValue={row.original.owner}
                 aria-label={t('inventory.ownerLabel', {
                   asset: row.original.assetTag,
@@ -86,7 +79,7 @@ export const InventoryTable: React.FC = () => {
         },
       },
     ],
-    [editingRowId, handleEdit, form, t],
+    [editingRowId, handleEdit, form, t, updateInventoryOwner],
   );
 
   const table = useReactTable({ columns, data: rows, getCoreRowModel: getCoreRowModel() });
