@@ -19,37 +19,6 @@ import {
 } from '../../entities';
 import { queryKeys } from '../../shared/api/queryKeys';
 
-
-let jsPdfModulePromise: Promise<JsPdfModule> | null = null;
-let xlsxModulePromise: Promise<XlsxModule> | null = null;
-
-const loadJsPdfModule = () => {
-  if (!jsPdfModulePromise) {
-    jsPdfModulePromise = import('jspdf/dist/jspdf.es.min.js') as Promise<JsPdfModule>;
-  }
-  return jsPdfModulePromise;
-};
-
-const getJsPdfConstructor = async (): Promise<JsPdfConstructor> => {
-  const mod = await loadJsPdfModule();
-  if ('jsPDF' in mod && mod.jsPDF) {
-    return mod.jsPDF;
-  }
-  const fallback = (mod as { default?: JsPdfConstructor }).default;
-  if (fallback) {
-    return fallback;
-  }
-  throw new Error('jsPDF export is unavailable');
-};
-
-const getXlsxModule = async (): Promise<XlsxModule> => {
-  if (!xlsxModulePromise) {
-    xlsxModulePromise = import('xlsx').then(mod => (mod.default ?? mod) as XlsxModule);
-  }
-  return xlsxModulePromise;
-
-};
-
 const deviceStatusLabels: Record<DeviceStatus, string> = {
   in_service: 'В эксплуатации',
   maintenance: 'На обслуживании',
@@ -140,6 +109,7 @@ const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[
 };
 
 const downloadWorkbook = async (rows: Array<[string, string]>, filename: string) => {
+
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
@@ -156,7 +126,9 @@ const downloadWorkbook = async (rows: Array<[string, string]>, filename: string)
   setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 };
 
+
 const downloadPdf = async (rows: Array<[string, string]>, filename: string) => {
+
   const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;
   const marginTop = 56;
@@ -1371,9 +1343,9 @@ const PassportWizardTab: React.FC<{
       const rows = buildExportRows(passport, history);
       const filename = `${passport.metadata.assetTag}-паспорт-v${passport.version}`;
       if (type === 'excel') {
-        await downloadWorkbook(rows, filename);
+        downloadWorkbook(rows, filename);
       } else {
-        await downloadPdf(rows, filename);
+        downloadPdf(rows, filename);
       }
       toast.success(type === 'excel' ? 'Экспортирован Excel-файл.' : 'PDF сформирован.');
     } finally {
