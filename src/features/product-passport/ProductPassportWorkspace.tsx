@@ -121,7 +121,8 @@ const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[
   return rows;
 };
 
-const createWorkbookBlob = (rows: ExportRow[]) => {
+const downloadWorkbook = async (rows: Array<[string, string]>, filename: string) => {
+
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
@@ -141,12 +142,11 @@ const triggerFileDownload = (blob: Blob, filename: string) => {
   setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 };
 
-const downloadWorkbook = (rows: ExportRow[], filename: string) => {
-  const blob = createWorkbookBlob(rows);
-  triggerFileDownload(blob, `${filename}.xlsx`);
-};
 
-const downloadPdf = (rows: ExportRow[], filename: string) => {
+
+const downloadPdf = async (rows: Array<[string, string]>, filename: string) => {
+
+
   const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;
   const marginTop = 56;
