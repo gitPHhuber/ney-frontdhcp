@@ -3,16 +3,24 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const blockOptions = [
-  'Сводка KPI',
-  'Временной ряд',
-  'Таблица пропускной способности',
-  'Хронология инцидентов',
+
+  'Обложка паспорта изделия',
+  'Входной контроль и бригада',
+  'HDD диски',
+  'SSD накопители',
+  'Backplane и плата управления',
+  'Память',
+  'Питание и охлаждение',
+  'Контроллеры расширения',
 ] as const;
 
-const presetOptions = ['day', 'week', 'month'] as const;
+const presetOptions = ['rack-server', 'blade-server', 'storage-node'] as const;
+
 
 type BlockOption = (typeof blockOptions)[number];
 type PresetOption = (typeof presetOptions)[number];
+
+type ExportVariant = 'pdf' | 'csv' | 'xlsx';
 
 const builderSchema = z.object({
   name: z.string().min(3),
@@ -26,6 +34,67 @@ interface BlockMeta {
   subtitle: string;
   preview: React.ReactNode;
 }
+
+
+const FormatIcon: React.FC<{ variant: ExportVariant }> = ({ variant }) => {
+  const label = variant.toUpperCase();
+  const gradientStops: Record<ExportVariant, string> = {
+    pdf: 'rgba(244, 114, 182, 0.7)',
+    csv: 'rgba(45, 212, 191, 0.65)',
+    xlsx: 'rgba(74, 222, 128, 0.65)',
+  };
+
+  return (
+    <svg className="format-icon" viewBox="0 0 32 40" aria-hidden focusable="false">
+      <defs>
+        <linearGradient id={`format-${variant}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={gradientStops[variant]} />
+          <stop offset="100%" stopColor="rgba(51, 245, 255, 0.45)" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M7 2.5h13.5L27.5 9v24.5c0 1.38-1.12 2.5-2.5 2.5H7c-1.38 0-2.5-1.12-2.5-2.5V5c0-1.38 1.12-2.5 2.5-2.5Z"
+        fill={`url(#format-${variant})`}
+        stroke="rgba(148, 163, 184, 0.45)"
+        strokeWidth="1.4"
+      />
+      <text
+        x="50%"
+        y="70%"
+        textAnchor="middle"
+        fontSize="10"
+        fontFamily="'Inter', 'Segoe UI', sans-serif"
+        fontWeight={600}
+        fill="#010409"
+      >
+        {label}
+      </text>
+    </svg>
+  );
+};
+
+const PassportTable: React.FC<{ caption: string; rows: PassportRow[] }> = ({ caption, rows }) => (
+  <table className="passport-table">
+    <caption>{caption}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Наименование</th>
+        <th scope="col">Тип / ревизия / производитель</th>
+        <th scope="col">Серийный номер</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map(row => (
+        <tr key={`${row.name}-${row.details}-${row.serial}`}>
+          <td>{row.name}</td>
+          <td>{row.details}</td>
+          <td>{row.serial}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
 
 const blockLibrary: Record<BlockOption, BlockMeta> = {
   'Сводка KPI': {
@@ -134,54 +203,110 @@ const presetLabels: Record<PresetOption, string> = {
   month: 'Месячный отчёт',
 };
 
+const BlockChips: React.FC<{
+  value: BlockOption[];
+  onChange: (value: BlockOption[]) => void;
+}> = ({ value, onChange }) => (
+  <div className="chip-group">
+    {blockOptions.map(option => {
+      const isSelected = value.includes(option);
+      return (
+        <button
+          type="button"
+          key={option}
+          className={isSelected ? 'chip chip--selected' : 'chip'}
+          onClick={() => {
+            const next = isSelected ? value.filter(item => item !== option) : [...value, option];
+            onChange(next as BlockOption[]);
+          }}
+        >
+          {option}
+        </button>
+      );
+    })}
+  </div>
+);
+
+const BuilderPreview: React.FC<{ blocks: BlockOption[] }> = ({ blocks }) => {
+  if (blocks.length === 0) {
+    return (
+      <div className="preview-placeholder">
+        <svg viewBox="0 0 64 64" aria-hidden focusable="false">
+          <path
+            d="M10 14h44v36H10z"
+            fill="none"
+            stroke="rgba(148, 163, 184, 0.4)"
+            strokeWidth="2"
+            strokeDasharray="6 4"
+            strokeLinecap="round"
+          />
+          <path
+            d="M18 40l8-12 8 8 10-14 12 18"
+            fill="none"
+            stroke="rgba(51, 245, 255, 0.75)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <p>Выберите разделы паспорта, чтобы увидеть структуру документа.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="preview-grid">
+      {blocks.map(block => {
+        const blockMeta = blockLibrary[block];
+        return (
+          <article key={block} className="builder-block">
+            <div className="builder-block__icon" aria-hidden>
+              <svg viewBox="0 0 48 48">
+                <rect x="6" y="10" width="36" height="28" rx="6" fill="rgba(148, 163, 184, 0.14)" />
+                <path
+                  d="M12 30c4-6 8-10 12-10s8 4 12 10"
+                  stroke="rgba(51, 245, 255, 0.75)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              </svg>
+            </div>
+            <div className="builder-block__body">
+              <h3>{block}</h3>
+              <p className="muted">{blockMeta.subtitle}</p>
+              <div className="builder-block__preview">{blockMeta.preview}</div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+};
+
 export const ReportsBuilderCanvas: React.FC = () => {
   const { control, handleSubmit, watch } = useForm<ReportsBuilderForm>({
     defaultValues: {
-      name: 'Еженедельный обзор для руководства',
-      preset: 'week',
-      blocks: ['Сводка KPI', 'Временной ряд', 'Хронология инцидентов'],
+
+      name: 'Паспорт сервера №020524027B',
+      preset: 'rack-server',
+      blocks: [
+        'Обложка паспорта изделия',
+        'Входной контроль и бригада',
+        'HDD диски',
+        'SSD накопители',
+        'Backplane и плата управления',
+        'Память',
+        'Питание и охлаждение',
+        'Контроллеры расширения',
+      ],
+
     },
   });
 
   const blocks = watch('blocks');
   const idPrefix = useId();
-
-  const FormatIcon: React.FC<{ variant: 'pdf' | 'csv' | 'xlsx' }> = ({ variant }) => {
-    const label = variant.toUpperCase();
-    const gradientStops: Record<'pdf' | 'csv' | 'xlsx', string> = {
-      pdf: 'rgba(244, 114, 182, 0.7)',
-      csv: 'rgba(45, 212, 191, 0.65)',
-      xlsx: 'rgba(74, 222, 128, 0.65)',
-    };
-
-    return (
-      <svg className="format-icon" viewBox="0 0 32 40" aria-hidden focusable="false">
-        <defs>
-          <linearGradient id={`format-${variant}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={gradientStops[variant]} />
-            <stop offset="100%" stopColor="rgba(51, 245, 255, 0.45)" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M7 2.5h13.5L27.5 9v24.5c0 1.38-1.12 2.5-2.5 2.5H7c-1.38 0-2.5-1.12-2.5-2.5V5c0-1.38 1.12-2.5 2.5-2.5Z"
-          fill={`url(#format-${variant})`}
-          stroke="rgba(148, 163, 184, 0.45)"
-          strokeWidth="1.4"
-        />
-        <text
-          x="50%"
-          y="70%"
-          textAnchor="middle"
-          fontSize="10"
-          fontFamily="'Inter', 'Segoe UI', sans-serif"
-          fontWeight={600}
-          fill="#010409"
-        >
-          {label}
-        </text>
-      </svg>
-    );
-  };
 
   const onSubmit = handleSubmit(data => {
     const parseResult = builderSchema.safeParse(data);
@@ -197,18 +322,24 @@ export const ReportsBuilderCanvas: React.FC = () => {
     <section className="reports-builder">
       <header className="reports-builder__header">
         <div>
-          <h2>Конструктор отчётов</h2>
+
+          <h2>Конструктор паспорта изделия</h2>
+
           <p className="muted">
             Соберите интерактивный отчёт из готовых блоков, настройте пресет периода и выгрузите данные в нужном формате.
           </p>
         </div>
-        <span className="status-badge status-active">Предпросмотр в реальном времени</span>
+
+        <span className="status-badge status-active">Синхронизировано с CMDB</span>
+
       </header>
 
       <form className="reports-builder__form" onSubmit={onSubmit}>
         <div className="form-controls">
           <div className="form-field">
-            <label htmlFor={`${idPrefix}-name`}>Название отчёта</label>
+
+            <label htmlFor={`${idPrefix}-name`}>Название паспорта</label>
+
             <Controller
               control={control}
               name="name"
@@ -216,7 +347,9 @@ export const ReportsBuilderCanvas: React.FC = () => {
                 <input
                   {...field}
                   id={`${idPrefix}-name`}
-                  placeholder="Сводка для руководства"
+
+                  placeholder="Паспорт изделия"
+
                   required
                 />
               )}
@@ -224,7 +357,9 @@ export const ReportsBuilderCanvas: React.FC = () => {
           </div>
 
           <div className="form-field">
-            <label htmlFor={`${idPrefix}-preset`}>Предустановка</label>
+
+            <label htmlFor={`${idPrefix}-preset`}>Тип конфигурации</label>
+
             <Controller
               control={control}
               name="preset"
@@ -242,39 +377,20 @@ export const ReportsBuilderCanvas: React.FC = () => {
         </div>
 
         <fieldset>
-          <legend>Блоки</legend>
+
+          <legend>Разделы паспорта</legend>
           <Controller
             control={control}
             name="blocks"
-            render={({ field }) => {
-              const value = field.value ?? [];
-              return (
-                <div className="chip-group">
-                  {blockOptions.map(option => {
-                    const isSelected = value.includes(option);
-                    return (
-                      <button
-                        type="button"
-                        key={option}
-                        className={isSelected ? 'chip chip--selected' : 'chip'}
-                        onClick={() => {
-                          const next = isSelected
-                            ? (value.filter(current => current !== option) as BlockOption[])
-                            : ([...value, option] as BlockOption[]);
-                          field.onChange(next);
-                        }}
-                      >
-                        {option}
-                      </button>
-                    );
-                  })}
-                </div>
-              );
-            }}
+            render={({ field }) => (
+              <BlockChips value={field.value} onChange={value => field.onChange(value as BlockOption[])} />
+            )}
+
           />
         </fieldset>
 
         <div className="builder-preview">
+
           {blocks.length === 0 ? (
             <div className="preview-placeholder">
               <svg viewBox="0 0 64 64" aria-hidden focusable="false">
@@ -326,20 +442,23 @@ export const ReportsBuilderCanvas: React.FC = () => {
               })}
             </div>
           )}
+
         </div>
 
         <footer className="reports-builder__actions">
           <button type="submit" className="primary">
             <FormatIcon variant="pdf" />
-            Экспорт в PDF
+
+            Сформировать PDF паспорт
           </button>
           <button type="button" className="secondary">
             <FormatIcon variant="csv" />
-            Экспорт в CSV
+            Выгрузить CSV реестр
           </button>
           <button type="button" className="ghost">
             <FormatIcon variant="xlsx" />
-            Экспорт в XLSX
+            Экспорт XLSX спецификации
+
           </button>
         </footer>
       </form>

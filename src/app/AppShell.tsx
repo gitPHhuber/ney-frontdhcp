@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../context/AuthContext';
 import { isFeatureEnabled } from '../shared/config/featureFlags';
+import { ProductPassportProvider } from '../features/product-passport/ProductPassportContext';
 import { CommandPalette } from '../widgets/command-palette/CommandPalette';
 import { NotificationCenter } from '../widgets/notification-center/NotificationCenter';
 
@@ -162,7 +163,9 @@ const AppShell: FC = () => {
       </header>
       <main className="app-shell__content col-start-2 row-start-2 min-h-0 overflow-auto p-6 md:p-10">
         <div className="container w-full">
-          <Outlet />
+          <ProductPassportProvider>
+            <Outlet />
+          </ProductPassportProvider>
         </div>
       </main>
       <CommandPalette isOpen={isPaletteOpen} onClose={() => setPaletteOpen(false)} />
