@@ -2,9 +2,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
 type XlsxModule = typeof import('xlsx');
 type JsPdfModule = typeof import('jspdf');
 type JsPdfConstructor = typeof import('jspdf')['jsPDF'];
+
 
 import Modal from '../../components/ui/Modal';
 import {
@@ -42,6 +44,7 @@ const getXlsxModule = async (): Promise<XlsxModule> => {
     xlsxModulePromise = import('xlsx').then(mod => (mod.default ?? mod) as XlsxModule);
   }
   return xlsxModulePromise;
+
 };
 
 const deviceStatusLabels: Record<DeviceStatus, string> = {
