@@ -730,7 +730,7 @@ main > .container {
 .playbook-list__item {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
+  align-items: flex-start;
   gap: 1.25rem;
   padding: 1.1rem 1.25rem;
   border-radius: 1.1rem;
@@ -748,7 +748,12 @@ main > .container {
 
 .playbook-list__details {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.55rem;
+}
+
+.playbook-list__description {
+  font-size: 0.9rem;
+  color: rgba(203, 213, 225, 0.88);
 }
 
 .playbook-list__details strong {
@@ -759,6 +764,40 @@ main > .container {
 .playbook-list__risk {
   min-width: 10rem;
   justify-self: flex-end;
+}
+
+.playbook-list__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+}
+
+.playbook-list__meta-tooltip {
+  margin-left: auto;
+}
+
+.playbook-list__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+
+.playbook-list__feedback,
+.playbook-list__empty {
+  font-size: 0.9rem;
+  color: rgba(148, 163, 184, 0.92);
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 0.95rem;
+  padding: 0.9rem 1.1rem;
+  margin-top: 1.25rem;
+}
+
+.playbook-list__feedback {
+  border-color: rgba(59, 130, 246, 0.4);
+  color: rgba(191, 219, 254, 0.95);
 }
 
 .playbook-list__risk--high {
@@ -877,6 +916,10 @@ main > .container {
 
   .playbook-list__risk {
     justify-self: flex-start;
+  }
+
+  .playbook-list__meta {
+    align-items: flex-start;
   }
 
   .playbook-actions {
