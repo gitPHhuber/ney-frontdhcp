@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 import Modal from '../../components/ui/Modal';
 import {
   productPassportRepository,
@@ -117,6 +118,7 @@ const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[
   return rows;
 };
 
+const createExcelBlob = (rows: ExportRow[]) => {
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
@@ -136,6 +138,18 @@ const triggerFileDownload = (blob: Blob, filename: string) => {
   setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 };
 
+const downloadWorkbook = (rows: ExportRow[], filename: string) => {
+  const blob = createExcelBlob(rows);
+  triggerFileDownload(blob, `${filename}.xlsx`);
+};
+
+const downloadPdf = async (rows: ExportRow[], filename: string) => {
+  type JsPdfCtor = typeof import('jspdf').jsPDF;
+  const module = await import('jspdf');
+  const JsPdfConstructor: JsPdfCtor | undefined = module.jsPDF ?? (module.default as JsPdfCtor | undefined);
+  if (!JsPdfConstructor) {
+    throw new Error('jsPDF constructor is unavailable');
+  }
   const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;
   const marginTop = 56;
@@ -1336,9 +1350,12 @@ const PassportWizardTab: React.FC<{
       if (type === 'excel') {
         downloadWorkbook(rows, filename);
       } else {
-        downloadPdf(rows, filename);
+        await downloadPdf(rows, filename);
       }
       toast.success(type === 'excel' ? 'Экспортирован Excel-файл.' : 'PDF сформирован.');
+    } catch (error) {
+      console.error(error);
+      toast.error('Не удалось сформировать файл.');
     } finally {
       setExporting(false);
     }
