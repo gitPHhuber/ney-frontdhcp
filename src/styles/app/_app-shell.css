@@ -1046,6 +1046,94 @@ main > .container {
   gap: 0.85rem;
 }
 
+.passport-wizard__actions-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.passport-workspace {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.tab-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.tab {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.6);
+  color: #e2e8f0;
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  transition: background 0.2s ease, border 0.2s ease;
+}
+
+.tab.active,
+.tab:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.passport-wizard__sidebar {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 1.2rem;
+}
+
+@media (min-width: 1200px) {
+  .passport-wizard__form {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .passport-wizard__form > .passport-wizard__grid {
+    grid-column: 1;
+  }
+
+  .passport-wizard__sidebar {
+    grid-column: 2;
+    align-content: start;
+  }
+}
+
+.passport-history {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 1rem;
+  padding: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.passport-history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.attachments-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.attachments-list a {
+  color: #60a5fa;
+}
+
+.passport-summary {
+  margin-top: 1rem;
+}
+
 .passport-constructor__actions {
   display: flex;
   flex-wrap: wrap;

@@ -21,6 +21,7 @@
     "cytoscape": "^3.28.1",
     "framer-motion": "^11.11.11",
     "i18next": "^25.4.1",
+    "jspdf": "^3.0.3",
     "react": "18.3.1",
     "react-chartjs-2": "5.2.0",
     "react-dom": "18.3.1",
@@ -31,6 +32,7 @@
     "recharts": "^2.12.7",
     "sonner": "^1.7.1",
     "vis-network": "^9.1.6",
+    "xlsx": "^0.18.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
