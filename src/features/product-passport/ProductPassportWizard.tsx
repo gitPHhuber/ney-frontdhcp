@@ -10,7 +10,7 @@ export interface ProductPassportForm {
   warrantyUntil?: string;
 }
 
-const steps = ['Lookup device', 'Confirm metadata', 'Add details', 'Attach documents'];
+const steps = ['Поиск устройства', 'Проверка метаданных', 'Добавление сведений', 'Приложение документов'];
 
 export const ProductPassportWizard: React.FC = () => {
   const { control, handleSubmit } = useForm<ProductPassportForm>({
@@ -34,12 +34,22 @@ export const ProductPassportWizard: React.FC = () => {
     type?: string;
     required?: boolean;
   }> = [
-    { name: 'assetTag', label: 'Asset tag', placeholder: 'e.g. AST-1001', required: true },
-    { name: 'model', label: 'Model', placeholder: 'Cisco C9500', required: true },
-    { name: 'serialNumber', label: 'Serial number', placeholder: 'SN123456789', required: true },
-    { name: 'location', label: 'Location', placeholder: 'DC-West / Rack 42', required: true },
-    { name: 'owner', label: 'Owner', placeholder: 'Network Team', required: true },
-    { name: 'warrantyUntil', label: 'Warranty valid until', type: 'date' },
+    { name: 'assetTag', label: 'Инвентарный номер', placeholder: 'Например, AST-1001', required: true },
+    { name: 'model', label: 'Модель', placeholder: 'Cisco C9500', required: true },
+    {
+      name: 'serialNumber',
+      label: 'Серийный номер',
+      placeholder: 'SN123456789',
+      required: true,
+    },
+    {
+      name: 'location',
+      label: 'Расположение',
+      placeholder: 'DC-West / Стойка 42',
+      required: true,
+    },
+    { name: 'owner', label: 'Ответственный', placeholder: 'Команда сетей', required: true },
+    { name: 'warrantyUntil', label: 'Гарантия действует до', type: 'date' },
   ];
 
   const onSubmit = handleSubmit(data => {
@@ -51,10 +61,10 @@ export const ProductPassportWizard: React.FC = () => {
     <section className="passport-wizard">
       <header className="passport-wizard__header">
         <div>
-          <h2>Product passport wizard</h2>
-          <p className="muted">Auto-populate fields from inventory and finalize a PDF passport.</p>
+          <h2>Мастер создания паспорта изделия</h2>
+          <p className="muted">Автоматически заполните данные из инвентаря и сформируйте PDF-паспорт.</p>
         </div>
-        <span className="status-badge status-online">Connected</span>
+        <span className="status-badge status-online">Подключено</span>
       </header>
       <ol className="wizard-steps">
         {steps.map((step, index) => {
@@ -95,10 +105,10 @@ export const ProductPassportWizard: React.FC = () => {
         </div>
         <footer className="passport-wizard__actions">
           <button type="submit" className="primary">
-            Generate PDF passport
+            Сформировать PDF-паспорт
           </button>
           <button type="button" className="secondary">
-            Export registry CSV
+            Экспортировать реестр в CSV
           </button>
         </footer>
       </form>
