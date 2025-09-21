@@ -224,7 +224,7 @@ export const appNavigation: NavigationSection[] = [
       },
       {
         path: '/executive-dashboard',
-        title: 'Исполнительный дашборд',
+        title: 'Дашборд для руководства',
         icon: 'leader',
         translationKey: 'navigation.executiveDashboard',
         element: ExecutiveDashboardPage,
