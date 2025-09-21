@@ -3,6 +3,7 @@ import {
   useProductionLinesQuery,
   useProductionOrdersQuery,
   useValueStreamsQuery,
+  useWorkCentersQuery,
   useWorkOrdersQuery,
 } from './hooks';
 
@@ -22,6 +23,12 @@ export const ManufacturingCommandCenter: React.FC = () => {
   const { data: workOrders = [] } = useWorkOrdersQuery();
   const { data: productionLines = [] } = useProductionLinesQuery();
   const { data: valueStreams = [] } = useValueStreamsQuery();
+  const { data: workCenters = [] } = useWorkCentersQuery();
+
+  const workCenterMap = useMemo(
+    () => new Map(workCenters.map(center => [center.id, center])),
+    [workCenters],
+  );
 
   const orderSummary = useMemo(() => {
     const base = new Map<string, number>();
@@ -89,8 +96,11 @@ export const ManufacturingCommandCenter: React.FC = () => {
       </header>
       <div className="mes-command__grid">
         <article className="mes-command__card">
-          <header>
-            <h2>Портфель заказов</h2>
+          <header className="mes-command__card-header">
+            <div>
+              <h2>Портфель заказов</h2>
+              <p className="muted">Ключевые статусы и динамика по текущей неделе.</p>
+            </div>
             <span className="badge">{orderSummary.total}</span>
           </header>
           <div className="mes-command__metrics">
@@ -102,73 +112,114 @@ export const ManufacturingCommandCenter: React.FC = () => {
             ))}
           </div>
           <footer className="mes-command__footer">
-            <span>Срок <strong>&lt; 72ч</strong>: {orderSummary.dueSoon}</span>
-            <span>Активных операций: {workOrders.filter(item => item.status === 'in-progress').length}</span>
+            <span className="chip chip--ghost">
+              <span className="chip__label">Срок &lt; 72ч</span>
+              <span className="chip__value">{orderSummary.dueSoon}</span>
+            </span>
+            <span className="chip chip--ghost">
+              <span className="chip__label">Активных операций</span>
+              <span className="chip__value">
+                {workOrders.filter(item => item.status === 'in-progress').length}
+              </span>
+            </span>
           </footer>
         </article>
         <article className="mes-command__card mes-command__card--stretch">
-          <header>
-            <h2>Производственные линии</h2>
-            <p className="muted">Нагрузка, такт и доступность по потокам.</p>
+          <header className="mes-command__card-header">
+            <div>
+              <h2>Производственные линии</h2>
+              <p className="muted">Нагрузка, такт и доступность по потокам.</p>
+            </div>
           </header>
           <ul className="mes-command__list">
             {loadByLine.map(line => (
               <li key={line.id}>
-                <div>
-                  <strong>{line.name}</strong>
+                <div className="mes-command__line-body">
+                  <div className="mes-command__line-heading">
+                    <strong>{line.name}</strong>
+                    <span className="chip chip--muted">Смена {line.shiftPattern}</span>
+                  </div>
                   <p className="muted">
-                    Такт {Math.round(line.taktTimeSec / 60)} мин • План {line.targetPerShift} шт/смена
+                    Такт {Math.round(line.taktTimeSec / 60)} мин · План {line.targetPerShift} шт/смена · Факт {line.throughputPerShift} шт
                   </p>
                   {line.blockers.length > 0 && (
                     <p className="alert">Блокеры: {line.blockers.join(', ')}</p>
                   )}
-                </div>
-                <div className="mes-command__line-indicators">
-                  <span>WIP: {line.currentWip}</span>
-                  <span>Очередь: {line.wipOrders}</span>
-                  <span>Работает: {line.active}</span>
-                  <span>OEE: {formatPercent(line.availability)}</span>
+                  <div className="mes-command__line-indicators">
+                    <span className="chip">
+                      <span className="chip__label">WIP</span>
+                      <span className="chip__value">{line.currentWip}</span>
+                    </span>
+                    <span className="chip">
+                      <span className="chip__label">Очередь</span>
+                      <span className="chip__value">{line.wipOrders}</span>
+                    </span>
+                    <span className="chip">
+                      <span className="chip__label">Работает</span>
+                      <span className="chip__value">{line.active}</span>
+                    </span>
+                    <span className="chip">
+                      <span className="chip__label">OEE</span>
+                      <span className="chip__value">{formatPercent(line.availability)}</span>
+                    </span>
+                  </div>
                 </div>
               </li>
             ))}
+            {loadByLine.length === 0 && <li className="muted">Нет активных линий</li>}
           </ul>
         </article>
         <article className="mes-command__card">
-          <header>
-            <h2>Value stream сегментация</h2>
-            <p className="muted">Разделённые зоны ответственности и точки эскалации.</p>
+          <header className="mes-command__card-header">
+            <div>
+              <h2>Value stream сегментация</h2>
+              <p className="muted">Разделённые зоны ответственности и точки эскалации.</p>
+            </div>
           </header>
           <ul className="mes-command__streams">
             {valueStreams.map(stream => (
               <li key={stream.id}>
-                <div>
-                  <strong>{stream.name}</strong>
-                  <p className="muted">{stream.focus}</p>
+                <div className="mes-command__stream-body">
+                  <div className="mes-command__stream-heading">
+                    <strong>{stream.name}</strong>
+                    <span className="chip chip--accent">{stream.focus}</span>
+                  </div>
+                  <div className="mes-command__stream-metrics">
+                    <span className="chip">
+                      <span className="chip__label">Спрос недели</span>
+                      <span className="chip__value">{stream.demandThisWeek}</span>
+                    </span>
+                    <span className="chip">
+                      <span className="chip__label">Незакрытый бэклог</span>
+                      <span className="chip__value">{stream.backlogUnits}</span>
+                    </span>
+                    <span className={`chip chip--risk-${stream.riskLevel}`}>
+                      <span className="chip__label">Риск</span>
+                      <span className="chip__value">{stream.riskLevel}</span>
+                    </span>
+                  </div>
+                  <div className="mes-command__stream-meta">
+                    <span className="chip chip--ghost">
+                      <span className="chip__label">Группы доступа</span>
+                      <span className="chip__value">{stream.gatekeepers.join(', ')}</span>
+                    </span>
+                    <span className="chip chip--ghost">
+                      <span className="chip__label">Следующий рубеж</span>
+                      <span className="chip__value">{stream.nextMilestone}</span>
+                    </span>
+                  </div>
                 </div>
-                <dl>
-                  <div>
-                    <dt>Спрос недели</dt>
-                    <dd>{stream.demandThisWeek}</dd>
-                  </div>
-                  <div>
-                    <dt>Незакрытый бэклог</dt>
-                    <dd>{stream.backlogUnits}</dd>
-                  </div>
-                  <div>
-                    <dt>Риск</dt>
-                    <dd className={`status status--${stream.riskLevel}`}>{stream.riskLevel}</dd>
-                  </div>
-                </dl>
-                <p className="muted">Группы доступа: {stream.gatekeepers.join(', ')}</p>
-                <p className="muted">Следующий рубеж: {stream.nextMilestone}</p>
               </li>
             ))}
+            {valueStreams.length === 0 && <li className="muted">Value stream&apos;ы не назначены</li>}
           </ul>
         </article>
         <article className="mes-command__card">
-          <header>
-            <h2>Нагрузка рабочих центров</h2>
-            <p className="muted">Контроль WIP и доступности по всем зонам.</p>
+          <header className="mes-command__card-header">
+            <div>
+              <h2>Нагрузка рабочих центров</h2>
+              <p className="muted">Контроль WIP и доступности по всем зонам.</p>
+            </div>
           </header>
           <table className="mes-command__table">
             <thead>
@@ -179,13 +230,40 @@ export const ManufacturingCommandCenter: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {Array.from(workCentersLoad.entries()).map(([wcId, stats]) => (
-                <tr key={wcId}>
-                  <td>{wcId}</td>
-                  <td>{stats.backlog}</td>
-                  <td>{stats.running}</td>
+              {Array.from(workCentersLoad.entries()).map(([wcId, stats]) => {
+                const center = workCenterMap.get(wcId);
+                return (
+                  <tr key={wcId}>
+                    <td>
+                      <div className="mes-command__wc-name">
+                        <strong>{center?.name ?? wcId}</strong>
+                        {center?.capabilityTags.length ? (
+                          <span className="chip chip--muted">{center.capabilityTags.join(', ')}</span>
+                        ) : null}
+                      </div>
+                    </td>
+                    <td>
+                      <span className="chip">
+                        <span className="chip__label">Очередь</span>
+                        <span className="chip__value">{stats.backlog}</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span className="chip">
+                        <span className="chip__label">В работе</span>
+                        <span className="chip__value">{stats.running}</span>
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+              {workCentersLoad.size === 0 && (
+                <tr>
+                  <td colSpan={3} className="muted">
+                    Нет активных рабочих центров
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </article>
