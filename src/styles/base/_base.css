@@ -12,11 +12,11 @@ body {
   font-family: 'Inter', 'Roboto', sans-serif;
   font-weight: 400;
   line-height: 1.6;
-  color: var(--netgrip-text-muted);
+  color: var(--text-secondary);
   background:
-    radial-gradient(1100px 700px at 70% 10%, rgba(255, 255, 255, 0.05), transparent),
-    linear-gradient(180deg, rgba(6, 10, 20, 0.96) 0%, rgba(5, 8, 15, 0.98) 45%, rgba(4, 6, 12, 0.96) 100%),
-    var(--netgrip-bg-dark);
+    radial-gradient(1400px 70% at 65% -10%, rgba(var(--accent-primary-rgb), 0.12), transparent 70%),
+    linear-gradient(180deg, rgba(5, 11, 23, 0.9) 0%, rgba(5, 10, 22, 0.96) 42%, rgba(4, 9, 21, 0.98) 100%),
+    var(--bg-base);
   overflow-x: hidden;
 }
 
@@ -31,16 +31,17 @@ body::after {
 
 body::before {
   background-image:
-    linear-gradient(to right, var(--netgrip-circuit-color-rgba) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--netgrip-circuit-color-rgba) 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(to right, rgba(var(--accent-primary-rgb), 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--accent-primary-rgb), 0.04) 1px, transparent 1px);
+  background-size: 52px 52px;
   opacity: var(--netgrip-circuit-opacity);
 }
 
 body::after {
-  background: radial-gradient(circle at top left, rgba(var(--netgrip-primary-accent-rgb), 0.22), transparent 42%),
-    radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.18), transparent 38%);
-  filter: blur(0.5px);
+  background:
+    radial-gradient(circle at top left, rgba(var(--accent-primary-rgb), 0.18), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(94, 234, 212, 0.14), transparent 42%);
+  filter: blur(0.6px);
 }
 
 h1,
@@ -51,22 +52,22 @@ h5,
 h6 {
   font-family: 'Inter', 'Roboto', sans-serif;
   font-weight: 600;
-  color: var(--netgrip-text-strong);
+  color: var(--text-primary);
   margin-top: 0;
   letter-spacing: -0.01em;
 }
 
 p {
   margin: 0;
-  color: rgba(226, 232, 240, 0.9);
+  color: var(--text-secondary);
 }
 
 strong {
-  color: var(--netgrip-text-strong);
+  color: var(--text-primary);
 }
 
 a {
-  color: var(--netgrip-primary-accent);
+  color: var(--accent-primary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -77,6 +78,6 @@ a:focus-visible {
 }
 
 ::selection {
-  background: rgba(var(--netgrip-primary-accent-rgb), 0.25);
-  color: var(--netgrip-text-strong);
+  background: rgba(var(--accent-primary-rgb), 0.25);
+  color: var(--text-primary);
 }

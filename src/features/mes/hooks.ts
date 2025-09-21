@@ -40,6 +40,41 @@ export const useMaintenanceOrdersQuery = () =>
     queryFn: () => mesRepository.listMaintenanceOrders(),
   });
 
+export const useProductionLinesQuery = () =>
+  useQuery({
+    queryKey: queryKeys.mes.productionLines,
+    queryFn: () => mesRepository.listProductionLines(),
+    staleTime: 60_000,
+  });
+
+export const useValueStreamsQuery = () =>
+  useQuery({
+    queryKey: queryKeys.mes.valueStreams,
+    queryFn: () => mesRepository.listValueStreams(),
+    staleTime: 60_000,
+  });
+
+export const useTestCellsQuery = () =>
+  useQuery({
+    queryKey: queryKeys.mes.testCells,
+    queryFn: () => mesRepository.listTestCells(),
+    staleTime: 20_000,
+  });
+
+export const useTestPlansQuery = () =>
+  useQuery({
+    queryKey: queryKeys.mes.testPlans,
+    queryFn: () => mesRepository.listTestPlans(),
+    staleTime: 60_000,
+  });
+
+export const useTestRunsQuery = () =>
+  useQuery({
+    queryKey: queryKeys.mes.testRuns,
+    queryFn: () => mesRepository.listTestRuns(),
+    staleTime: 10_000,
+  });
+
 export const useGenerateWorkOrders = () => {
   const queryClient = useQueryClient();
   return useMutation({

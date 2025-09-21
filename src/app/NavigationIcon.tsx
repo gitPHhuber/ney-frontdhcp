@@ -15,7 +15,11 @@ type NavigationIconName =
   | 'passport'
   | 'shield'
   | 'roles'
-  | 'settings';
+  | 'settings'
+  | 'factory'
+  | 'quality'
+  | 'lab'
+  | 'people';
 
 const ICONS: Record<NavigationIconName | 'default', ReactElement> = {
   dashboard: (
@@ -125,6 +129,36 @@ const ICONS: Record<NavigationIconName | 'default', ReactElement> = {
     <>
       <circle cx="10" cy="10" r="2.1" />
       <path d="m10 5.3.8-.5a.7.7 0 0 1 1 .3l.2.8a.4.4 0 0 0 .3.3l.8.2a.7.7 0 0 1 .4.9l-.4.7a.4.4 0 0 0 0 .3l.4.7a.7.7 0 0 1-.4.9l-.8.2a.4.4 0 0 0-.3.3l-.2.8a.7.7 0 0 1-1 .3l-.8-.5a.4.4 0 0 0-.3 0l-.8.5a.7.7 0 0 1-1-.3l-.2-.8a.4.4 0 0 0-.3-.3l-.8-.2a.7.7 0 0 1-.4-.9l.4-.7a.4.4 0 0 0 0-.3l-.4-.7a.7.7 0 0 1 .4-.9l.8-.2a.4.4 0 0 0 .3-.3l.2-.8a.7.7 0 0 1 1-.3l.8.5a.4.4 0 0 0 .3 0Z" />
+    </>
+  ),
+  factory: (
+    <>
+      <path d="M4 14.8V7.2l3.2 2.4V7.2l4 3v-2l4 2.8v3.8Z" />
+      <path d="M6.4 14.8v-2.4" />
+      <path d="M9.6 14.8v-2.4" />
+      <path d="M12.8 14.8v-2.4" />
+      <path d="M4 14.8h12" />
+    </>
+  ),
+  quality: (
+    <>
+      <path d="M5.2 5.6h9.6v6.2a4.8 4.8 0 0 1-4.8 4.8h0a4.8 4.8 0 0 1-4.8-4.8Z" />
+      <path d="m7.4 9.4 1.8 1.8 3.6-3.6" />
+    </>
+  ),
+  lab: (
+    <>
+      <path d="M7 4.5h6.2v1.8L9.8 11v2.2a1.8 1.8 0 0 1-1.8 1.8h0a1.8 1.8 0 0 1-1.8-1.8V11L7 9.2Z" />
+      <path d="M9.8 11.2h4.2" />
+      <path d="M9.8 13.4h4.2" />
+    </>
+  ),
+  people: (
+    <>
+      <circle cx="7.2" cy="7.4" r="1.8" />
+      <circle cx="12.8" cy="8.6" r="1.6" />
+      <path d="M4.8 14.8c.6-1.8 1.8-2.8 3-2.8s2.4 1 3 2.8" />
+      <path d="M10.6 14.8c.5-1.6 1.5-2.4 2.5-2.4s2 .8 2.5 2.4" />
     </>
   ),
   default: (
