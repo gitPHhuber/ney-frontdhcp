@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import JsPdfConstructor from 'jspdf';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
-import { jsPDF as JsPdfConstructor } from 'jspdf';
-
-
 import Modal from '../../components/ui/Modal';
 import {
   productPassportRepository,
@@ -82,63 +80,84 @@ const formatFieldValue = (value: TemplateFieldValue | undefined) => {
   return String(value);
 };
 
+type ExportRow = [string, string];
+
+const createPassportSummary = (passport: ProductPassport): ExportRow[] => [
+  ['Паспорт изделия', `${passport.metadata.assetTag} (версия ${passport.version})`],
+  ['Статус', passport.status === 'ready' ? 'Готов' : 'Черновик'],
+  ['Дата обновления', formatDateTime(passport.updatedAt)],
+];
+
+const createDeviceMetadataRows = (passport: ProductPassport): ExportRow[] => [
+  ['Инвентарный номер', passport.metadata.assetTag],
+  ['Модель', passport.metadata.modelName],
+  ['Производитель', passport.metadata.vendor ?? '—'],
+  ['Серийный номер', passport.metadata.serialNumber],
+  ['IP-адрес', passport.metadata.ipAddress],
+  ['Расположение', passport.metadata.location],
+  ['Ответственный', passport.metadata.owner],
+];
+
+const createSchemaRows = (passport: ProductPassport): ExportRow[] =>
+  passport.schema.map(field => [field.label, formatFieldValue(passport.fieldValues[field.key])]);
+
+const createHistoryRows = (history: DeviceHistoryEntry[]): ExportRow[] =>
+  history.map(entry => [formatDateTime(entry.ts), `${entry.action}: ${entry.details} (${entry.actor})`]);
+
 const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[]) => {
-  const rows: Array<[string, string]> = [];
-  rows.push(['Паспорт изделия', `${passport.metadata.assetTag} (версия ${passport.version})`]);
-  rows.push(['Статус', passport.status === 'ready' ? 'Готов' : 'Черновик']);
-  rows.push(['Дата обновления', formatDateTime(passport.updatedAt)]);
-  rows.push(['', '']);
-  rows.push(['Инвентарный номер', passport.metadata.assetTag]);
-  rows.push(['Модель', passport.metadata.modelName]);
-  rows.push(['Производитель', passport.metadata.vendor ?? '—']);
-  rows.push(['Серийный номер', passport.metadata.serialNumber]);
-  rows.push(['IP-адрес', passport.metadata.ipAddress]);
-  rows.push(['Расположение', passport.metadata.location]);
-  rows.push(['Ответственный', passport.metadata.owner]);
-  rows.push(['', '']);
-  rows.push(['Поля шаблона', '']);
-  passport.schema.forEach(field => {
-    rows.push([field.label, formatFieldValue(passport.fieldValues[field.key])]);
-  });
-  rows.push(['', '']);
-  rows.push(['История устройства', '']);
-  history.forEach(entry => {
-    rows.push([formatDateTime(entry.ts), `${entry.action}: ${entry.details} (${entry.actor})`]);
-  });
+  const rows: ExportRow[] = [
+    ...createPassportSummary(passport),
+    ['', ''],
+    ...createDeviceMetadataRows(passport),
+    ['', ''],
+    ['Поля шаблона', ''],
+    ...createSchemaRows(passport),
+    ['', ''],
+    ['История устройства', ''],
+    ...createHistoryRows(history),
+  ];
   return rows;
 };
 
-const downloadWorkbook = (rows: Array<[string, string]>, filename: string) => {
+
+
+const createExcelBlob = (rows: ExportRow[]) => {
+
+
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
   const arrayBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  const blob = new Blob([arrayBuffer], {
+  return new Blob([arrayBuffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
+};
+
+const triggerFileDownload = (blob: Blob, filename: string) => {
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `${filename}.xlsx`;
+  link.download = filename;
   document.body.append(link);
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 };
 
-const downloadPdf = (rows: Array<[string, string]>, filename: string) => {
+
+
+const exportRowsToPdf = (rows: ExportRow[], filename: string) => {
+
+
   const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;
   const marginTop = 56;
   let cursorY = marginTop;
+
   doc.setFontSize(16);
   doc.text(`Паспорт изделия ${filename}`, marginLeft, cursorY);
   cursorY += 24;
-  doc.setFontSize(11);
-  rows.forEach(([left, right]) => {
-    if (!left && !right) {
-      cursorY += 12;
-      return;
-    }
+
+  const writeRow = (left: string, right: string) => {
     const text = right ? `${left}: ${right}` : left;
     const splitted = doc.splitTextToSize(text, 500);
     if (cursorY + splitted.length * 14 > 780) {
@@ -147,8 +166,31 @@ const downloadPdf = (rows: Array<[string, string]>, filename: string) => {
     }
     doc.text(splitted, marginLeft, cursorY);
     cursorY += splitted.length * 14;
+  };
+
+  const addSpacing = (value: number) => {
+    cursorY += value;
+  };
+
+  doc.setFontSize(11);
+  rows.forEach(([left, right]) => {
+    if (!left && !right) {
+      addSpacing(12);
+      return;
+    }
+    writeRow(left, right);
   });
+
   doc.save(`${filename}.pdf`);
+};
+
+const downloadWorkbook = (rows: ExportRow[], filename: string) => {
+  const blob = createExcelBlob(rows);
+  triggerFileDownload(blob, `${filename}.xlsx`);
+};
+
+const downloadPdf = (rows: ExportRow[], filename: string) => {
+  exportRowsToPdf(rows, filename);
 };
 
 const getMissingRequired = (schema: PassportTemplateField[], values: Record<string, TemplateFieldValue>) =>
@@ -186,6 +228,26 @@ const normalizeFieldDraft = (draft: TemplateFieldDraft): PassportTemplateField =
 
 const generateTempId = () => `tmp-${Math.random().toString(36).slice(2, 10)}`;
 
+const createBlankFieldDraft = (): TemplateFieldDraft => ({
+  id: generateTempId(),
+  label: 'Наименование узла',
+  key: 'nodeName',
+  type: 'text',
+  required: true,
+  options: '',
+});
+
+const createDefaultDeviceFormValues = (models: DeviceModel[]): DeviceFormValues => ({
+  assetTag: '',
+  deviceModelId: models[0]?.id ?? '',
+  serialNumber: '',
+  ipAddress: '',
+  location: '',
+  owner: '',
+  status: 'in_service',
+  historyNote: '',
+});
+
 const DeviceFormModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -200,32 +262,14 @@ const DeviceFormModal: React.FC<{
     reset,
     formState: { isSubmitting },
   } = useForm<DeviceFormValues>({
-    defaultValues: {
-      assetTag: '',
-      deviceModelId: models[0]?.id ?? '',
-      serialNumber: '',
-      ipAddress: '',
-      location: '',
-      owner: '',
-      status: 'in_service',
-      historyNote: '',
-    },
+    defaultValues: createDefaultDeviceFormValues(models),
   });
 
   useEffect(() => {
     if (!isOpen) {
       return;
     }
-    reset({
-      assetTag: '',
-      deviceModelId: models[0]?.id ?? '',
-      serialNumber: '',
-      ipAddress: '',
-      location: '',
-      owner: '',
-      status: 'in_service',
-      historyNote: '',
-    });
+    reset(createDefaultDeviceFormValues(models));
   }, [isOpen, models, reset]);
 
   return (
@@ -234,16 +278,7 @@ const DeviceFormModal: React.FC<{
         className="stacked-form"
         onSubmit={handleSubmit(async values => {
           await onSubmit(values);
-          reset({
-            assetTag: '',
-            deviceModelId: models[0]?.id ?? '',
-            serialNumber: '',
-            ipAddress: '',
-            location: '',
-            owner: '',
-            status: 'in_service',
-            historyNote: '',
-          });
+          reset(createDefaultDeviceFormValues(models));
         })}
       >
         <label>
@@ -315,16 +350,7 @@ const TemplateEditorModal: React.FC<{
   const [description, setDescription] = useState('');
   const [deviceModelId, setDeviceModelId] = useState(defaultModelId ?? models[0]?.id ?? '');
   const [setActive, setSetActive] = useState(true);
-  const [fields, setFields] = useState<TemplateFieldDraft[]>([
-    {
-      id: generateTempId(),
-      label: 'Наименование узла',
-      key: 'nodeName',
-      type: 'text',
-      required: true,
-      options: '',
-    },
-  ]);
+  const [fields, setFields] = useState<TemplateFieldDraft[]>([createBlankFieldDraft()]);
   const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -366,16 +392,7 @@ const TemplateEditorModal: React.FC<{
       });
       setName('');
       setDescription('');
-      setFields([
-        {
-          id: generateTempId(),
-          label: 'Наименование узла',
-          key: 'nodeName',
-          type: 'text',
-          required: true,
-          options: '',
-        },
-      ]);
+      setFields([createBlankFieldDraft()]);
       toast.success('Шаблон сохранён.');
       onClose();
     } catch {
@@ -426,12 +443,10 @@ const TemplateEditorModal: React.FC<{
                   setFields(current => [
                     ...current,
                     {
-                      id: generateTempId(),
+                      ...createBlankFieldDraft(),
                       label: '',
                       key: '',
-                      type: 'text',
                       required: false,
-                      options: '',
                     },
                   ])
                 }
