@@ -18,6 +18,7 @@ export interface ProductPassportForm {
   warrantyUntil?: string;
 }
 
+
 interface CreateDeviceForm {
   modelId: string;
   assetTag: string;
@@ -455,6 +456,7 @@ const ModelsTab: React.FC<ModelsTabProps> = ({
   </div>
 );
 
+
 export const ProductPassportWizard: React.FC = () => {
   const idPrefix = useId();
   const {
@@ -715,6 +717,7 @@ export const ProductPassportWizard: React.FC = () => {
     });
   });
 
+
   const onSubmit = handleSubmit(data => {
     console.log('Generating product passport', data);
     setStatusMessage('Черновик паспорта подготовлен.');
@@ -729,6 +732,7 @@ export const ProductPassportWizard: React.FC = () => {
         </div>
         <span className="status-badge status-online">Подключено</span>
       </header>
+
 
       {statusMessage && <div className="passport-wizard__status">{statusMessage}</div>}
 
@@ -789,6 +793,7 @@ export const ProductPassportWizard: React.FC = () => {
           )}
         </aside>
       </div>
+
     </section>
   );
 };

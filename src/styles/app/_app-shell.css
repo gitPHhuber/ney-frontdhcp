@@ -881,6 +881,21 @@ main > .container {
   transition: background 0.2s ease, color 0.2s ease;
 }
 
+.playbook-actions__option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.playbook-actions__option .tooltip {
+  flex-shrink: 0;
+}
+
+.playbook-actions__option button {
+  flex: 1 1 auto;
+}
+
 .playbook-actions__menu button:hover,
 .playbook-actions__menu button:focus-visible {
   background: rgba(var(--netgrip-primary-accent-rgb), 0.18);
@@ -1031,6 +1046,7 @@ main > .container {
   flex-wrap: wrap;
   gap: 0.85rem;
 }
+
 
 .passport-wizard__status {
   padding: 0.9rem 1.2rem;
@@ -1366,12 +1382,14 @@ main > .container {
   }
 }
 
+
 .passport-constructor__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.85rem;
   align-items: center;
 }
+
 
 .passport-constructor__template-bar {
   margin-top: 1.25rem;
@@ -1400,6 +1418,7 @@ main > .container {
   border-color: rgba(94, 234, 212, 0.65);
   box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.15);
 }
+
 
 .passport-constructor__content {
   display: grid;
@@ -1513,9 +1532,11 @@ main > .container {
   overflow: auto;
 }
 
+
 /* ==========================================================================
    Passport constructor & preview
    ========================================================================== */
+
 
 .passport-preview__section {
   display: grid;
@@ -1591,6 +1612,7 @@ main > .container {
 /* ==========================================================================
    Guided tour overlay
    ========================================================================== */
+
 
 .guided-tour-card {
   display: flex;

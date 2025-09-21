@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState } from 'react';
+import { Tooltip } from '../../shared/ui/Tooltip';
 
 interface AddStaticLeaseFormProps {
     onSave: (data: { ip: string, mac: string, hostname: string }) => void;
@@ -36,7 +37,10 @@ const AddStaticLeaseForm = ({ onSave, onCancel, isSaving }: AddStaticLeaseFormPr
         <form onSubmit={handleSubmit}>
             {error && <p style={{ color: 'var(--netgrip-danger)', marginBottom: '1rem' }}>{error}</p>}
             <div className="form-group">
-                <label htmlFor="ip">IP Address</label>
+                <div className="form-label-with-hint">
+                    <label htmlFor="ip">IP Address</label>
+                    <Tooltip id="static-lease-ip" text="Укажите IPv4 адрес, например 192.168.1.150." />
+                </div>
                 <input
                     id="ip"
                     type="text"
@@ -47,7 +51,10 @@ const AddStaticLeaseForm = ({ onSave, onCancel, isSaving }: AddStaticLeaseFormPr
                 />
             </div>
             <div className="form-group">
-                <label htmlFor="mac">MAC Address</label>
+                <div className="form-label-with-hint">
+                    <label htmlFor="mac">MAC Address</label>
+                    <Tooltip id="static-lease-mac" text="Используйте формат XX:XX:XX:XX:XX:XX, например 00:1A:2B:3C:4D:5E." />
+                </div>
                 <input
                     id="mac"
                     type="text"
@@ -58,7 +65,10 @@ const AddStaticLeaseForm = ({ onSave, onCancel, isSaving }: AddStaticLeaseFormPr
                 />
             </div>
             <div className="form-group">
-                <label htmlFor="hostname">Hostname</label>
+                <div className="form-label-with-hint">
+                    <label htmlFor="hostname">Hostname</label>
+                    <Tooltip id="static-lease-hostname" text="Введите имя хоста латиницей, например branch-dhcp-01." />
+                </div>
                 <input
                     id="hostname"
                     type="text"

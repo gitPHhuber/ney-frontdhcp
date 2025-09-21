@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
+
 import {
   DEFAULT_TEMPLATE_ID,
   type PassportSection,
@@ -370,10 +371,12 @@ const usePassportConstructorState = () => {
 
   const serializableStructure = useMemo<SerializableSection[]>(
     () => sectionsToSerializable(sections),
+
     [sections],
   );
 
   useEffect(() => {
+
     if (!feedbackMessage) {
       return;
     }
@@ -587,6 +590,7 @@ const usePassportConstructorState = () => {
 
   const handleSectionTitleChange = (sectionId: string, title: string) => {
     setSections(prev => prev.map(section => (section.id === sectionId ? { ...section, title } : section)));
+
   };
 
   const handleRowNameChange = (sectionId: string, rowId: string, name: string) => {
@@ -714,6 +718,7 @@ const usePassportConstructorState = () => {
     );
   };
 
+
   return {
     templates,
     sections,
@@ -764,6 +769,7 @@ export const ProductPassportConstructor: React.FC = () => {
     handleRemoveEntry,
   } = usePassportConstructorState();
 
+
   return (
     <section className="passport-constructor">
       <header className="passport-constructor__header">
@@ -773,40 +779,153 @@ export const ProductPassportConstructor: React.FC = () => {
             Соберите собственный шаблон паспорта для серверов, сетевого и другого оборудования.
           </p>
         </div>
-        <ConstructorActions
-          onExportExcel={exportExcel}
-          onSaveTemplate={saveTemplate}
-          onCreateTemplate={createTemplate}
-          onApplyTemplate={() => applyTemplate()}
-          onResetTemplate={resetTemplate}
-          onCopyStructure={copyStructure}
-        />
+
+        <div className="passport-constructor__actions">
+          <button type="button" className="secondary" onClick={handleResetTemplate}>
+            Вернуть шаблон сервера
+          </button>
+          <button type="button" className="ghost" onClick={handleCopyStructure}>
+            Скопировать структуру JSON
+          </button>
+        </div>
       </header>
 
-      <TemplateSelect
-        templates={templates}
-        selectedTemplateId={selectedTemplateId}
-        onChange={changeTemplateSelection}
-      />
-
       <div className="passport-constructor__content">
-        <SectionsEditor
-          sections={sections}
-          onSectionTitleChange={handleSectionTitleChange}
-          onRowNameChange={handleRowNameChange}
-          onEntryChange={handleEntryChange}
-          onAddSection={handleAddSection}
-          onRemoveSection={handleRemoveSection}
-          onAddRow={handleAddRow}
-          onRemoveRow={handleRemoveRow}
-          onAddEntry={handleAddEntry}
-          onRemoveEntry={handleRemoveEntry}
-        />
+        <div className="passport-constructor__editor">
+          {sections.map(section => (
+            <article key={section.id} className="passport-section">
+              <div className="passport-section__header">
+                <input
+                  value={section.title}
+                  onChange={event => handleSectionTitleChange(section.id, event.target.value)}
+                  className="passport-section__title"
+                  placeholder="Название раздела"
+                />
+                <div className="passport-section__controls">
+                  <button type="button" className="ghost" onClick={() => handleAddRow(section.id)}>
+                    Добавить строку
+                  </button>
+                  <button
+                    type="button"
+                    className="ghost"
+                    onClick={() => handleRemoveSection(section.id)}
+                  >
+                    Удалить раздел
+                  </button>
+                </div>
+              </div>
 
-        <PreviewPanel sections={sections} serializableStructure={serializableStructure} />
+              {section.rows.map(row => (
+                <div key={row.id} className="passport-row-editor">
+                  <input
+                    value={row.name}
+                    onChange={event => handleRowNameChange(section.id, row.id, event.target.value)}
+                    className="passport-row-editor__name"
+                    placeholder="Описание компонента"
+                  />
+                  <div className="passport-row-editor__entries">
+                    {row.entries.map(entry => (
+                      <div key={entry.id} className="passport-entry-editor">
+                        <input
+                          value={entry.label}
+                          onChange={event =>
+                            handleEntryChange(section.id, row.id, entry.id, 'label', event.target.value)
+                          }
+                          placeholder="Подпись поля"
+                        />
+                        <input
+                          value={entry.value}
+                          onChange={event =>
+                            handleEntryChange(section.id, row.id, entry.id, 'value', event.target.value)
+                          }
+                          placeholder="Значение"
+                        />
+                        <button
+                          type="button"
+                          className="ghost"
+                          onClick={() => handleRemoveEntry(section.id, row.id, entry.id)}
+                          aria-label="Удалить поле"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="passport-row-editor__controls">
+                    <button
+                      type="button"
+                      className="ghost"
+                      onClick={() => handleAddEntry(section.id, row.id)}
+                    >
+                      Добавить поле
+                    </button>
+                    <button
+                      type="button"
+                      className="ghost"
+                      onClick={() => handleRemoveRow(section.id, row.id)}
+                    >
+                      Удалить строку
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </article>
+          ))}
+
+          <button type="button" className="ghost" onClick={handleAddSection}>
+            Добавить раздел
+          </button>
+        </div>
+
+        <aside className="passport-constructor__preview">
+          <h3>Предпросмотр паспорта</h3>
+          <div className="passport-preview" role="presentation">
+            {sections.length === 0 ? (
+              <div className="preview-placeholder">
+                <p className="muted">Добавьте разделы, чтобы увидеть структуру паспорта.</p>
+              </div>
+            ) : (
+              sections.map(section => (
+                <div key={`${section.id}-preview`} className="passport-preview__section">
+                  <h4>{section.title || 'Без названия'}</h4>
+                  {section.rows.length === 0 ? (
+                    <p className="muted">Нет строк в разделе.</p>
+                  ) : (
+                    section.rows.map(row => (
+                      <div key={`${row.id}-preview`} className="passport-preview__row">
+                        <span className="passport-preview__row-name">{row.name || 'Новая строка'}</span>
+                        <div className="passport-preview__entries">
+                          {row.entries.length === 0 ? (
+                            <span className="muted">Нет полей</span>
+                          ) : (
+                            row.entries.map(entry => (
+                              <div key={`${entry.id}-preview`} className="passport-preview__entry">
+                                {entry.label ? (
+                                  <span className="passport-preview__entry-label">{entry.label}</span>
+                                ) : null}
+                                <span className="passport-preview__entry-value">
+                                  {entry.value ? entry.value : '—'}
+                                </span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+          <pre className="passport-preview__json" aria-label="Структура паспорта в формате JSON">
+            {JSON.stringify(serializableStructure, null, 2)}
+          </pre>
+        </aside>
       </div>
 
-      {feedbackMessage ? <p className="passport-constructor__status muted">{feedbackMessage}</p> : null}
+      {copyStatus ? <p className="passport-constructor__status muted">{copyStatus}</p> : null}
     </section>
   );
 };
+
+
