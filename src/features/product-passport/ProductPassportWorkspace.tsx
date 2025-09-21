@@ -2,10 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-
-type XlsxModule = typeof import('xlsx');
-type JsPdfModule = typeof import('jspdf');
-type JsPdfConstructor = typeof import('jspdf')['jsPDF'];
+import * as XLSX from 'xlsx';
+import { jsPDF as JsPdfConstructor } from 'jspdf';
 
 
 import Modal from '../../components/ui/Modal';
@@ -20,32 +18,6 @@ import {
   type ProductPassport,
 } from '../../entities';
 import { queryKeys } from '../../shared/api/queryKeys';
-
-let jsPdfModulePromise: Promise<JsPdfModule> | null = null;
-let xlsxModulePromise: Promise<XlsxModule> | null = null;
-
-const getJsPdfConstructor = async (): Promise<JsPdfConstructor> => {
-  if (!jsPdfModulePromise) {
-    jsPdfModulePromise = import('jspdf');
-  }
-  const mod = await jsPdfModulePromise;
-  if ('jsPDF' in mod && mod.jsPDF) {
-    return mod.jsPDF;
-  }
-  const fallback = (mod as { default?: JsPdfConstructor }).default;
-  if (fallback) {
-    return fallback;
-  }
-  throw new Error('jsPDF export is unavailable');
-};
-
-const getXlsxModule = async (): Promise<XlsxModule> => {
-  if (!xlsxModulePromise) {
-    xlsxModulePromise = import('xlsx').then(mod => (mod.default ?? mod) as XlsxModule);
-  }
-  return xlsxModulePromise;
-
-};
 
 const deviceStatusLabels: Record<DeviceStatus, string> = {
   in_service: 'В эксплуатации',
@@ -136,8 +108,7 @@ const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[
   return rows;
 };
 
-const downloadWorkbook = async (rows: Array<[string, string]>, filename: string) => {
-  const XLSX = await getXlsxModule();
+const downloadWorkbook = (rows: Array<[string, string]>, filename: string) => {
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
@@ -154,9 +125,8 @@ const downloadWorkbook = async (rows: Array<[string, string]>, filename: string)
   setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 };
 
-const downloadPdf = async (rows: Array<[string, string]>, filename: string) => {
-  const JsPdf = await getJsPdfConstructor();
-  const doc = new JsPdf({ unit: 'pt', format: 'a4' });
+const downloadPdf = (rows: Array<[string, string]>, filename: string) => {
+  const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;
   const marginTop = 56;
   let cursorY = marginTop;
@@ -1370,9 +1340,9 @@ const PassportWizardTab: React.FC<{
       const rows = buildExportRows(passport, history);
       const filename = `${passport.metadata.assetTag}-паспорт-v${passport.version}`;
       if (type === 'excel') {
-        await downloadWorkbook(rows, filename);
+        downloadWorkbook(rows, filename);
       } else {
-        await downloadPdf(rows, filename);
+        downloadPdf(rows, filename);
       }
       toast.success(type === 'excel' ? 'Экспортирован Excel-файл.' : 'PDF сформирован.');
     } finally {
