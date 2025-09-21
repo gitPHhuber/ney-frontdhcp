@@ -24,11 +24,15 @@ import { queryKeys } from '../../shared/api/queryKeys';
 let jsPdfModulePromise: Promise<JsPdfModule> | null = null;
 let xlsxModulePromise: Promise<XlsxModule> | null = null;
 
-const getJsPdfConstructor = async (): Promise<JsPdfConstructor> => {
+const loadJsPdfModule = () => {
   if (!jsPdfModulePromise) {
-    jsPdfModulePromise = import('jspdf');
+    jsPdfModulePromise = import('jspdf/dist/jspdf.es.min.js') as Promise<JsPdfModule>;
   }
-  const mod = await jsPdfModulePromise;
+  return jsPdfModulePromise;
+};
+
+const getJsPdfConstructor = async (): Promise<JsPdfConstructor> => {
+  const mod = await loadJsPdfModule();
   if ('jsPDF' in mod && mod.jsPDF) {
     return mod.jsPDF;
   }
