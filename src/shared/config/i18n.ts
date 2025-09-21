@@ -38,6 +38,7 @@ const resources = {
           observability: 'Observability',
           automation: 'Automation',
           administration: 'Administration',
+          mes: 'Manufacturing',
         },
       },
       commandPalette: {
@@ -243,6 +244,7 @@ const resources = {
           observability: 'Наблюдаемость',
           automation: 'Автоматизация',
           administration: 'Администрирование',
+          mes: 'Производство',
         },
       },
       commandPalette: {

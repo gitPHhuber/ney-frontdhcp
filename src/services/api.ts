@@ -53,6 +53,7 @@ const ALL_PERMISSIONS: Record<string, Permission[]> = {
     'Роли': ['roles:read', 'roles:create', 'roles:update', 'roles:delete'],
     'Настройки': ['settings:read', 'settings:update'],
     'Контроль доступа': ['access:read', 'access:approve', 'audit:read'],
+    'Производство': ['mes:production', 'mes:quality', 'mes:labs', 'mes:workforce'],
 };
 
 const INITIAL_ROLES: Role[] = [
@@ -84,6 +85,11 @@ const INITIAL_ROLES: Role[] = [
             'audit:read',
         ],
     },
+    {
+        id: 5,
+        name: 'MES руководитель',
+        permissions: ['mes:production', 'mes:quality', 'mes:labs', 'mes:workforce', 'reports:read'],
+    },
 ];
 
 const INITIAL_USERS: User[] = [
@@ -92,6 +98,7 @@ const INITIAL_USERS: User[] = [
     { id: 3, username: 'auditor', roleId: 3, status: 'active' },
     { id: 4, username: 'newuser', roleId: 4, status: 'pending' },
     { id: 5, username: 'contractor', roleId: 3, status: 'pending' },
+    { id: 6, username: 'planner', roleId: 5, status: 'active' },
 ];
 
 const INITIAL_DHCP_SERVER: DhcpServerState = {

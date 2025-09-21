@@ -23,7 +23,8 @@ export type Permission =
     | 'roles:read' | 'roles:create' | 'roles:update' | 'roles:delete'
     | 'settings:read' | 'settings:update'
     | 'access:read' | 'access:approve'
-    | 'audit:read';
+    | 'audit:read'
+    | 'mes:production' | 'mes:quality' | 'mes:labs' | 'mes:workforce';
 
 export interface Role {
     id: number;
