@@ -1,7 +1,3 @@
-.app-shell-wrapper {
-  display: contents;
-}
-
 .app-shell {
   position: relative;
   display: grid;

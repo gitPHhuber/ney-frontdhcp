@@ -161,7 +161,7 @@ const AppShell: FC = () => {
   );
 
   return (
-    <div className="app-shell-wrapper">
+    <>
       <a className="skip-nav" href="#app-content">
         {t('navigation.skipToContent', { defaultValue: 'Перейти к содержимому' })}
       </a>
@@ -283,7 +283,7 @@ const AppShell: FC = () => {
         </main>
         <CommandPalette isOpen={isPaletteOpen} onClose={() => setPaletteOpen(false)} />
       </div>
-    </div>
+    </>
   );
 };
 
