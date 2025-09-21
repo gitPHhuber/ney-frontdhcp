@@ -2,9 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import XLSX from '../../shared/libs/xlsx';
-import { jsPDF as JsPdfConstructor } from 'jspdf';
-
 import Modal from '../../components/ui/Modal';
 import {
   productPassportRepository,
@@ -120,7 +117,6 @@ const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[
   return rows;
 };
 
-const createWorkbookBlob = (rows: ExportRow[]) => {
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
@@ -140,12 +136,6 @@ const triggerFileDownload = (blob: Blob, filename: string) => {
   setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 };
 
-const downloadWorkbook = (rows: ExportRow[], filename: string) => {
-  const blob = createWorkbookBlob(rows);
-  triggerFileDownload(blob, `${filename}.xlsx`);
-};
-
-const downloadPdf = (rows: ExportRow[], filename: string) => {
   const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;
   const marginTop = 56;
