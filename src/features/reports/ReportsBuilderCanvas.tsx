@@ -9,22 +9,137 @@ const blockOptions = [
   'Хронология инцидентов',
 ] as const;
 
+const presetOptions = ['day', 'week', 'month'] as const;
+
 type BlockOption = (typeof blockOptions)[number];
+type PresetOption = (typeof presetOptions)[number];
 
 const builderSchema = z.object({
   name: z.string().min(3),
-  preset: z.enum(['day', 'week', 'month']),
+  preset: z.enum(presetOptions),
   blocks: z.array(z.enum(blockOptions)).min(1),
 });
 
 type ReportsBuilderForm = z.infer<typeof builderSchema>;
+
+interface BlockMeta {
+  subtitle: string;
+  preview: React.ReactNode;
+}
+
+const blockLibrary: Record<BlockOption, BlockMeta> = {
+  'Сводка KPI': {
+    subtitle: 'Компактный блок для ключевых метрик, SLA и статусов выполнения задач.',
+    preview: (
+      <dl className="kpi-grid">
+        <div>
+          <dt>Уровень арен</dt>
+          <dd>73%</dd>
+        </div>
+        <div>
+          <dt>Отказы DHCP</dt>
+          <dd>4 за сутки</dd>
+        </div>
+        <div>
+          <dt>Устранено</dt>
+          <dd>92%</dd>
+        </div>
+        <div>
+          <dt>Среднее TTR</dt>
+          <dd>31 мин</dd>
+        </div>
+      </dl>
+    ),
+  },
+  'Временной ряд': {
+    subtitle: 'График активности арен с выделением пиков и провалов.',
+    preview: (
+      <svg viewBox="0 0 160 72" className="chart-spark" aria-hidden>
+        <rect x="1" y="1" width="158" height="70" rx="8" fill="rgba(148, 163, 184, 0.12)" />
+        <polyline
+          fill="none"
+          stroke="rgba(51, 245, 255, 0.75)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          points="4,60 28,44 52,46 76,30 100,38 124,18 148,26"
+        />
+      </svg>
+    ),
+  },
+  'Таблица пропускной способности': {
+    subtitle: 'Сравнение загрузки пулов IP-адресов по площадкам и сегментам.',
+    preview: (
+      <table className="capacity-table">
+        <caption>Сводка по пулам</caption>
+        <thead>
+          <tr>
+            <th scope="col">Пул</th>
+            <th scope="col">Занято</th>
+            <th scope="col">Доступно</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DC-1 / Prod</td>
+            <td>582 из 768</td>
+            <td>186</td>
+          </tr>
+          <tr>
+            <td>DC-2 / Test</td>
+            <td>130 из 256</td>
+            <td>126</td>
+          </tr>
+          <tr>
+            <td>Edge / IoT</td>
+            <td>912 из 1024</td>
+            <td>112</td>
+          </tr>
+        </tbody>
+      </table>
+    ),
+  },
+  'Хронология инцидентов': {
+    subtitle: 'Список значимых событий с уровнем влияния и ответственными.',
+    preview: (
+      <ol className="timeline">
+        <li>
+          <span className="timeline__time">08:42</span>
+          <div>
+            <strong>Перегружен DHCP01</strong>
+            <p className="muted">Автоматический рестарт завершился успешно, SLA не нарушен.</p>
+          </div>
+        </li>
+        <li>
+          <span className="timeline__time">12:15</span>
+          <div>
+            <strong>Сбой авторизации PXE</strong>
+            <p className="muted">На согласовании фикса конфигурации. Ответственный: Н. Болышев.</p>
+          </div>
+        </li>
+        <li>
+          <span className="timeline__time">16:20</span>
+          <div>
+            <strong>Пиковая нагрузка сегмента IoT</strong>
+            <p className="muted">Рекомендовано расширение пула и пересмотр политики арен.</p>
+          </div>
+        </li>
+      </ol>
+    ),
+  },
+};
+
+const presetLabels: Record<PresetOption, string> = {
+  day: 'Ежедневный срез',
+  week: 'Недельный обзор',
+  month: 'Месячный отчёт',
+};
 
 export const ReportsBuilderCanvas: React.FC = () => {
   const { control, handleSubmit, watch } = useForm<ReportsBuilderForm>({
     defaultValues: {
       name: 'Еженедельный обзор для руководства',
       preset: 'week',
-      blocks: ['Сводка KPI'],
+      blocks: ['Сводка KPI', 'Временной ряд', 'Хронология инцидентов'],
     },
   });
 
@@ -71,11 +186,11 @@ export const ReportsBuilderCanvas: React.FC = () => {
   const onSubmit = handleSubmit(data => {
     const parseResult = builderSchema.safeParse(data);
     if (!parseResult.success) {
-      console.warn('Validation failed', parseResult.error.flatten());
+      console.warn('Ошибка валидации', parseResult.error.flatten());
       return;
     }
 
-    console.log('Exporting report', parseResult.data);
+    console.log('Экспорт отчёта', parseResult.data);
   });
 
   return (
@@ -83,7 +198,9 @@ export const ReportsBuilderCanvas: React.FC = () => {
       <header className="reports-builder__header">
         <div>
           <h2>Конструктор отчётов</h2>
-          <p className="muted">Создавайте макеты методом перетаскивания и экспортируйте их в PDF/CSV/XLSX.</p>
+          <p className="muted">
+            Соберите интерактивный отчёт из готовых блоков, настройте пресет периода и выгрузите данные в нужном формате.
+          </p>
         </div>
         <span className="status-badge status-active">Предпросмотр в реальном времени</span>
       </header>
@@ -113,9 +230,11 @@ export const ReportsBuilderCanvas: React.FC = () => {
               name="preset"
               render={({ field }) => (
                 <select {...field} id={`${idPrefix}-preset`}>
-                  <option value="day">День</option>
-                  <option value="week">Неделя</option>
-                  <option value="month">Месяц</option>
+                  {presetOptions.map(option => (
+                    <option key={option} value={option}>
+                      {presetLabels[option]}
+                    </option>
+                  ))}
                 </select>
               )}
             />
@@ -127,28 +246,31 @@ export const ReportsBuilderCanvas: React.FC = () => {
           <Controller
             control={control}
             name="blocks"
-            render={({ field }) => (
-              <div className="chip-group">
-                {blockOptions.map(option => {
-                  const isSelected = field.value.includes(option);
-                  return (
-                    <button
-                      type="button"
-                      key={option}
-                      className={isSelected ? 'chip chip--selected' : 'chip'}
-                      onClick={() => {
-                        const next = isSelected
-                          ? field.value.filter(value => value !== option)
-                          : [...field.value, option];
-                        field.onChange(next as BlockOption[]);
-                      }}
-                    >
-                      {option}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            render={({ field }) => {
+              const value = field.value ?? [];
+              return (
+                <div className="chip-group">
+                  {blockOptions.map(option => {
+                    const isSelected = value.includes(option);
+                    return (
+                      <button
+                        type="button"
+                        key={option}
+                        className={isSelected ? 'chip chip--selected' : 'chip'}
+                        onClick={() => {
+                          const next = isSelected
+                            ? (value.filter(current => current !== option) as BlockOption[])
+                            : ([...value, option] as BlockOption[]);
+                          field.onChange(next);
+                        }}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            }}
           />
         </fieldset>
 
@@ -173,34 +295,39 @@ export const ReportsBuilderCanvas: React.FC = () => {
                   strokeLinejoin="round"
                 />
               </svg>
-              <p>Предпросмотр отчёта будет отображаться здесь</p>
+              <p>Выберите блоки отчёта, чтобы увидеть структуру документа.</p>
             </div>
           ) : (
             <div className="preview-grid">
-              {blocks.map(block => (
-                <article key={block} className="builder-block">
-                  <div className="builder-block__icon" aria-hidden>
-                    <svg viewBox="0 0 48 48">
-                      <rect x="6" y="10" width="36" height="28" rx="6" fill="rgba(148, 163, 184, 0.14)" />
-                      <path
-                        d="M12 30c4-6 8-10 12-10s8 4 12 10"
-                        stroke="rgba(51, 245, 255, 0.75)"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        fill="none"
-                      />
-                    </svg>
-                  </div>
-                  <div className="builder-block__body">
-                    <h3>{block}</h3>
-                    <p className="muted">Предпросмотр отчёта будет отображаться здесь</p>
-                  </div>
-                </article>
-              ))}
+              {blocks.map(block => {
+                const blockMeta = blockLibrary[block];
+                return (
+                  <article key={block} className="builder-block">
+                    <div className="builder-block__icon" aria-hidden>
+                      <svg viewBox="0 0 48 48">
+                        <rect x="6" y="10" width="36" height="28" rx="6" fill="rgba(148, 163, 184, 0.14)" />
+                        <path
+                          d="M12 30c4-6 8-10 12-10s8 4 12 10"
+                          stroke="rgba(51, 245, 255, 0.75)"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          fill="none"
+                        />
+                      </svg>
+                    </div>
+                    <div className="builder-block__body">
+                      <h3>{block}</h3>
+                      <p className="muted">{blockMeta.subtitle}</p>
+                      <div className="builder-block__preview">{blockMeta.preview}</div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
         </div>
+
         <footer className="reports-builder__actions">
           <button type="submit" className="primary">
             <FormatIcon variant="pdf" />
