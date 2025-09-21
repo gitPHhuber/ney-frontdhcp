@@ -26,6 +26,7 @@
 /* 4. Layout */
 @import './layout/_layout.css';
 @import './app/_app-shell.css';
+@import './app/_app-shell-modern.css';
 
 /* 5. Page-Specific Styles */
 @import './pages/_dashboard.css';
