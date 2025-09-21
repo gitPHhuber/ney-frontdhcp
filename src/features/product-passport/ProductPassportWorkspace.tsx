@@ -120,7 +120,9 @@ const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[
 };
 
 
+
 const createExcelBlob = (rows: ExportRow[]) => {
+
 
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
@@ -142,7 +144,9 @@ const triggerFileDownload = (blob: Blob, filename: string) => {
 };
 
 
+
 const exportRowsToPdf = (rows: ExportRow[], filename: string) => {
+
 
   const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;

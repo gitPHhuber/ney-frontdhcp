@@ -348,7 +348,12 @@ export const ProductionDashboard: React.FC = () => {
                         <p className="muted">Поставка до {formatDate(order.dueDate)}</p>
                       </div>
                       <div className="mes-production__list-meta">
-                        <span className="muted">{progress}%</span>
+
+                        <span className="chip chip--ghost">
+                          <span className="chip__label">Прогресс</span>
+                          <span className="chip__value">{progress}%</span>
+                        </span>
+
                         <span className={`status status--${order.status}`}>
                           {productionStatusLabel[order.status]}
                         </span>
@@ -401,18 +406,31 @@ export const ProductionDashboard: React.FC = () => {
                     </header>
                     <ul className="mes-production__list">
                       {group.orders.map(order => (
-                        <li key={order.id}>
-                          <div>
-                            <strong>{order.opId}</strong>
-                            <p className="muted">Заказ {order.prodOrderId}</p>
-                          </div>
-                          <div className="mes-production__list-meta">
-                            {order.assignee && <span>{order.assignee}</span>}
-                            <span className={`status status--${order.status}`}>
-                              {workOrderStatusLabel[order.status]}
-                            </span>
-                          </div>
-                        </li>
+
+                    <li key={order.id}>
+                      <div>
+                        <strong>{order.opId}</strong>
+                        <p className="muted">Заказ {order.prodOrderId}</p>
+                      </div>
+                      <div className="mes-production__list-meta">
+                        {order.startedAt && (
+                          <span className="chip chip--ghost">
+                            <span className="chip__label">Старт</span>
+                            <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                          </span>
+                        )}
+                        {order.assignee && (
+                          <span className="chip chip--ghost">
+                            <span className="chip__label">Исполнитель</span>
+                            <span className="chip__value">{order.assignee}</span>
+                          </span>
+                        )}
+                        <span className={`status status--${order.status}`}>
+                          {workOrderStatusLabel[order.status]}
+                        </span>
+                      </div>
+                    </li>
+
                       ))}
                       {group.orders.length === 0 && <li className="muted">Нет операций в статусе</li>}
                     </ul>
@@ -433,7 +451,20 @@ export const ProductionDashboard: React.FC = () => {
                       <p className="muted">Заказ {order.prodOrderId}</p>
                     </div>
                     <div className="mes-production__list-meta">
-                      {order.assignee && <span>{order.assignee}</span>}
+
+                      {order.assignee && (
+                        <span className="chip chip--ghost">
+                          <span className="chip__label">Исполнитель</span>
+                          <span className="chip__value">{order.assignee}</span>
+                        </span>
+                      )}
+                      {order.startedAt && (
+                        <span className="chip chip--ghost">
+                          <span className="chip__label">Старт</span>
+                          <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                        </span>
+                      )}
+
                       <span className={`status status--${order.status}`}>
                         {workOrderStatusLabel[order.status]}
                       </span>
@@ -456,8 +487,20 @@ export const ProductionDashboard: React.FC = () => {
                       <p className="muted">{productionOrderMap.get(order.prodOrderId)?.itemId ?? order.prodOrderId}</p>
                     </div>
                     <div className="mes-production__list-meta">
-                      {order.startedAt && <span className="muted">{formatDateTime(order.startedAt)}</span>}
-                      {order.assignee && <span>{order.assignee}</span>}
+
+                      {order.startedAt && (
+                        <span className="chip chip--ghost">
+                          <span className="chip__label">Старт</span>
+                          <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                        </span>
+                      )}
+                      {order.assignee && (
+                        <span className="chip chip--ghost">
+                          <span className="chip__label">Исполнитель</span>
+                          <span className="chip__value">{order.assignee}</span>
+                        </span>
+                      )}
+
                     </div>
                   </li>
                 ))}
@@ -477,18 +520,38 @@ export const ProductionDashboard: React.FC = () => {
               <ul className="mes-production__lines">
                 {lineSignals.map(line => (
                   <li key={line.id}>
-                    <div>
-                      <strong>{line.name}</strong>
+
+                    <div className="mes-production__line-body">
+                      <div className="mes-production__line-heading">
+                        <strong>{line.name}</strong>
+                        <span className="chip chip--ghost">
+                          <span className="chip__label">Смена</span>
+                          <span className="chip__value">{line.shiftPattern}</span>
+                        </span>
+                      </div>
                       <p className="muted">
-                        План {line.targetPerShift} шт • Факт {line.throughputPerShift} шт
+                        План {line.targetPerShift} шт • Факт {line.throughputPerShift} шт • Такт {Math.round(line.taktTimeSec / 60)} мин
                       </p>
-                      <p className="muted">Смена: {line.shiftPattern}</p>
                       {line.blockers.length > 0 && <p className="alert">Блокеры: {line.blockers.join(', ')}</p>}
-                    </div>
-                    <div className="mes-production__line-indicators">
-                      <span>WIP: {line.currentWip}</span>
-                      <span>Доступность: {Math.round(line.availability * 100)}%</span>
-                      <span>Выполнение плана: {line.attainment}%</span>
+                      <div className="mes-production__line-indicators">
+                        <span className="chip">
+                          <span className="chip__label">WIP</span>
+                          <span className="chip__value">{line.currentWip}</span>
+                        </span>
+                        <span className="chip">
+                          <span className="chip__label">План</span>
+                          <span className="chip__value">{line.targetPerShift}</span>
+                        </span>
+                        <span className="chip">
+                          <span className="chip__label">Факт</span>
+                          <span className="chip__value">{line.throughputPerShift}</span>
+                        </span>
+                        <span className="chip">
+                          <span className="chip__label">OEE</span>
+                          <span className="chip__value">{line.attainment}%</span>
+                        </span>
+                      </div>
+
                     </div>
                   </li>
                 ))}
@@ -518,9 +581,26 @@ export const ProductionDashboard: React.FC = () => {
                           {center.capabilities && <p className="muted">{center.capabilities}</p>}
                         </div>
                       </td>
-                      <td>{center.inQueue}</td>
-                      <td>{center.running}</td>
-                      <td>{center.blocked}</td>
+
+                      <td>
+                        <span className="chip">
+                          <span className="chip__label">Очередь</span>
+                          <span className="chip__value">{center.inQueue}</span>
+                        </span>
+                      </td>
+                      <td>
+                        <span className="chip">
+                          <span className="chip__label">В работе</span>
+                          <span className="chip__value">{center.running}</span>
+                        </span>
+                      </td>
+                      <td>
+                        <span className="chip">
+                          <span className="chip__label">Блокировано</span>
+                          <span className="chip__value">{center.blocked}</span>
+                        </span>
+                      </td>
+
                     </tr>
                   ))}
                   {backlogByCenter.length === 0 && (
@@ -601,9 +681,17 @@ export const ProductionDashboard: React.FC = () => {
                       </strong>
                       <p className="muted">{nc.action ?? 'Действие не назначено'}</p>
                     </div>
-                    <span className={`status status--${nc.status}`}>
-                      {nonconformanceStatusLabel[nc.status]}
-                    </span>
+
+                    <div className="mes-production__list-meta">
+                      <span className={`chip chip--risk-${nc.severity}`}>
+                        <span className="chip__label">Риск</span>
+                        <span className="chip__value">{nc.severity}</span>
+                      </span>
+                      <span className={`status status--${nc.status}`}>
+                        {nonconformanceStatusLabel[nc.status]}
+                      </span>
+                    </div>
+
                   </li>
                 ))}
                 {nonconformances.length === 0 && <li className="muted">Несоответствий нет</li>}

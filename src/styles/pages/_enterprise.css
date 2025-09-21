@@ -340,12 +340,25 @@
   flex-wrap: wrap;
 }
 
+
+.mes-production__line-body {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mes-production__line-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .mes-production__line-indicators {
   display: flex;
-  gap: 0.75rem 1.25rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+
 }
 
 .mes-production__table {
@@ -428,6 +441,17 @@
   gap: 1rem;
 }
 
+.mes-command__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.mes-command__card-header .muted {
+  margin-top: 0.35rem;
+}
+
 .mes-command__card--stretch {
   grid-column: span 2;
   min-width: 0;
@@ -444,6 +468,8 @@
   justify-content: space-between;
   font-size: 0.85rem;
   color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .mes-command__list,
@@ -469,6 +495,25 @@
   font-size: 0.9rem;
 }
 
+.mes-command__line-body {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mes-command__line-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.mes-command__line-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .mes-command__streams li,
 .quality-card__list li,
 .test-lab__cells li,
@@ -480,6 +525,41 @@
   justify-content: space-between;
   gap: 1rem;
   align-items: flex-start;
+}
+
+.mes-command__streams li {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mes-command__stream-body {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mes-command__stream-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.mes-command__stream-metrics,
+.mes-command__stream-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mes-command__wc-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mes-command__wc-name .chip {
+  align-self: flex-start;
 }
 
 .mes-command__table,
@@ -549,6 +629,59 @@
   background: rgba(14, 165, 233, 0.18);
   color: var(--accent);
   font-size: 0.75rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--text-strong);
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.chip__label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.chip__value {
+  font-weight: 600;
+}
+
+.chip--ghost {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-strong);
+}
+
+.chip--muted {
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--text-muted);
+}
+
+.chip--accent {
+  background: rgba(37, 99, 235, 0.14);
+  color: var(--info-strong);
+}
+
+.chip--risk-low {
+  background: rgba(34, 197, 94, 0.16);
+  color: var(--success-strong);
+}
+
+.chip--risk-medium {
+  background: rgba(245, 158, 11, 0.16);
+  color: var(--warning-strong);
+}
+
+.chip--risk-high {
+  background: rgba(239, 68, 68, 0.18);
+  color: var(--danger-strong);
 }
 
 .metric {
