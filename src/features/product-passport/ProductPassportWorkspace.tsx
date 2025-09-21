@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import JsPdfConstructor from 'jspdf';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import Modal from '../../components/ui/Modal';
@@ -118,7 +119,11 @@ const buildExportRows = (passport: ProductPassport, history: DeviceHistoryEntry[
   return rows;
 };
 
+
 const createExcelBlob = (rows: ExportRow[]) => {
+
+
+
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
@@ -138,6 +143,7 @@ const triggerFileDownload = (blob: Blob, filename: string) => {
   setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 };
 
+
 const downloadWorkbook = (rows: ExportRow[], filename: string) => {
   const blob = createExcelBlob(rows);
   triggerFileDownload(blob, `${filename}.xlsx`);
@@ -150,6 +156,7 @@ const downloadPdf = async (rows: ExportRow[], filename: string) => {
   if (!JsPdfConstructor) {
     throw new Error('jsPDF constructor is unavailable');
   }
+
   const doc = new JsPdfConstructor({ unit: 'pt', format: 'a4' });
   const marginLeft = 48;
   const marginTop = 56;
@@ -184,6 +191,15 @@ const downloadPdf = async (rows: ExportRow[], filename: string) => {
   });
 
   doc.save(`${filename}.pdf`);
+};
+
+const downloadWorkbook = (rows: ExportRow[], filename: string) => {
+  const blob = createExcelBlob(rows);
+  triggerFileDownload(blob, `${filename}.xlsx`);
+};
+
+const downloadPdf = (rows: ExportRow[], filename: string) => {
+  exportRowsToPdf(rows, filename);
 };
 
 const getMissingRequired = (schema: PassportTemplateField[], values: Record<string, TemplateFieldValue>) =>
