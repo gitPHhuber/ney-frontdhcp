@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
-
 import Modal from '../../components/ui/Modal';
 import {
   productPassportRepository,
