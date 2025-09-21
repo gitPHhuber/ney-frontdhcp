@@ -450,13 +450,13 @@
 
     overflow: visible;
 
+
   }
 
   .playbook-builder__actions-row {
     flex-direction: column;
     align-items: flex-start;
   }
-
 
   .playbook-builder__chat-launcher {
     position: static;
