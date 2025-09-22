@@ -24,6 +24,13 @@ export const queryKeys = {
     testCells: ['mes', 'test-cells'] as const,
     testPlans: ['mes', 'test-plans'] as const,
     testRuns: ['mes', 'test-runs'] as const,
+    flashAgents: ['mes', 'flash', 'agents'] as const,
+    flashPorts: ['mes', 'flash', 'ports'] as const,
+    flashPresets: ['mes', 'flash', 'presets'] as const,
+    flashArtifacts: (filters: Record<string, string | undefined>) =>
+      ['mes', 'flash', 'artifacts', filters] as const,
+    flashJobs: (filters: Record<string, string | undefined>) => ['mes', 'flash', 'jobs', filters] as const,
+    deviceSessions: ['mes', 'flash', 'device-sessions'] as const,
   },
   metrics: {
     all: ['metrics'] as const,

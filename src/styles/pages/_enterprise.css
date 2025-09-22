@@ -892,6 +892,356 @@
   min-width: 0;
 }
 
+.firmware-console {
+  display: grid;
+  gap: 2rem;
+}
+
+.firmware-console__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.firmware-console__metrics {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.firmware-console__agents {
+  background: var(--surface-card);
+  border-radius: 18px;
+  padding: 1.2rem;
+  box-shadow: var(--shadow-md);
+  display: grid;
+  gap: 1rem;
+  min-width: 260px;
+}
+
+.firmware-console__agents ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.firmware-console__agents li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.firmware-console__agent-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.firmware-console__content {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+}
+
+@media (max-width: 1200px) {
+  .firmware-console__content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.firmware-console__panels {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.firmware-console__panel-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.firmware-console__panel-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.firmware-console__panel {
+  background: var(--surface-card);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow-md);
+  display: grid;
+  gap: 1rem;
+}
+
+.firmware-console__panel--manual {
+  background: var(--surface-subtle);
+  border: 1px dashed var(--border-subtle);
+  box-shadow: none;
+}
+
+.firmware-console__panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.firmware-console__details {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.firmware-console__details div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.firmware-console__details dt {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.firmware-console__details dd {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.firmware-console__options {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.firmware-console__telemetry {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.firmware-console__log-wrapper {
+  min-height: 88px;
+}
+
+.firmware-console__log {
+  list-style: none;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-subtle);
+  border-radius: 12px;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.firmware-console__log-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.firmware-console__log-line--info {
+  color: var(--text-muted);
+}
+
+.firmware-console__log-line--warn {
+  color: var(--warning-strong);
+}
+
+.firmware-console__log-line--error {
+  color: var(--danger-strong);
+}
+
+.firmware-console__panel-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.firmware-console__manual-fields {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.firmware-console__manual-fields label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.firmware-console__manual-fields select,
+.firmware-console__manual-fields input {
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  font-size: 0.9rem;
+}
+
+.firmware-console__options-toggle {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.firmware-console__sidebar {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.firmware-console__presets,
+.firmware-console__notes {
+  background: var(--surface-card);
+  border-radius: 18px;
+  padding: 1.2rem;
+  box-shadow: var(--shadow-md);
+  display: grid;
+  gap: 1rem;
+}
+
+.firmware-console__presets ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.firmware-console__presets li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.firmware-console__notes ul {
+  list-style: disc;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.firmware-console__section-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.firmware-console__checklist ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.firmware-console__checklist li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.firmware-console__alert {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger-strong);
+  font-size: 0.85rem;
+}
+
+.firmware-console__alert--warning {
+  background: rgba(245, 158, 11, 0.18);
+  color: var(--warning-strong);
+}
+
+.chip--danger {
+  background: rgba(239, 68, 68, 0.18);
+  color: var(--danger-strong);
+}
+
+.firmware-console__summary {
+  background: var(--surface-card);
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  display: grid;
+  gap: 1.25rem;
+}
+
+.firmware-console__summary header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.firmware-console__summary-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.firmware-console__filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.firmware-console__filters label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.firmware-console__filters select {
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-subtle);
+  font-size: 0.9rem;
+}
+
+.firmware-console__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.firmware-console__table th,
+.firmware-console__table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  text-align: left;
+}
+
+.firmware-console__table tbody tr:hover {
+  background: rgba(148, 163, 184, 0.08);
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

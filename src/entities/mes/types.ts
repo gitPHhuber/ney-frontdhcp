@@ -1,8 +1,12 @@
 export type WorkOrderStatus = 'planned' | 'in-progress' | 'paused' | 'completed' | 'blocked';
 export type ProductionOrderStatus = 'draft' | 'released' | 'in-progress' | 'completed' | 'closed';
 export type QualityStatus = 'pending' | 'passed' | 'failed' | 'blocked';
-export type NonconformanceStatus = 'open' | 'investigating' | 'resolved' | 'closed';
+export type NonconformanceStatus = 'draft' | 'open' | 'investigating' | 'resolved' | 'closed';
 export type MaintenanceOrderStatus = 'draft' | 'scheduled' | 'in-progress' | 'completed';
+export type FlashPortState = 'disconnected' | 'ready' | 'bootloader' | 'flashing' | 'ok' | 'error';
+export type FlashAgentStatus = 'online' | 'offline' | 'updating';
+export type FlashJobStatus = 'queued' | 'running' | 'ok' | 'error' | 'aborted';
+export type FlashLogLevel = 'info' | 'warn' | 'error';
 
 export interface OperationStep {
   opId: string;
@@ -119,7 +123,7 @@ export interface QualityCheck {
 
 export interface Nonconformance {
   id: string;
-  refType: 'ProductionOrder' | 'WorkOrder' | 'PurchaseOrder' | 'QualityCheck';
+  refType: 'ProductionOrder' | 'WorkOrder' | 'PurchaseOrder' | 'QualityCheck' | 'FlashJob';
   refId: string;
   severity: 'low' | 'medium' | 'high';
   status: NonconformanceStatus;
@@ -142,6 +146,121 @@ export interface MaintenanceOrder {
   logs: MaintenanceLogEntry[];
 }
 
+export interface FlashAgent {
+  id: string;
+  workstationId: string;
+  workstationName: string;
+  status: FlashAgentStatus;
+  version: string;
+  ipAddress: string;
+  supportedTools: string[];
+  lastSeenAt: string;
+  connectedPorts: string[];
+}
+
+export interface FlashPort {
+  id: string;
+  path: string;
+  displayName: string;
+  vendorId?: string;
+  productId?: string;
+  deviceHint?: string;
+  busy: boolean;
+  state: FlashPortState;
+  workstationId: string;
+  lastSeenAt: string;
+  notes?: string;
+}
+
+export interface FlashArtifact {
+  id: string;
+  project: 'servers' | 'drones';
+  deviceType: string;
+  model: string;
+  version: string;
+  buildId: string;
+  checksum: string;
+  url: string;
+  releasedAt: string;
+  allowed: boolean;
+  compatibleModels: string[];
+  mandatoryOptions?: string[];
+}
+
+export interface FlashPresetOption {
+  erase: boolean;
+  verify: boolean;
+  setParams: boolean;
+  notes?: string;
+}
+
+export interface FlashChecklistItem {
+  id: string;
+  label: string;
+  required: boolean;
+}
+
+export interface FlashPreset {
+  id: string;
+  name: string;
+  project: 'servers' | 'drones';
+  deviceType: string;
+  model: string;
+  artifactId: string;
+  defaultOptions: FlashPresetOption;
+  defaultChecklist: FlashChecklistItem[];
+  requiresMasterOverride?: boolean;
+}
+
+export interface FlashLogEntry {
+  id: string;
+  ts: string;
+  level: FlashLogLevel;
+  message: string;
+}
+
+export interface FlashJob {
+  id: string;
+  jobNumber: string;
+  portId: string;
+  workstationId: string;
+  operator: string;
+  status: FlashJobStatus;
+  project: 'servers' | 'drones';
+  deviceType: string;
+  model: string;
+  serialNumber: string;
+  presetId?: string;
+  artifactId: string;
+  artifactVersion: string;
+  checksum: string;
+  startedAt: string;
+  finishedAt?: string;
+  durationSec?: number;
+  bytesWritten?: number;
+  speedKbps?: number;
+  progressPercent?: number;
+  etaSec?: number;
+  log: FlashLogEntry[];
+  resultLogUrl?: string;
+  ncrId?: string;
+  reflash?: boolean;
+  powerChecklist: FlashChecklistItem[];
+}
+
+export interface DeviceSession {
+  serialNumber: string;
+  project: 'servers' | 'drones';
+  deviceType: string;
+  model: string;
+  lastArtifactId: string;
+  lastArtifactVersion: string;
+  lastFlashedAt: string;
+  lastOperator: string;
+  allowedArtifactIds: string[];
+  notes?: string;
+}
+
 export interface MesState {
   routings: Routing[];
   workCenters: WorkCenter[];
@@ -155,4 +274,10 @@ export interface MesState {
   testCells: TestCell[];
   testPlans: TestPlan[];
   testRuns: TestRun[];
+  flashAgents: FlashAgent[];
+  flashPorts: FlashPort[];
+  flashArtifacts: FlashArtifact[];
+  flashPresets: FlashPreset[];
+  flashJobs: FlashJob[];
+  deviceSessions: DeviceSession[];
 }

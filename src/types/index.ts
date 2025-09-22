@@ -24,7 +24,8 @@ export type Permission =
     | 'settings:read' | 'settings:update'
     | 'access:read' | 'access:approve'
     | 'audit:read'
-    | 'mes:production' | 'mes:quality' | 'mes:labs' | 'mes:workforce';
+    | 'mes:production' | 'mes:quality' | 'mes:labs' | 'mes:workforce'
+    | 'mes:flash' | 'mes:flash:override' | 'mes:flash:presets';
 
 export interface Role {
     id: number;

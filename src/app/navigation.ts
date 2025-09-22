@@ -43,6 +43,7 @@ const loadMesCommandCenterPage = () => import('../pages/mes/CommandCenterPage');
 const loadMesProductionPage = () => import('../pages/mes/ProductionPage');
 const loadMesQualityPage = () => import('../pages/mes/QualityPage');
 const loadMesTestLabPage = () => import('../pages/mes/TestLabPage');
+const loadMesFirmwarePage = () => import('../pages/mes/FirmwarePage');
 const loadWorkforceAnalyticsPage = () => import('../pages/workforce/WorkforceAnalyticsPage');
 
 const DashboardPage = lazy(loadDashboardPage);
@@ -63,6 +64,7 @@ const MesCommandCenterPage = lazy(loadMesCommandCenterPage);
 const MesProductionPage = lazy(loadMesProductionPage);
 const MesQualityPage = lazy(loadMesQualityPage);
 const MesTestLabPage = lazy(loadMesTestLabPage);
+const MesFirmwarePage = lazy(loadMesFirmwarePage);
 const WorkforceAnalyticsPage = lazy(loadWorkforceAnalyticsPage);
 
 export const appNavigation: NavigationSection[] = [
@@ -102,6 +104,17 @@ export const appNavigation: NavigationSection[] = [
         groupKey: 'navigation.sections.mes',
         featureFlag: 'mes-quality-operations',
         permission: 'mes:quality',
+      },
+      {
+        path: '/mes/firmware',
+        title: 'Прошивка',
+        icon: 'robot',
+        element: MesFirmwarePage,
+        loader: loadMesFirmwarePage,
+        group: 'Производство',
+        groupKey: 'navigation.sections.mes',
+        featureFlag: 'mes-flash-console',
+        permission: 'mes:flash',
       },
       {
         path: '/mes/test-lab',

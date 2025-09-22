@@ -10,7 +10,8 @@ export type FeatureFlag =
   | 'mes-production-operations'
   | 'mes-quality-operations'
   | 'mes-test-lab-control'
-  | 'mes-workforce-analytics';
+  | 'mes-workforce-analytics'
+  | 'mes-flash-console';
 
 const activeFlags: Record<FeatureFlag, boolean> = {
   'inventory-presets': true,
@@ -25,6 +26,7 @@ const activeFlags: Record<FeatureFlag, boolean> = {
   'mes-quality-operations': true,
   'mes-test-lab-control': true,
   'mes-workforce-analytics': true,
+  'mes-flash-console': true,
 
 };
 

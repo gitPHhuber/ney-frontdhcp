@@ -2,6 +2,13 @@ import { enterpriseState } from '../state';
 import { inventoryRepository } from '../inventory/mockRepository';
 import { deepClone, generateId } from '../utils';
 import type {
+  DeviceSession,
+  FlashAgent,
+  FlashArtifact,
+  FlashJob,
+  FlashJobStatus,
+  FlashPort,
+  FlashPreset,
   MaintenanceLogEntry,
   MaintenanceOrder,
   MesState,
@@ -70,6 +77,52 @@ export const mesRepository = {
   },
   async listTestRuns(): Promise<TestRun[]> {
     return deepClone(getState().testRuns);
+  },
+  async listFlashAgents(): Promise<FlashAgent[]> {
+    return deepClone(getState().flashAgents);
+  },
+  async listFlashPorts(): Promise<FlashPort[]> {
+    return deepClone(getState().flashPorts);
+  },
+  async listFlashPresets(): Promise<FlashPreset[]> {
+    return deepClone(getState().flashPresets);
+  },
+  async listFlashArtifacts(filters: Partial<Record<'project' | 'deviceType' | 'model', string>> = {}): Promise<FlashArtifact[]> {
+    const state = getState();
+    return state.flashArtifacts
+      .filter(artifact => {
+        if (filters.project && artifact.project !== filters.project) return false;
+        if (filters.deviceType && artifact.deviceType !== filters.deviceType) return false;
+        if (filters.model && artifact.model !== filters.model) return false;
+        return true;
+      })
+      .map(artifact => deepClone(artifact));
+  },
+  async listFlashJobs(filters: { date?: 'today' | 'week'; status?: FlashJobStatus | 'all' } = {}): Promise<FlashJob[]> {
+    const state = getState();
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOfWeek = new Date(startOfToday);
+    startOfWeek.setDate(startOfToday.getDate() - startOfToday.getDay());
+
+    return state.flashJobs
+      .filter(job => {
+        if (filters.status && filters.status !== 'all' && job.status !== filters.status) {
+          return false;
+        }
+        if (filters.date === 'today') {
+          return new Date(job.startedAt) >= startOfToday;
+        }
+        if (filters.date === 'week') {
+          return new Date(job.startedAt) >= startOfWeek;
+        }
+        return true;
+      })
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+      .map(job => deepClone(job));
+  },
+  async listDeviceSessions(): Promise<DeviceSession[]> {
+    return deepClone(getState().deviceSessions);
   },
   async generateWorkOrders(prodOrderId: string): Promise<WorkOrder[]> {
     const state = getState();

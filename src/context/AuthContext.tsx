@@ -50,6 +50,9 @@ const ADMIN_PERMISSIONS: Permission[] = [
   'mes:quality',
   'mes:labs',
   'mes:workforce',
+  'mes:flash',
+  'mes:flash:override',
+  'mes:flash:presets',
 ];
 
 const shouldBypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === '1';
