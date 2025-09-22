@@ -18,6 +18,8 @@ type TabKey = 'orders' | 'operations' | 'resources' | 'quality';
 const formatDate = (value: string) =>
   new Date(value).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
 
+const formatNumber = (value: number) => value.toLocaleString('ru-RU');
+
 const formatDateTime = (value: string) =>
   new Date(value).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
@@ -80,8 +82,6 @@ export const ProductionDashboard: React.FC = () => {
   const [orderView, setOrderView] = useState<'table' | 'timeline'>('table');
   const [operationFocus, setOperationFocus] = useState<'status' | 'shift'>('status');
   const [selectedStream, setSelectedStream] = useState<'all' | string>('all');
-  const [nonconformanceSeverity, setNonconformanceSeverity] = useState<'all' | 'low' | 'medium' | 'high'>('all');
-
 
   const { data: productionOrders = [] } = useProductionOrdersQuery();
   const { data: workOrders = [] } = useWorkOrdersQuery();
@@ -344,14 +344,6 @@ export const ProductionDashboard: React.FC = () => {
     [productionLines],
   );
 
-  const filteredLineSignals = useMemo(
-    () =>
-      selectedStream === 'all'
-        ? lineSignals
-        : lineSignals.filter(line => line.streamId === selectedStream),
-    [lineSignals, selectedStream],
-  );
-
   const streamLoads = useMemo(
     () =>
       valueStreams.map(stream => {
@@ -443,29 +435,14 @@ export const ProductionDashboard: React.FC = () => {
       .slice(0, 6);
   }, [maintenanceOrders]);
 
-  const qualityByEntity = useMemo(() => {
-    const aggregates = qualityChecks.reduce(
-      (acc, check) => {
-        const key = check.entityType;
-        if (!acc[key]) {
-          acc[key] = { total: 0, blocked: 0, failed: 0 };
-        }
-        acc[key].total += 1;
-        if (check.status === 'blocked') {
-          acc[key].blocked += 1;
-        }
-        if (check.status === 'failed') {
-          acc[key].failed += 1;
-        }
-        return acc;
-      },
-      {} as Record<string, { total: number; blocked: number; failed: number }>,
-    );
-
-    return Object.entries(aggregates)
-      .map(([entity, values]) => ({ entity, ...values }))
-      .sort((a, b) => b.total - a.total);
-  }, [qualityChecks]);
+  const testPlans = useMemo(
+    () => [
+      { id: 'plan-1', name: 'Регрессия по стендам', ownerTeam: 'QA Core', coverage: 86, requiredFor: ['Серверы'] },
+      { id: 'plan-2', name: 'Нагрузочные тесты', ownerTeam: 'Performance Lab', coverage: 72, requiredFor: ['Дроны'] },
+      { id: 'plan-3', name: 'Электробезопасность', ownerTeam: 'Compliance', coverage: 64, requiredFor: ['Все'] },
+    ],
+    [],
+  );
 
   const nonconformanceCounts = useMemo(
     () =>
@@ -479,14 +456,6 @@ export const ProductionDashboard: React.FC = () => {
     [nonconformances],
   );
 
-  const filteredNonconformances = useMemo(
-    () =>
-      nonconformanceSeverity === 'all'
-        ? nonconformances
-        : nonconformances.filter(nc => nc.severity === nonconformanceSeverity),
-    [nonconformances, nonconformanceSeverity],
-  );
-
   const tabs: { id: TabKey; label: string }[] = [
     { id: 'orders', label: 'Заказы' },
     { id: 'operations', label: 'Операции' },
@@ -496,864 +465,694 @@ export const ProductionDashboard: React.FC = () => {
 
 
   return (
-    <section className="mes-production" aria-label="Операции производства">
-      <header className="mes-production__header">
+    <section className="mes-page mes-production" aria-label="Операции производства">
+      <header className="page__header">
         <div>
           <h1>Операционное управление производством</h1>
           <p className="muted">Контролируйте портфель заказов, загрузку смены и качество на одном экране.</p>
         </div>
-        <div className="mes-production__actions">
-          <button type="button" className="secondary">
-            Сводка смены
-          </button>
-          <button type="button" className="primary">
-            Создать производственный заказ
-          </button>
+        <div className="page__header-actions">
+          <button type="button" className="secondary">Сводка смены</button>
+          <button type="button" className="primary">Создать производственный заказ</button>
         </div>
       </header>
 
-      <div className="mes-production__summary" role="list">
-        <div className="mes-production__summary-card" role="listitem">
+      <div className="page__metrics">
+        <div className="page__metric-card">
           <span className="metric__label">Заказы в работе</span>
-          <span className="metric__value">{orderSummary.inProgress}</span>
-          <span className="mes-production__hint">Средний прогресс {orderSummary.averageProgress}%</span>
+          <span className="metric__value">{formatNumber(orderSummary.inProgress)}</span>
         </div>
-        <div className="mes-production__summary-card" role="listitem">
-          <span className="metric__label">Запланировано операций</span>
-          <span className="metric__value">{workOrderSummary.planned}</span>
-          <span className="mes-production__hint">К запуску: {workOrderSummary['in-progress']} активных</span>
-        </div>
-        <div className="mes-production__summary-card" role="listitem">
+        <div className="page__metric-card">
           <span className="metric__label">Срок &lt; 3 дней</span>
-          <span className="metric__value">{orderSummary.dueSoon}</span>
-          <span className="mes-production__hint">Просрочено: {orderSummary.overdue}</span>
+          <span className="metric__value">{formatNumber(orderSummary.dueSoon)}</span>
         </div>
-        <div className="mes-production__summary-card" role="listitem">
-          <span className="metric__label">Несоответствия открыты</span>
-          <span className="metric__value">{qualitySummary.openNonconformances}</span>
-          <span className="mes-production__hint">Контрольных точек: {qualitySummary.total}</span>
+        <div className="page__metric-card">
+          <span className="metric__label">Просрочено</span>
+          <span className="metric__value">{formatNumber(orderSummary.overdue)}</span>
+        </div>
+        <div className="page__metric-card">
+          <span className="metric__label">Активных операций</span>
+          <span className="metric__value">{formatNumber(workOrderSummary['in-progress'])}</span>
+        </div>
+        <div className="page__metric-card">
+          <span className="metric__label">Открытые NCR</span>
+          <span className="metric__value">{formatNumber(qualitySummary.openNonconformances)}</span>
         </div>
       </div>
 
-      <div className="mes-production__tabs" role="tablist" aria-label="Навигация по разделу производства">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            className={`mes-production__tab ${activeTab === tab.id ? 'mes-production__tab--active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <div className="page__content">
+        <section className="page__main" aria-label="Панели производства">
+          <div className="mes-production__tabs" role="tablist" aria-label="Навигация по разделу производства">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                className={`mes-production__tab ${activeTab === tab.id ? 'mes-production__tab--active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-      <div className="mes-production__content">
-        {activeTab === 'orders' && (
-          <div className="mes-production__panels mes-production__panels--grid">
-            <article className="mes-production__panel mes-production__panel--wide">
-              <header>
-                <h3>Производственные заказы</h3>
-                <p className="muted">Факт исполнения по каждому заказу и контроль сроков.</p>
-              </header>
+          <div className="mes-production__content">
+            {activeTab === 'orders' && (
+              <div className="mes-production__panels mes-production__panels--grid">
+                <article className="mes-production__panel mes-production__panel--wide">
+                  <header>
+                    <h3>Производственные заказы</h3>
+                    <p className="muted">Факт исполнения по каждому заказу и контроль сроков.</p>
+                  </header>
 
-              <div className="mes-production__toolbar">
-                <div className="mes-production__filters" role="group" aria-label="Фильтрация по статусу заказа">
-                  {([
-                    { id: 'all', label: 'Все', count: orderSummary.total },
-                    { id: 'in-progress', label: 'В работе', count: orderStatusCounts['in-progress'] },
-                    { id: 'released', label: 'Выпущен', count: orderStatusCounts.released },
-                    { id: 'draft', label: 'Черновик', count: orderStatusCounts.draft },
-                    { id: 'completed', label: 'Завершён', count: orderStatusCounts.completed },
-                    { id: 'closed', label: 'Закрыт', count: orderStatusCounts.closed },
-                  ] as const).map(option => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      className={`mes-production__filter ${orderStatusFilter === option.id ? 'mes-production__filter--active' : ''}`}
-                      aria-pressed={orderStatusFilter === option.id}
-                      onClick={() => setOrderStatusFilter(option.id)}
-                    >
-                      <span>{option.label}</span>
-                      <span className="mes-production__filter-count">{option.count}</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="mes-production__view-toggle" role="group" aria-label="Представление заказов">
-                  <button
-                    type="button"
-                    className={`mes-production__toggle ${orderView === 'table' ? 'mes-production__toggle--active' : ''}`}
-                    aria-pressed={orderView === 'table'}
-                    onClick={() => setOrderView('table')}
-                  >
-                    Таблица
-                  </button>
-                  <button
-                    type="button"
-                    className={`mes-production__toggle ${orderView === 'timeline' ? 'mes-production__toggle--active' : ''}`}
-                    aria-pressed={orderView === 'timeline'}
-                    onClick={() => setOrderView('timeline')}
-                  >
-                    Таймлайн
-                  </button>
-                </div>
+                  <div className="mes-production__toolbar">
+                    <div className="mes-production__filters" role="group" aria-label="Фильтрация по статусу заказа">
+                      {(
+                        [
+                          { id: 'all', label: 'Все', count: orderSummary.total },
+                          { id: 'in-progress', label: 'В работе', count: orderStatusCounts['in-progress'] },
+                          { id: 'released', label: 'Выпущен', count: orderStatusCounts.released },
+                          { id: 'draft', label: 'Черновик', count: orderStatusCounts.draft },
+                          { id: 'completed', label: 'Завершён', count: orderStatusCounts.completed },
+                          { id: 'closed', label: 'Закрыт', count: orderStatusCounts.closed },
+                        ] as const
+                      ).map(option => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          className={`mes-production__filter ${orderStatusFilter === option.id ? 'mes-production__filter--active' : ''}`}
+                          aria-pressed={orderStatusFilter === option.id}
+                          onClick={() => setOrderStatusFilter(option.id)}
+                        >
+                          <span>{option.label}</span>
+                          <span className="mes-production__filter-count">{option.count}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mes-production__view-toggle" role="group" aria-label="Представление заказов">
+                      <button
+                        type="button"
+                        className={`mes-production__toggle ${orderView === 'table' ? 'mes-production__toggle--active' : ''}`}
+                        aria-pressed={orderView === 'table'}
+                        onClick={() => setOrderView('table')}
+                      >
+                        Таблица
+                      </button>
+                      <button
+                        type="button"
+                        className={`mes-production__toggle ${orderView === 'timeline' ? 'mes-production__toggle--active' : ''}`}
+                        aria-pressed={orderView === 'timeline'}
+                        onClick={() => setOrderView('timeline')}
+                      >
+                        Таймлайн
+                      </button>
+                    </div>
+                  </div>
+                  {orderView === 'table' ? (
+                    <table className="mes-production__table">
+                      <thead>
+                        <tr>
+                          <th>Заказ</th>
+                          <th>Объём</th>
+                          <th>Срок</th>
+                          <th>Статус</th>
+                          <th>Прогресс</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredOrders.map(order => {
+                          const progress = getProgress(order, workOrders);
+                          return (
+                            <tr key={order.id}>
+                              <td>
+                                <div>
+                                  <strong>{order.id}</strong>
+                                  <p className="muted">Номенклатура {order.itemId}</p>
+                                </div>
+                              </td>
+                              <td>{order.qty}</td>
+                              <td>{formatDate(order.dueDate)}</td>
+                              <td>
+                                <span className={`status status--${order.status}`}>
+                                  {productionStatusLabel[order.status]}
+                                </span>
+                              </td>
+                              <td>
+                                <div
+                                  className="progress"
+                                  role="progressbar"
+                                  aria-valuenow={progress}
+                                  aria-valuemin={0}
+                                  aria-valuemax={100}
+                                >
+                                  <div className="progress__bar" style={{ width: `${progress}%` }}>
+                                    {progress}%
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <ul className="mes-production__timeline">
+                      {ordersTimeline.map(order => (
+                        <li key={order.id}>
+                          <div>
+                            <strong>{order.id}</strong>
+                            <p className="muted">{order.dueLabel}</p>
+                          </div>
+                          <span className={`status status--${order.status}`}>{productionStatusLabel[order.status]}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
+
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Критические заказы</h3>
+                    <p className="muted">Ближайшие к сроку и требующие внимания.</p>
+                  </header>
+                  <ul className="mes-production__list">
+                    {criticalOrders.map(order => (
+                      <li key={order.id}>
+                        <div>
+                          <strong>{order.id}</strong>
+                          <p className="muted">{order.dueLabel}</p>
+                        </div>
+                        <span className={`status status--${order.status}`}>{productionStatusLabel[order.status]}</span>
+                      </li>
+                    ))}
+                    {criticalOrders.length === 0 && <li className="muted">Срочных заказов нет</li>}
+                  </ul>
+                </article>
+
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Фокус потоков</h3>
+                    <p className="muted">Синхронизация спроса, WIP и выполнения.</p>
+                  </header>
+                  <ul className="mes-production__operator-list">
+                    {streamInsights.map(stream => (
+                      <li key={stream.id} className="mes-production__operator">
+                        <div>
+                          <strong>{stream.name}</strong>
+                          <p className="muted">{stream.focus}</p>
+                        </div>
+                        <div className="mes-production__stream-meta">
+                          <span className={`chip chip--risk-${stream.risk}`}>Риск {stream.risk}</span>
+                          <span className="chip chip--ghost">WIP {stream.wip}</span>
+                          <span className="chip chip--ghost">Линий {stream.lineCount}</span>
+                        </div>
+                      </li>
+                    ))}
+                    {streamInsights.length === 0 && <li className="muted">Потоки не настроены</li>}
+                  </ul>
+                </article>
               </div>
-              {orderView === 'table' ? (
-                <table className="mes-production__table">
-                  <thead>
-                    <tr>
-                      <th>Заказ</th>
-                      <th>Объём</th>
-                      <th>Срок</th>
-                      <th>Статус</th>
-                      <th>Прогресс</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredOrders.map(order => {
-                      const progress = getProgress(order, workOrders);
-                      return (
-                        <tr key={order.id}>
+            )}
+
+            {activeTab === 'operations' && (
+              <div className="mes-production__panels mes-production__panels--grid">
+                <article className="mes-production__panel mes-production__panel--wide">
+                  <header>
+                    <h3>Исполнение операций</h3>
+                    <p className="muted">Распределение по статусам и назначенным исполнителям.</p>
+                  </header>
+
+                  <div className="mes-production__toolbar mes-production__toolbar--sub">
+                    <div className="mes-production__filters" role="group" aria-label="Представление операций">
+                      <button
+                        type="button"
+                        className={`mes-production__toggle ${operationFocus === 'status' ? 'mes-production__toggle--active' : ''}`}
+                        aria-pressed={operationFocus === 'status'}
+                        onClick={() => setOperationFocus('status')}
+                      >
+                        По статусам
+                      </button>
+                      <button
+                        type="button"
+                        className={`mes-production__toggle ${operationFocus === 'shift' ? 'mes-production__toggle--active' : ''}`}
+                        aria-pressed={operationFocus === 'shift'}
+                        onClick={() => setOperationFocus('shift')}
+                      >
+                        По сменам
+                      </button>
+                    </div>
+                  </div>
+                  {operationFocus === 'status' ? (
+                    <div className="mes-production__operations">
+                      {operationsGroups.map(group => (
+                        <section key={group.key}>
+                          <header className="mes-production__operations-header">
+                            <h4>{group.title}</h4>
+                            <p className="muted">{group.hint}</p>
+                          </header>
+                          <ul className="mes-production__list">
+                            {group.orders.map(order => (
+                              <li key={order.id}>
+                                <div>
+                                  <strong>{order.opId}</strong>
+                                  <p className="muted">Заказ {order.prodOrderId}</p>
+                                </div>
+                                <div className="mes-production__list-meta">
+                                  {order.startedAt && (
+                                    <span className="chip chip--ghost">
+                                      <span className="chip__label">Старт</span>
+                                      <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                                    </span>
+                                  )}
+                                  {order.assignee && (
+                                    <span className="chip chip--ghost">
+                                      <span className="chip__label">Исполнитель</span>
+                                      <span className="chip__value">{order.assignee}</span>
+                                    </span>
+                                  )}
+                                  <span className={`status status--${order.status}`}>
+                                    {workOrderStatusLabel[order.status]}
+                                  </span>
+                                </div>
+                              </li>
+                            ))}
+                            {group.orders.length === 0 && <li className="muted">Нет операций в статусе</li>}
+                          </ul>
+                        </section>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mes-production__operations">
+                      {shiftBuckets.map(group => (
+                        <section key={group.key}>
+                          <header className="mes-production__operations-header">
+                            <h4>{group.title}</h4>
+                            <p className="muted">{group.window}</p>
+                          </header>
+                          <ul className="mes-production__list">
+                            {group.orders.map(order => (
+                              <li key={order.id}>
+                                <div>
+                                  <strong>{order.opId}</strong>
+                                  <p className="muted">Заказ {order.prodOrderId}</p>
+                                </div>
+                                <div className="mes-production__list-meta">
+                                  {order.startedAt && (
+                                    <span className="chip chip--ghost">
+                                      <span className="chip__label">Старт</span>
+                                      <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                                    </span>
+                                  )}
+                                  {order.assignee && (
+                                    <span className="chip chip--ghost">
+                                      <span className="chip__label">Исполнитель</span>
+                                      <span className="chip__value">{order.assignee}</span>
+                                    </span>
+                                  )}
+                                  <span className={`status status--${order.status}`}>
+                                    {workOrderStatusLabel[order.status]}
+                                  </span>
+                                </div>
+                              </li>
+                            ))}
+                            {group.orders.length === 0 && <li className="muted">Нет операций в смене</li>}
+                          </ul>
+                        </section>
+                      ))}
+                    </div>
+                  )}
+                </article>
+
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Блокирующие операции</h3>
+                    <p className="muted">Действия требующие вмешательства мастера.</p>
+                  </header>
+                  <ul className="mes-production__list">
+                    {blockedOperations.map(order => (
+                      <li key={order.id}>
+                        <div>
+                          <strong>{order.opId}</strong>
+                          <p className="muted">Заказ {order.prodOrderId}</p>
+                        </div>
+                        <div className="mes-production__list-meta">
+                          {order.assignee && (
+                            <span className="chip chip--ghost">
+                              <span className="chip__label">Исполнитель</span>
+                              <span className="chip__value">{order.assignee}</span>
+                            </span>
+                          )}
+                          {order.startedAt && (
+                            <span className="chip chip--ghost">
+                              <span className="chip__label">Старт</span>
+                              <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                            </span>
+                          )}
+                          <span className={`status status--${order.status}`}>
+                            {workOrderStatusLabel[order.status]}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                    {blockedOperations.length === 0 && <li className="muted">Блокеров не обнаружено</li>}
+                  </ul>
+                </article>
+
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Назначения смены</h3>
+                    <p className="muted">Последние операции с фактическим стартом.</p>
+                  </header>
+                  <ul className="mes-production__list">
+                    {activeOperations.map(order => (
+                      <li key={order.id}>
+                        <div>
+                          <strong>{order.opId}</strong>
+                          <p className="muted">{productionOrderMap.get(order.prodOrderId)?.itemId ?? order.prodOrderId}</p>
+                        </div>
+                        <div className="mes-production__list-meta">
+                          {order.startedAt && (
+                            <span className="chip chip--ghost">
+                              <span className="chip__label">Старт</span>
+                              <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                            </span>
+                          )}
+                          {order.assignee && (
+                            <span className="chip chip--ghost">
+                              <span className="chip__label">Исполнитель</span>
+                              <span className="chip__value">{order.assignee}</span>
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                    {activeOperations.length === 0 && <li className="muted">Нет операций в работе</li>}
+                  </ul>
+                </article>
+
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Лидеры смены</h3>
+                    <p className="muted">Активные исполнители и глубина очереди по ним.</p>
+                  </header>
+                  <ul className="mes-production__operator-list">
+                    {operatorUtilization.map(operator => (
+                      <li key={operator.assignee} className="mes-production__operator">
+                        <div>
+                          <strong>{operator.assignee}</strong>
+                          <p className="muted">Активно {operator.active} / Всего {operator.total}</p>
+                        </div>
+                        <div className="mes-production__bar">
+                          <div
+                            className="mes-production__bar-fill"
+                            style={{ width: operator.total === 0 ? '0%' : `${(operator.active / operator.total) * 100}%` }}
+                          />
+                        </div>
+                      </li>
+                    ))}
+                    {operatorUtilization.length === 0 && <li className="muted">Исполнители не назначены</li>}
+                  </ul>
+                </article>
+
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Долгие операции</h3>
+                    <p className="muted">Мониторинг затянувшихся заданий текущей смены.</p>
+                  </header>
+                  <ul className="mes-production__list">
+                    {operationAging.map(order => (
+                      <li key={order.id}>
+                        <div>
+                          <strong>{order.opId}</strong>
+                          <p className="muted">Заказ {order.prodOrderId}</p>
+                        </div>
+                        <div className="mes-production__list-meta">
+                          {order.startedAt && (
+                            <span className="chip chip--ghost">
+                              <span className="chip__label">Старт</span>
+                              <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                            </span>
+                          )}
+                          <span className="chip chip--accent">{order.agingMin} мин</span>
+                        </div>
+                      </li>
+                    ))}
+                    {operationAging.length === 0 && <li className="muted">Долгих операций нет</li>}
+                  </ul>
+                </article>
+              </div>
+            )}
+
+            {activeTab === 'resources' && (
+              <div className="mes-production__panels mes-production__panels--grid">
+                <article className="mes-production__panel mes-production__panel--wide">
+                  <header>
+                    <h3>Загрузка рабочих центров</h3>
+                    <p className="muted">Контроль WIP и доступности по всем зонам.</p>
+                  </header>
+                  <div className="mes-production__toolbar mes-production__toolbar--sub">
+                    <div className="mes-production__filters" role="group" aria-label="Фильтр потоков">
+                      <button
+                        type="button"
+                        className={`mes-production__filter ${selectedStream === 'all' ? 'mes-production__filter--active' : ''}`}
+                        aria-pressed={selectedStream === 'all'}
+                        onClick={() => setSelectedStream('all')}
+                      >
+                        Все потоки
+                      </button>
+                      {valueStreams.map(stream => (
+                        <button
+                          key={stream.id}
+                          type="button"
+                          className={`mes-production__filter ${selectedStream === stream.id ? 'mes-production__filter--active' : ''}`}
+                          aria-pressed={selectedStream === stream.id}
+                          onClick={() => setSelectedStream(stream.id)}
+                        >
+                          {stream.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <table className="mes-production__table">
+                    <thead>
+                      <tr>
+                        <th>Центр</th>
+                        <th>Очередь</th>
+                        <th>В работе</th>
+                        <th>Блокировано</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredBacklogByCenter.map(center => (
+                        <tr key={center.id}>
                           <td>
                             <div>
-                              <strong>{order.id}</strong>
-                              <p className="muted">Номенклатура {order.itemId}</p>
+                              <strong>{center.name}</strong>
+                              <p className="muted">{center.capabilities}</p>
                             </div>
                           </td>
-                          <td>{order.qty}</td>
-                          <td>{formatDate(order.dueDate)}</td>
                           <td>
-                            <span className={`status status--${order.status}`}>
-                              {productionStatusLabel[order.status]}
+                            <span className="chip">
+                              <span className="chip__label">Очередь</span>
+                              <span className="chip__value">{center.inQueue}</span>
                             </span>
                           </td>
                           <td>
-                            <div
-                              className="progress"
-                              role="progressbar"
-                              aria-valuenow={progress}
-                              aria-valuemin={0}
-                              aria-valuemax={100}
-                            >
-                              <div className="progress__bar" style={{ width: `${progress}%` }}>
-                                <span>{progress}%</span>
-                              </div>
-                            </div>
+                            <span className="chip">
+                              <span className="chip__label">В работе</span>
+                              <span className="chip__value">{center.running}</span>
+                            </span>
+                          </td>
+                          <td>
+                            <span className="chip">
+                              <span className="chip__label">Блокировано</span>
+                              <span className="chip__value">{center.blocked}</span>
+                            </span>
                           </td>
                         </tr>
-                      );
-                    })}
-                    {filteredOrders.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="mes-production__empty">
-                          Нет активных производственных заказов
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              ) : (
-                <ol className="mes-production__timeline">
-                  {ordersTimeline.map(order => (
-                    <li key={order.id} className="mes-production__timeline-item">
-                      <div className="mes-production__timeline-header">
-                        <strong>{order.id}</strong>
-                        <span className={`status status--${order.status}`}>
-                          {productionStatusLabel[order.status]}
-                        </span>
-                      </div>
-                      <p className="muted">Срок {formatDate(order.dueDate)} • {order.dueLabel}</p>
-                      <div className="mes-production__timeline-progress">
-                        <div className="mes-production__timeline-track">
-                          <div className="mes-production__timeline-bar" style={{ width: `${order.progress}%` }} />
-                        </div>
-                        <span className="mes-production__timeline-value">{order.progress}%</span>
-                      </div>
-                    </li>
-                  ))}
-                  {ordersTimeline.length === 0 && (
-                    <li className="muted">Нет заказов в выбранном фильтре</li>
-                  )}
-                </ol>
-              )}
-
-            </article>
-            <article className="mes-production__panel">
-              <header>
-                <h3>Критичные сроки</h3>
-                <p className="muted">Заказы требующие внимания в ближайшие дни.</p>
-              </header>
-              <ul className="mes-production__list">
-                {criticalOrders.map(order => {
-                  const progress = getProgress(order, workOrders);
-                  return (
-                    <li key={order.id}>
-                      <div>
-                        <strong>{order.id}</strong>
-                        <p className="muted">Поставка до {formatDate(order.dueDate)}</p>
-                      </div>
-                      <div className="mes-production__list-meta">
-
-                        <span className="chip chip--ghost">
-                          <span className="chip__label">Прогресс</span>
-                          <span className="chip__value">{progress}%</span>
-                        </span>
-
-                        <span className={`status status--${order.status}`}>
-                          {productionStatusLabel[order.status]}
-                        </span>
-                      </div>
-                    </li>
-                  );
-                })}
-                {criticalOrders.length === 0 && <li className="muted">Срочных заказов нет</li>}
-              </ul>
-            </article>
-            <article className="mes-production__panel">
-              <header>
-
-                <h3>Value stream сегментация</h3>
-                <p className="muted">Зоны ответственности, риск и ближайшие вехи по потокам.</p>
-              </header>
-              <ul className="mes-production__stream-list">
-                {streamInsights.map(stream => (
-                  <li key={stream.id} className="mes-production__stream-card">
-                    <div className="mes-production__stream-header">
-                      <div className="mes-production__stream-title">
-                        <strong>{stream.name}</strong>
-                        <p className="muted">{stream.focus}</p>
-                      </div>
-                      <div className="mes-production__stream-tags">
-                        <span className={`chip chip--risk-${stream.risk}`}>
-                          <span className="chip__label">Риск</span>
-                          <span className="chip__value">{stream.risk}</span>
-                        </span>
-                        <span className="chip chip--ghost">
-                          <span className="chip__label">Линий</span>
-                          <span className="chip__value">{stream.lineCount}</span>
-                        </span>
-                        <span className="chip chip--ghost">
-                          <span className="chip__label">Доступность</span>
-                          <span className="chip__value">{stream.availability}%</span>
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mes-production__stream-stats">
-                      <span className="chip chip--ghost">
-                        <span className="chip__label">Спрос недели</span>
-                        <span className="chip__value">{stream.demand}</span>
-                      </span>
-                      <span className="chip chip--ghost">
-                        <span className="chip__label">Backlog</span>
-                        <span className="chip__value">{stream.backlog}</span>
-                      </span>
-                      <span className="chip chip--ghost">
-                        <span className="chip__label">WIP</span>
-                        <span className="chip__value">{stream.wip}</span>
-                      </span>
-                      <span className="chip chip--ghost">
-                        <span className="chip__label">Выполнение</span>
-                        <span className="chip__value">{stream.attainment}%</span>
-                      </span>
-                    </div>
-                    <div className="mes-production__stream-notes">
-                      <span className="muted">
-                        Дежурные: {stream.gatekeepers.length > 0 ? stream.gatekeepers.join(', ') : 'не назначены'}
-                      </span>
-                      <span className="muted">Следующий рубеж: {stream.nextMilestone}</span>
-                    </div>
-                    {stream.blockers.length > 0 && (
-                      <div className="mes-production__stream-alert">
-                        <span className="alert">Блокеры: {stream.blockers.join(', ')}</span>
-                      </div>
-                    )}
-                  </li>
-                ))}
-                {streamInsights.length === 0 && <li className="muted">Потоки не настроены</li>}
-              </ul>
-
-            </article>
-          </div>
-        )}
-
-        {activeTab === 'operations' && (
-          <div className="mes-production__panels mes-production__panels--grid">
-            <article className="mes-production__panel mes-production__panel--wide">
-              <header>
-                <h3>Исполнение операций</h3>
-                <p className="muted">Распределение по статусам и назначенным исполнителям.</p>
-              </header>
-
-              <div className="mes-production__toolbar mes-production__toolbar--sub">
-                <div className="mes-production__filters" role="group" aria-label="Представление операций">
-                  <button
-                    type="button"
-                    className={`mes-production__toggle ${operationFocus === 'status' ? 'mes-production__toggle--active' : ''}`}
-                    aria-pressed={operationFocus === 'status'}
-                    onClick={() => setOperationFocus('status')}
-                  >
-                    По статусам
-                  </button>
-                  <button
-                    type="button"
-                    className={`mes-production__toggle ${operationFocus === 'shift' ? 'mes-production__toggle--active' : ''}`}
-                    aria-pressed={operationFocus === 'shift'}
-                    onClick={() => setOperationFocus('shift')}
-                  >
-                    По сменам
-                  </button>
-                </div>
-              </div>
-              {operationFocus === 'status' ? (
-                <div className="mes-production__operations">
-                  {operationsGroups.map(group => (
-                    <section key={group.key}>
-                      <header className="mes-production__operations-header">
-                        <h4>{group.title}</h4>
-                        <p className="muted">{group.hint}</p>
-                      </header>
-                      <ul className="mes-production__list">
-                        {group.orders.map(order => (
-                          <li key={order.id}>
-                            <div>
-                              <strong>{order.opId}</strong>
-                              <p className="muted">Заказ {order.prodOrderId}</p>
-                            </div>
-                            <div className="mes-production__list-meta">
-                              {order.startedAt && (
-                                <span className="chip chip--ghost">
-                                  <span className="chip__label">Старт</span>
-                                  <span className="chip__value">{formatDateTime(order.startedAt)}</span>
-                                </span>
-                              )}
-                              {order.assignee && (
-                                <span className="chip chip--ghost">
-                                  <span className="chip__label">Исполнитель</span>
-                                  <span className="chip__value">{order.assignee}</span>
-                                </span>
-                              )}
-                              <span className={`status status--${order.status}`}>
-                                {workOrderStatusLabel[order.status]}
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                        {group.orders.length === 0 && <li className="muted">Нет операций в статусе</li>}
-                      </ul>
-                    </section>
-                  ))}
-                </div>
-              ) : (
-                <div className="mes-production__operations">
-                  {shiftBuckets.map(group => (
-                    <section key={group.key}>
-                      <header className="mes-production__operations-header">
-                        <h4>{group.title}</h4>
-                        <p className="muted">{group.window}</p>
-                      </header>
-                      <ul className="mes-production__list">
-                        {group.orders.map(order => (
-                          <li key={order.id}>
-                            <div>
-                              <strong>{order.opId}</strong>
-                              <p className="muted">Заказ {order.prodOrderId}</p>
-                            </div>
-                            <div className="mes-production__list-meta">
-                              {order.startedAt && (
-                                <span className="chip chip--ghost">
-                                  <span className="chip__label">Старт</span>
-                                  <span className="chip__value">{formatDateTime(order.startedAt)}</span>
-                                </span>
-                              )}
-                              {order.assignee && (
-                                <span className="chip chip--ghost">
-                                  <span className="chip__label">Исполнитель</span>
-                                  <span className="chip__value">{order.assignee}</span>
-                                </span>
-                              )}
-                              <span className={`status status--${order.status}`}>
-                                {workOrderStatusLabel[order.status]}
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                        {group.orders.length === 0 && <li className="muted">Нет операций в смене</li>}
-                      </ul>
-                    </section>
-                  ))}
-                </div>
-              )}
-
-            </article>
-            <article className="mes-production__panel">
-              <header>
-                <h3>Блокирующие операции</h3>
-                <p className="muted">Действия требующие вмешательства мастера.</p>
-              </header>
-              <ul className="mes-production__list">
-                {blockedOperations.map(order => (
-                  <li key={order.id}>
-                    <div>
-                      <strong>{order.opId}</strong>
-                      <p className="muted">Заказ {order.prodOrderId}</p>
-                    </div>
-                    <div className="mes-production__list-meta">
-
-                      {order.assignee && (
-                        <span className="chip chip--ghost">
-                          <span className="chip__label">Исполнитель</span>
-                          <span className="chip__value">{order.assignee}</span>
-                        </span>
+                      ))}
+                      {filteredBacklogByCenter.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="mes-production__empty">
+                            Нет активных рабочих центров
+                          </td>
+                        </tr>
                       )}
-                      {order.startedAt && (
-                        <span className="chip chip--ghost">
-                          <span className="chip__label">Старт</span>
-                          <span className="chip__value">{formatDateTime(order.startedAt)}</span>
-                        </span>
-                      )}
+                    </tbody>
+                  </table>
+                </article>
 
-                      <span className={`status status--${order.status}`}>
-                        {workOrderStatusLabel[order.status]}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-                {blockedOperations.length === 0 && <li className="muted">Блокеров не обнаружено</li>}
-              </ul>
-            </article>
-            <article className="mes-production__panel">
-              <header>
-                <h3>Назначения смены</h3>
-                <p className="muted">Последние операции с фактическим стартом.</p>
-              </header>
-              <ul className="mes-production__list">
-                {activeOperations.map(order => (
-                  <li key={order.id}>
-                    <div>
-                      <strong>{order.opId}</strong>
-                      <p className="muted">{productionOrderMap.get(order.prodOrderId)?.itemId ?? order.prodOrderId}</p>
-                    </div>
-                    <div className="mes-production__list-meta">
-
-                      {order.startedAt && (
-                        <span className="chip chip--ghost">
-                          <span className="chip__label">Старт</span>
-                          <span className="chip__value">{formatDateTime(order.startedAt)}</span>
-                        </span>
-                      )}
-                      {order.assignee && (
-                        <span className="chip chip--ghost">
-                          <span className="chip__label">Исполнитель</span>
-                          <span className="chip__value">{order.assignee}</span>
-                        </span>
-                      )}
-
-                    </div>
-                  </li>
-                ))}
-                {activeOperations.length === 0 && <li className="muted">Нет операций в работе</li>}
-              </ul>
-            </article>
-
-            <article className="mes-production__panel">
-              <header>
-                <h3>Лидеры смены</h3>
-                <p className="muted">Активные исполнители и глубина очереди по ним.</p>
-              </header>
-              <ul className="mes-production__operator-list">
-                {operatorUtilization.map(operator => (
-                  <li key={operator.assignee} className="mes-production__operator">
-                    <div>
-                      <strong>{operator.assignee}</strong>
-                      <p className="muted">Активно {operator.active} / Всего {operator.total}</p>
-                    </div>
-                    <div className="mes-production__bar">
-                      <div
-                        className="mes-production__bar-fill"
-                        style={{ width: operator.total === 0 ? '0%' : `${(operator.active / operator.total) * 100}%` }}
-                      />
-                    </div>
-                  </li>
-                ))}
-                {operatorUtilization.length === 0 && <li className="muted">Исполнители не назначены</li>}
-              </ul>
-            </article>
-            <article className="mes-production__panel">
-              <header>
-                <h3>Долгие операции</h3>
-                <p className="muted">Мониторинг затянувшихся заданий текущей смены.</p>
-              </header>
-              <ul className="mes-production__list">
-                {operationAging.map(order => (
-                  <li key={order.id}>
-                    <div>
-                      <strong>{order.opId}</strong>
-                      <p className="muted">Заказ {order.prodOrderId}</p>
-                    </div>
-                    <div className="mes-production__list-meta">
-                      {order.startedAt && (
-                        <span className="chip chip--ghost">
-                          <span className="chip__label">Старт</span>
-                          <span className="chip__value">{formatDateTime(order.startedAt)}</span>
-                        </span>
-                      )}
-                      <span className="chip chip--accent">
-                        <span className="chip__label">В работе</span>
-                        <span className="chip__value">{order.agingMin} мин</span>
-                      </span>
-                    </div>
-                  </li>
-                ))}
-                {operationAging.length === 0 && <li className="muted">Просроченных операций нет</li>}
-              </ul>
-            </article>
-
-          </div>
-        )}
-
-        {activeTab === 'resources' && (
-          <div className="mes-production__panels mes-production__panels--grid">
-            <article className="mes-production__panel mes-production__panel--wide">
-              <header>
-                <h3>Производственные линии</h3>
-                <p className="muted">Факт выполнения смены, доступность и риски.</p>
-              </header>
-
-              <div className="mes-production__toolbar mes-production__toolbar--sub">
-                <div className="mes-production__filters" role="group" aria-label="Фильтр по потокам">
-                  <button
-                    type="button"
-                    className={`mes-production__filter ${selectedStream === 'all' ? 'mes-production__filter--active' : ''}`}
-                    aria-pressed={selectedStream === 'all'}
-                    onClick={() => setSelectedStream('all')}
-                  >
-                    Все потоки
-                  </button>
-                  {valueStreams.map(stream => (
-                    <button
-                      key={stream.id}
-                      type="button"
-                      className={`mes-production__filter ${selectedStream === stream.id ? 'mes-production__filter--active' : ''}`}
-                      aria-pressed={selectedStream === stream.id}
-                      onClick={() => setSelectedStream(stream.id)}
-                    >
-                      {stream.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <ul className="mes-production__lines">
-                {filteredLineSignals.map(line => (
-                  <li key={line.id}>
-
-                    <div className="mes-production__line-body">
-                      <div className="mes-production__line-heading">
-                        <strong>{line.name}</strong>
-                        <span className="chip chip--ghost">
-                          <span className="chip__label">Смена</span>
-                          <span className="chip__value">{line.shiftPattern}</span>
-                        </span>
-                      </div>
-                      <p className="muted">
-                        План {line.targetPerShift} шт • Факт {line.throughputPerShift} шт • Такт {Math.round(line.taktTimeSec / 60)} мин
-                      </p>
-                      {line.blockers.length > 0 && <p className="alert">Блокеры: {line.blockers.join(', ')}</p>}
-                      <div className="mes-production__line-indicators">
-                        <span className="chip">
-                          <span className="chip__label">WIP</span>
-                          <span className="chip__value">{line.currentWip}</span>
-                        </span>
-                        <span className="chip">
-                          <span className="chip__label">План</span>
-                          <span className="chip__value">{line.targetPerShift}</span>
-                        </span>
-                        <span className="chip">
-                          <span className="chip__label">Факт</span>
-                          <span className="chip__value">{line.throughputPerShift}</span>
-                        </span>
-                        <span className="chip">
-                          <span className="chip__label">OEE</span>
-                          <span className="chip__value">{line.attainment}%</span>
-                        </span>
-                      </div>
-
-                    </div>
-                  </li>
-                ))}
-                {filteredLineSignals.length === 0 && <li className="muted">Линии не настроены</li>}
-
-              </ul>
-            </article>
-            <article className="mes-production__panel">
-              <header>
-                <h3>Нагрузка рабочих центров</h3>
-                <p className="muted">Очередь и блокировки по каждому центру.</p>
-              </header>
-              <table className="mes-production__table">
-                <thead>
-                  <tr>
-                    <th>Рабочий центр</th>
-                    <th>Очередь</th>
-                    <th>В работе</th>
-                    <th>Блокировано</th>
-                  </tr>
-                </thead>
-                <tbody>
-
-                  {filteredBacklogByCenter.map(center => (
-
-                    <tr key={center.id}>
-                      <td>
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Планы обслуживания</h3>
+                    <p className="muted">Запланированные работы и критичность.</p>
+                  </header>
+                  <ul className="mes-production__list">
+                    {upcomingMaintenance.map(order => (
+                      <li key={order.id}>
                         <div>
-                          <strong>{center.name}</strong>
-                          {center.capabilities && <p className="muted">{center.capabilities}</p>}
+                          <strong>{order.asset}</strong>
+                          <p className="muted">{maintenanceTypeLabel[order.type]}</p>
                         </div>
-                      </td>
-
-                      <td>
-                        <span className="chip">
-                          <span className="chip__label">Очередь</span>
-                          <span className="chip__value">{center.inQueue}</span>
-                        </span>
-                      </td>
-                      <td>
-                        <span className="chip">
-                          <span className="chip__label">В работе</span>
-                          <span className="chip__value">{center.running}</span>
-                        </span>
-                      </td>
-                      <td>
-                        <span className="chip">
-                          <span className="chip__label">Блокировано</span>
-                          <span className="chip__value">{center.blocked}</span>
-                        </span>
-                      </td>
-
-                    </tr>
-                  ))}
-                  {filteredBacklogByCenter.length === 0 && (
-
-
-                    <tr>
-                      <td colSpan={4} className="mes-production__empty">
-                        Нет активных рабочих центров
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </article>
-
-            <article className="mes-production__panel">
-              <header>
-                <h3>Загрузка потоков</h3>
-                <p className="muted">Синхронизация спроса, WIP и выполнения.</p>
-              </header>
-              <ul className="mes-production__operator-list">
-                {streamLoads.map(stream => (
-                  <li key={stream.id} className="mes-production__operator">
-                    <div>
-                      <strong>{stream.name}</strong>
-                      <p className="muted">{stream.focus}</p>
-                    </div>
-                    <div className="mes-production__stream-meta">
-                      <span className={`chip chip--risk-${stream.risk}`}>
-                        <span className="chip__label">Риск</span>
-                        <span className="chip__value">{stream.risk}</span>
-                      </span>
-                      <span className="chip chip--ghost">
-                        <span className="chip__label">Спрос</span>
-                        <span className="chip__value">{stream.demand}</span>
-                      </span>
-                      <span className="chip chip--ghost">
-                        <span className="chip__label">Backlog</span>
-                        <span className="chip__value">{stream.backlog}</span>
-                      </span>
-                    </div>
-                    <div className="mes-production__bar">
-                      <div
-                        className="mes-production__bar-fill"
-                        style={{
-                          width:
-                            stream.totalTarget === 0 ? '0%' : `${Math.min(100, (stream.totalThroughput / stream.totalTarget) * 100)}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="mes-production__stream-footer">
-                      <span className="muted">WIP {stream.totalWip}</span>
-                      <span className="muted">Выполнение {stream.attainment}%</span>
-                      {stream.blockers.length > 0 && (
-                        <span className="muted">Блокеры: {stream.blockers.join(', ')}</span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-                {streamLoads.length === 0 && <li className="muted">Потоки не настроены</li>}
-              </ul>
-            </article>
-
-          </div>
-        )}
-
-        {activeTab === 'quality' && (
-          <div className="mes-production__panels mes-production__panels--grid">
-            <article className="mes-production__panel">
-              <header>
-                <h3>Индикаторы качества</h3>
-              </header>
-              <div className="mes-production__metrics">
-                <div className="metric">
-                  <span className="metric__label">Контрольных точек</span>
-                  <span className="metric__value">{qualitySummary.total}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric__label">Ожидает</span>
-                  <span className="metric__value">{qualitySummary.pending}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric__label">Блокировано</span>
-                  <span className="metric__value">{qualitySummary.blocked}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric__label">Дефектов</span>
-                  <span className="metric__value">{qualitySummary.failed}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric__label">Открытые NCR</span>
-                  <span className="metric__value">{qualitySummary.openNonconformances}</span>
-                </div>
+                        <div className="mes-production__list-meta">
+                          <span className="chip chip--ghost">{formatDate(order.schedule)}</span>
+                          <span className={`status status--${order.status}`}>{maintenanceStatusLabel[order.status]}</span>
+                        </div>
+                      </li>
+                    ))}
+                    {upcomingMaintenance.length === 0 && <li className="muted">Обслуживание не требуется</li>}
+                  </ul>
+                </article>
               </div>
-            </article>
-            <article className="mes-production__panel">
-              <header>
-                <h3>Последние проверки</h3>
-                <p className="muted">Результаты по ключевым контрольным операциям.</p>
-              </header>
-              <ul className="mes-production__list">
-                {recentQualityChecks.map(check => (
-                  <li key={check.id}>
-                    <div>
-                      <strong>{check.ruleId}</strong>
-                      <p className="muted">
-                        {check.entityType} #{check.entityId}
-                      </p>
-                    </div>
-                    <span className={`status status--${check.status}`}>
-                      {qualityStatusLabel[check.status]}
-                    </span>
-                  </li>
-                ))}
-                {recentQualityChecks.length === 0 && <li className="muted">Нет данных по проверкам</li>}
-              </ul>
-            </article>
-            <article className="mes-production__panel">
-              <header>
+            )}
 
-                <h3>Фокус проверки</h3>
-                <p className="muted">Какие объекты попадают в контроль чаще других.</p>
-              </header>
-              <div className="mes-production__distribution">
-                {qualityByEntity.map(item => (
-                  <div key={item.entity} className="mes-production__distribution-row">
-                    <span className="mes-production__distribution-label">{item.entity}</span>
-                    <div className="mes-production__distribution-bar">
-                      <div
-                        className="mes-production__distribution-fill mes-production__distribution-fill--quality"
-                        style={{ width: `${item.total === 0 ? 0 : (item.failed / item.total) * 100}%` }}
-                      />
-                      <div
-                        className="mes-production__distribution-fill mes-production__distribution-fill--blocked"
-                        style={{ width: `${item.total === 0 ? 0 : (item.blocked / item.total) * 100}%` }}
-                      />
+            {activeTab === 'quality' && (
+              <div className="mes-production__panels mes-production__panels--grid">
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Индикаторы качества</h3>
+                  </header>
+                  <div className="mes-production__metrics">
+                    <div className="metric">
+                      <span className="metric__label">Контрольных точек</span>
+                      <span className="metric__value">{formatNumber(qualitySummary.total)}</span>
                     </div>
-                    <span className="mes-production__distribution-value">{item.total}</span>
+                    <div className="metric">
+                      <span className="metric__label">Ожидает</span>
+                      <span className="metric__value">{formatNumber(qualitySummary.pending)}</span>
+                    </div>
+                    <div className="metric">
+                      <span className="metric__label">Блокировано</span>
+                      <span className="metric__value">{formatNumber(qualitySummary.blocked)}</span>
+                    </div>
+                    <div className="metric">
+                      <span className="metric__label">Дефектов</span>
+                      <span className="metric__value">{formatNumber(qualitySummary.failed)}</span>
+                    </div>
+                    <div className="metric">
+                      <span className="metric__label">Открытые NCR</span>
+                      <span className="metric__value">{formatNumber(qualitySummary.openNonconformances)}</span>
+                    </div>
                   </div>
-                ))}
-                {qualityByEntity.length === 0 && <p className="muted">Контрольные точки не настроены</p>}
+                </article>
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Последние проверки</h3>
+                    <p className="muted">Результаты по ключевым контрольным операциям.</p>
+                  </header>
+                  <ul className="mes-production__list">
+                    {recentQualityChecks.map(check => (
+                      <li key={check.id}>
+                        <div>
+                          <strong>{check.ruleId}</strong>
+                          <p className="muted">{check.entityType}</p>
+                        </div>
+                        <div className="mes-production__list-meta">
+                          <span className="chip chip--ghost">{formatDateTime(check.checkedAt)}</span>
+                          <span className={`status status--${check.status}`}>{qualityStatusLabel[check.status]}</span>
+                        </div>
+                      </li>
+                    ))}
+                    {recentQualityChecks.length === 0 && <li className="muted">Проверок не выполнялось</li>}
+                  </ul>
+                </article>
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Нарушения</h3>
+                    <p className="muted">Статусы NCR и приоритеты расследования.</p>
+                  </header>
+                  <ul className="mes-production__list">
+                    {nonconformances.map(item => (
+                      <li key={item.id}>
+                        <div>
+                          <strong>{item.refType} #{item.refId}</strong>
+                          <p className="muted">Ответственный: {item.owner ?? '—'}</p>
+                        </div>
+                        <div className="mes-production__list-meta">
+                          <span className={`status status--${item.status}`}>{nonconformanceStatusLabel[item.status]}</span>
+                          <span className={`chip chip--${item.severity}`}>{item.severity}</span>
+                        </div>
+                      </li>
+                    ))}
+                    {nonconformances.length === 0 && <li className="muted">Нарушений не найдено</li>}
+                  </ul>
+                </article>
+                <article className="mes-production__panel">
+                  <header>
+                    <h3>Покрытие тест-планов</h3>
+                    <p className="muted">Статусы тестовых планов и ответственные команды.</p>
+                  </header>
+                  <ul className="mes-production__operator-list">
+                    {testPlans.map(plan => (
+                      <li key={plan.id} className="mes-production__operator">
+                        <div>
+                          <strong>{plan.name}</strong>
+                          <p className="muted">Команда {plan.ownerTeam}</p>
+                        </div>
+                        <div className="mes-production__stream-meta">
+                          <span className="chip chip--ghost">Охват {plan.coverage}%</span>
+                          <span className="chip chip--ghost">Обязателен для {plan.requiredFor.join(', ')}</span>
+                        </div>
+                      </li>
+                    ))}
+                    {testPlans.length === 0 && <li className="muted">Тест-планы не настроены</li>}
+                  </ul>
+                </article>
               </div>
-            </article>
-            <article className="mes-production__panel">
-              <header>
-                <h3>Несоответствия</h3>
-                <p className="muted">Мониторинг эскалаций и плана корректирующих действий.</p>
-              </header>
-              <div className="mes-production__toolbar mes-production__toolbar--sub">
-                <div className="mes-production__filters" role="group" aria-label="Фильтр по критичности NCR">
-                  {([
-                    { id: 'all', label: 'Все', count: nonconformances.length },
-                    { id: 'high', label: 'High', count: nonconformanceCounts.high },
-                    { id: 'medium', label: 'Medium', count: nonconformanceCounts.medium },
-                    { id: 'low', label: 'Low', count: nonconformanceCounts.low },
-                  ] as const).map(option => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      className={`mes-production__filter ${nonconformanceSeverity === option.id ? 'mes-production__filter--active' : ''}`}
-                      aria-pressed={nonconformanceSeverity === option.id}
-                      onClick={() => setNonconformanceSeverity(option.id)}
-                    >
-                      <span>{option.label}</span>
-                      <span className="mes-production__filter-count">{option.count}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <ul className="mes-production__list">
-                {filteredNonconformances.map(nc => (
-
-                  <li key={nc.id}>
-                    <div>
-                      <strong>
-                        {nc.refType} #{nc.refId}
-                      </strong>
-                      <p className="muted">{nc.action ?? 'Действие не назначено'}</p>
-                    </div>
-
-                    <div className="mes-production__list-meta">
-                      <span className={`chip chip--risk-${nc.severity}`}>
-                        <span className="chip__label">Риск</span>
-                        <span className="chip__value">{nc.severity}</span>
-                      </span>
-                      <span className={`status status--${nc.status}`}>
-                        {nonconformanceStatusLabel[nc.status]}
-                      </span>
-                    </div>
-
-                  </li>
-                ))}
-                {filteredNonconformances.length === 0 && <li className="muted">Несоответствий нет</li>}
-
-              </ul>
-            </article>
-            <article className="mes-production__panel">
-              <header>
-                <h3>План обслуживания</h3>
-                <p className="muted">Ближайшие заявки на обслуживание оборудования.</p>
-              </header>
-              <ul className="mes-production__list">
-                {upcomingMaintenance.map(order => (
-                  <li key={order.id}>
-                    <div>
-                      <strong>{order.assetId}</strong>
-                      <p className="muted">
-                        {maintenanceTypeLabel[order.type]} • {formatDate(order.schedule)}
-                      </p>
-                    </div>
-                    <span className={`status status--${order.status}`}>
-                      {maintenanceStatusLabel[order.status]}
-                    </span>
-                  </li>
-                ))}
-                {upcomingMaintenance.length === 0 && <li className="muted">Обслуживание не требуется</li>}
-              </ul>
-            </article>
+            )}
           </div>
-        )}
+        </section>
+
+        <aside className="page__sidebar" aria-label="Сводка качества и ТО">
+          <section className="card" aria-label="Состояние качества">
+            <h2>Состояние качества</h2>
+            <ul className="mes-production__metrics">
+              <li className="metric">
+                <span className="metric__label">Контрольных точек</span>
+                <span className="metric__value">{formatNumber(qualitySummary.total)}</span>
+              </li>
+              <li className="metric">
+                <span className="metric__label">Блокировано</span>
+                <span className="metric__value">{formatNumber(qualitySummary.blocked)}</span>
+              </li>
+              <li className="metric">
+                <span className="metric__label">Открыто NCR</span>
+                <span className="metric__value">{formatNumber(qualitySummary.openNonconformances)}</span>
+              </li>
+            </ul>
+          </section>
+          <section className="card" aria-label="Предстоящее обслуживание">
+            <h2>Предстоящее обслуживание</h2>
+            <ul className="mes-production__list">
+              {upcomingMaintenance.slice(0, 3).map(order => (
+                <li key={order.id}>
+                  <div>
+                    <strong>{order.asset}</strong>
+                    <p className="muted">{maintenanceTypeLabel[order.type]}</p>
+                  </div>
+                  <span className="chip chip--ghost">{formatDate(order.schedule)}</span>
+                </li>
+              ))}
+              {upcomingMaintenance.length === 0 && <li className="muted">Нет задач обслуживания</li>}
+            </ul>
+          </section>
+          <section className="card" aria-label="Сводка NCR">
+            <h2>Сводка NCR</h2>
+            <ul className="mes-production__metrics">
+              {(['low', 'medium', 'high'] as const).map(severity => (
+                <li key={severity} className="metric">
+                  <span className="metric__label">{severity.toUpperCase()}</span>
+                  <span className="metric__value">{nonconformanceCounts[severity]}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </aside>
       </div>
     </section>
   );
+
 };
 
 export default ProductionDashboard;

@@ -21,11 +21,11 @@ const portStateLabel: Record<FlashPort['state'], string> = {
 };
 
 const portStateClass: Record<FlashPort['state'], string> = {
-  disconnected: 'status--idle',
-  ready: 'status--available',
-  bootloader: 'status--queued',
+  disconnected: 'status--disconnected',
+  ready: 'status--ready',
+  bootloader: 'status--bootloader',
   flashing: 'status--running',
-  ok: 'status--completed',
+  ok: 'status--ok',
   error: 'status--error',
 };
 
@@ -40,9 +40,9 @@ const jobStatusLabel = {
 const jobStatusClass = {
   queued: 'status--queued',
   running: 'status--running',
-  ok: 'status--completed',
+  ok: 'status--ok',
   error: 'status--error',
-  aborted: 'status--paused',
+  aborted: 'status--aborted',
 } as const;
 
 type ManualPanelState = {
@@ -60,6 +60,8 @@ type ManualPanelState = {
     setParams: boolean;
   };
 };
+
+const formatNumber = (value: number) => value.toLocaleString('ru-RU');
 
 const formatDuration = (seconds?: number) => {
   if (!seconds || Number.isNaN(seconds)) {
@@ -276,65 +278,40 @@ export const FirmwareFlashingConsole: React.FC = () => {
   };
 
   return (
-    <section className="firmware-console" aria-label="Консоль прошивки">
+    <section className="mes-page firmware-console" aria-label="Консоль прошивки">
       <header className="firmware-console__header">
-        <div>
-          <h1>Прошивка устройств</h1>
-          <p className="muted">
-            Управляйте стендами прошивки, контролируйте версии и прослеживаемость для серверов и дронов в одной панели.
-          </p>
-          <div className="firmware-console__metrics">
-            <div className="metric">
-              <span className="metric__label">Всего прошивок сегодня</span>
-              <span className="metric__value">{totalJobs}</span>
-            </div>
-            <div className="metric">
-              <span className="metric__label">Успешно</span>
-              <span className="metric__value">{okJobs}</span>
-            </div>
-            <div className="metric">
-              <span className="metric__label">Ошибок</span>
-              <span className="metric__value">{errorJobs}</span>
-            </div>
-            <div className="metric">
-              <span className="metric__label">В процессе</span>
-              <span className="metric__value">{runningJobs}</span>
-            </div>
-            <div className="metric">
-              <span className="metric__label">Средняя длительность</span>
-              <span className="metric__value">{formatDuration(averageDurationSec)}</span>
-            </div>
-          </div>
-        </div>
-        <aside className="firmware-console__agents">
-          <h2>Состояние агентов</h2>
-          <ul>
-            {agents.map(agent => (
-              <li key={agent.id}>
-                <div>
-                  <strong>{agent.workstationName}</strong>
-                  <p className="muted">Версия {agent.version} · IP {agent.ipAddress}</p>
-                </div>
-                <div className={`status ${agent.status === 'online' ? 'status--available' : 'status--blocked'}`}>
-                  {agent.status === 'online' ? 'В сети' : agent.status === 'updating' ? 'Обновляется' : 'Недоступен'}
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div className="firmware-console__agent-meta">
-            <span>
-              Активные порты: <strong>{ports.length}</strong>
-            </span>
-            <span>
-              В очереди: <strong>{queuedJobs}</strong>
-            </span>
-          </div>
-        </aside>
+        <h1>Прошивка устройств</h1>
+        <p className="muted">
+          Управляйте стендами прошивки, контролируйте версии и прослеживаемость для серверов и дронов в одной панели.
+        </p>
       </header>
+
+      <div className="firmware-console__metrics">
+        <div className="metric">
+          <span className="metric__label">Всего прошивок сегодня</span>
+          <span className="metric__value">{formatNumber(totalJobs)}</span>
+        </div>
+        <div className="metric">
+          <span className="metric__label">Успешно</span>
+          <span className="metric__value">{formatNumber(okJobs)}</span>
+        </div>
+        <div className="metric">
+          <span className="metric__label">Ошибок</span>
+          <span className="metric__value">{formatNumber(errorJobs)}</span>
+        </div>
+        <div className="metric">
+          <span className="metric__label">В процессе</span>
+          <span className="metric__value">{formatNumber(runningJobs)}</span>
+        </div>
+        <div className="metric">
+          <span className="metric__label">Средняя длительность</span>
+          <span className="metric__value">{formatDuration(averageDurationSec)}</span>
+        </div>
+      </div>
 
       <div className="firmware-console__content">
         <section className="firmware-console__panels" aria-label="Панели прошивки">
-          <div className="firmware-console__panel-actions">
+          <div className="firmware-console__panel-controls">
             <button type="button" className="primary" disabled={readyPorts.length === 0}>
               Прошить всё подключённое ({readyPorts.length})
             </button>
@@ -354,6 +331,7 @@ export const FirmwareFlashingConsole: React.FC = () => {
               const canStartPort = !job && port.state === 'ready';
               const canDetach = job?.status === 'running' ? false : true;
               const logLink = job?.resultLogUrl;
+              const workstation = agents.find(item => item.workstationId === port.workstationId);
               return (
                 <article key={port.id} className="firmware-console__panel">
                   <header className="firmware-console__panel-header">
@@ -363,7 +341,11 @@ export const FirmwareFlashingConsole: React.FC = () => {
                       </h3>
                       <p className="muted">{port.deviceHint ?? 'USB устройство'}</p>
                     </div>
-                    <span className={`status ${job ? jobStatusClass[job.status] : portStateClass[port.state]}`}>
+                    <span
+                      className={`firmware-console__status ${
+                        job ? jobStatusClass[job.status] : portStateClass[port.state]
+                      }`}
+                    >
                       {job ? jobStatusLabel[job.status] : portStateLabel[port.state]}
                     </span>
                   </header>
@@ -395,7 +377,7 @@ export const FirmwareFlashingConsole: React.FC = () => {
                   </dl>
                   {optionsBadges(options)}
                   {job?.status === 'running' && typeof job.progressPercent === 'number' && (
-                    <div className="progress">
+                    <div className="progress" aria-label="Прогресс прошивки">
                       <div className="progress__bar" style={{ width: `${job.progressPercent}%` }}>
                         {job.progressPercent}%
                       </div>
@@ -405,10 +387,11 @@ export const FirmwareFlashingConsole: React.FC = () => {
                     <span>Старт: {formatTime(job?.startedAt)}</span>
                     <span>ETA: {job?.status === 'running' ? formatDuration(job.etaSec) : '—'}</span>
                     <span>Скорость: {formatSpeed(job?.speedKbps)}</span>
+                    <span>Станция: {workstation?.workstationName ?? port.workstationId ?? '—'}</span>
                   </div>
                   {renderChecklist(job?.powerChecklist ?? preset?.defaultChecklist)}
                   {mismatch && (
-                    <div className="firmware-console__alert">
+                    <div className="firmware-console__alert" role="alert">
                       <span>
                         Модель {job?.model} не входит в совместимые для {artifact?.version}
                       </span>
@@ -422,7 +405,7 @@ export const FirmwareFlashingConsole: React.FC = () => {
                     </div>
                   )}
                   {!versionAllowed && (
-                    <div className="firmware-console__alert firmware-console__alert--warning">
+                    <div className="firmware-console__alert firmware-console__alert--warning" role="alert">
                       <span>Версия не разрешена политикой выпуска.</span>
                     </div>
                   )}
@@ -450,7 +433,11 @@ export const FirmwareFlashingConsole: React.FC = () => {
 
             {manualPanels.map(panel => {
               const preset = panel.presetId ? presetMap.get(panel.presetId) : undefined;
-              const artifact = panel.artifactId ? artifactMap.get(panel.artifactId) : preset ? artifactMap.get(preset.artifactId) : undefined;
+              const artifact = panel.artifactId
+                ? artifactMap.get(panel.artifactId)
+                : preset
+                ? artifactMap.get(preset.artifactId)
+                : undefined;
               const options = panel.options ?? preset?.defaultOptions;
               const availableArtifacts = artifacts.filter(artifactItem => {
                 if (panel.project && artifactItem.project !== panel.project) {
@@ -476,7 +463,7 @@ export const FirmwareFlashingConsole: React.FC = () => {
                       <h3>Ручная панель</h3>
                       <p className="muted">Выберите порт и пресет</p>
                     </div>
-                    <span className="status status--idle">Готов</span>
+                    <span className="firmware-console__status status--ready">Готов</span>
                   </header>
                   <div className="firmware-console__manual-fields">
                     <label>
@@ -521,109 +508,67 @@ export const FirmwareFlashingConsole: React.FC = () => {
                       <span>Версия прошивки</span>
                       <select
                         value={panel.artifactId ?? ''}
-                        onChange={event => {
-                          const artifactId = event.target.value || undefined;
-                          const selectedArtifact = artifactId ? artifactMap.get(artifactId) : undefined;
-                          handleManualChange(panel.id, {
-                            artifactId,
-                            project: selectedArtifact?.project ?? panel.project,
-                            deviceType: selectedArtifact?.deviceType ?? panel.deviceType,
-                            model: selectedArtifact?.model ?? panel.model,
-                          });
-                        }}
+                        onChange={event => handleManualChange(panel.id, { artifactId: event.target.value || undefined })}
                       >
-                        <option value="">Выберите артефакт</option>
+                        <option value="">Не выбрано</option>
                         {availableArtifacts.map(artifactOption => (
                           <option key={artifactOption.id} value={artifactOption.id}>
-                            {artifactOption.version} · {artifactOption.buildId}
+                            {artifactOption.version} · {artifactOption.model}
                           </option>
                         ))}
                       </select>
                     </label>
                     <label>
-                      <span>Серийный номер *</span>
+                      <span>Проект</span>
+                      <select
+                        value={panel.project ?? ''}
+                        onChange={event =>
+                          handleManualChange(panel.id, {
+                            project: event.target.value
+                              ? (event.target.value as ManualPanelState['project'])
+                              : undefined,
+                          })
+                        }
+                      >
+                        <option value="">Не выбрано</option>
+                        <option value="servers">Серверы</option>
+                        <option value="drones">Дроны</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Серийный номер</span>
                       <input
-                        type="text"
                         value={panel.serialNumber ?? ''}
-                        placeholder="Отсканируйте или введите"
-                        onChange={event => handleManualChange(panel.id, { serialNumber: event.target.value })}
+                        onChange={event => handleManualChange(panel.id, { serialNumber: event.target.value || undefined })}
                       />
                     </label>
-                    <div className="firmware-console__options-toggle">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={Boolean(options?.erase)}
-                          onChange={event =>
-                            handleManualChange(panel.id, {
-                              options: {
-                                erase: event.target.checked,
-                                verify: Boolean(options?.verify),
-                                setParams: Boolean(options?.setParams),
-                              },
-                            })
-                          }
-                        />
-                        <span>Erase</span>
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={Boolean(options?.verify)}
-                          onChange={event =>
-                            handleManualChange(panel.id, {
-                              options: {
-                                erase: Boolean(options?.erase),
-                                verify: event.target.checked,
-                                setParams: Boolean(options?.setParams),
-                              },
-                            })
-                          }
-                        />
-                        <span>Verify</span>
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={Boolean(options?.setParams)}
-                          onChange={event =>
-                            handleManualChange(panel.id, {
-                              options: {
-                                erase: Boolean(options?.erase),
-                                verify: Boolean(options?.verify),
-                                setParams: event.target.checked,
-                              },
-                            })
-                          }
-                        />
-                        <span>Set params</span>
-                      </label>
-                    </div>
+                    <label>
+                      <span>Модель</span>
+                      <input
+                        value={panel.model ?? ''}
+                        onChange={event => handleManualChange(panel.id, { model: event.target.value || undefined })}
+                      />
+                    </label>
                   </div>
-                  <dl className="firmware-console__details">
-                    <div>
-                      <dt>Проект</dt>
-                      <dd>{panel.project === 'servers' ? 'Серверы' : panel.project === 'drones' ? 'Дроны' : '—'}</dd>
-                    </div>
-                    <div>
-                      <dt>Тип устройства</dt>
-                      <dd>{panel.deviceType ?? preset?.deviceType ?? '—'}</dd>
-                    </div>
-                    <div>
-                      <dt>Модель</dt>
-                      <dd>{panel.model ?? preset?.model ?? '—'}</dd>
-                    </div>
-                    <div>
-                      <dt>Checksum</dt>
-                      <dd>{artifact?.checksum ?? '—'}</dd>
-                    </div>
-                  </dl>
+                  <label className="firmware-console__options-toggle">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(options)}
+                      onChange={event =>
+                        handleManualChange(panel.id, {
+                          options: event.target.checked
+                            ? options ?? { erase: true, verify: true, setParams: true }
+                            : undefined,
+                        })
+                      }
+                    />
+                    Настроить опции вручную
+                  </label>
                   {optionsBadges(options)}
-                  {renderChecklist(preset?.defaultChecklist)}
                   {mismatch && (
-                    <div className="firmware-console__alert">
+                    <div className="firmware-console__alert" role="alert">
                       <span>
-                        Модель панели не входит в совместимые для {artifact?.version ?? 'артефакта'}
+                        Модель {panel.model} не входит в совместимые для {artifact?.version}
                       </span>
                       {canOverride ? (
                         <button type="button" className="ghost">
@@ -635,16 +580,16 @@ export const FirmwareFlashingConsole: React.FC = () => {
                     </div>
                   )}
                   {!versionAllowed && (
-                    <div className="firmware-console__alert firmware-console__alert--warning">
+                    <div className="firmware-console__alert firmware-console__alert--warning" role="alert">
                       <span>Версия не разрешена политикой выпуска.</span>
                     </div>
                   )}
                   <div className="firmware-console__panel-actions">
-                    <button type="button" className="primary" disabled={!canStart}>
-                      Начать прошивку
-                    </button>
-                    <button type="button" className="ghost" onClick={() => handleRemoveManualPanel(panel.id)}>
+                    <button type="button" className="secondary" onClick={() => handleRemoveManualPanel(panel.id)}>
                       Удалить панель
+                    </button>
+                    <button type="button" className="primary" disabled={!canStart}>
+                      Запустить прошивку
                     </button>
                   </div>
                 </article>
@@ -652,40 +597,72 @@ export const FirmwareFlashingConsole: React.FC = () => {
             })}
           </div>
         </section>
-
-        <aside className="firmware-console__sidebar">
-          <section className="firmware-console__presets" aria-label="Шаблоны прошивки">
-            <header>
-              <h2>Шаблоны конфигураций</h2>
-              {!canManagePresets && <span className="muted">Только просмотр</span>}
-            </header>
-            <ul>
-              {presets.map(preset => {
-                const artifact = artifactMap.get(preset.artifactId);
+        <aside className="firmware-console__sidebar" aria-label="Состояние инфраструктуры">
+          <section aria-label="Состояние агентов">
+            <h2>Состояние агентов</h2>
+            <ul className="firmware-console__agents-list">
+              {agents.map(agent => {
+                const agentStatusLabel =
+                  agent.status === 'online'
+                    ? 'В сети'
+                    : agent.status === 'updating'
+                    ? 'Обновляется'
+                    : 'Недоступен';
+                const agentStatusClass =
+                  agent.status === 'online'
+                    ? 'status--ready'
+                    : agent.status === 'updating'
+                    ? 'status--running'
+                    : 'status--error';
                 return (
-                  <li key={preset.id}>
+                  <li key={agent.id} className="firmware-console__agents-item">
                     <div>
-                      <strong>{preset.name}</strong>
-                      <p className="muted">
-                        {preset.project === 'servers' ? 'Серверы' : 'Дроны'} · {preset.deviceType} · {artifact?.version ?? '—'}
-                      </p>
+                      <strong>{agent.workstationName}</strong>
+                      <p className="muted">Версия {agent.version} · IP {agent.ipAddress}</p>
                     </div>
-                    <button
-                      type="button"
-                      className="secondary"
-                      onClick={() => handlePresetApply(preset)}
-                      disabled={!canManagePresets && preset.requiresMasterOverride}
-                    >
-                      Применить
-                    </button>
+                    <span className={`firmware-console__status ${agentStatusClass}`}>{agentStatusLabel}</span>
                   </li>
                 );
               })}
+              {agents.length === 0 && <li className="muted">Агенты не подключены</li>}
+            </ul>
+            <div className="firmware-console__agent-meta">
+              <span>
+                Активные порты: <strong>{ports.length}</strong>
+              </span>
+              <span>
+                В очереди: <strong>{queuedJobs}</strong>
+              </span>
+            </div>
+          </section>
+          <section aria-label="Шаблоны прошивки">
+            <h2>Шаблоны прошивки</h2>
+            <ul className="firmware-console__presets-list">
+              {presets.map(preset => (
+                <li key={preset.id}>
+                  <div>
+                    <strong>{preset.name}</strong>
+                    <p className="muted">
+                      {preset.project === 'servers' ? 'Серверы' : 'Дроны'} · {preset.deviceType} · {preset.model}
+                    </p>
+                    <p className="muted">Версия {preset.version}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={() => handlePresetApply(preset)}
+                    disabled={!canManagePresets && preset.requiresMasterOverride}
+                  >
+                    Применить
+                  </button>
+                </li>
+              ))}
+              {presets.length === 0 && <li className="muted">Нет сохранённых шаблонов</li>}
             </ul>
           </section>
-          <section className="firmware-console__notes" aria-label="Политики">
+          <section aria-label="Политики выпуска">
             <h2>Политики выпуска</h2>
-            <ul>
+            <ul className="firmware-console__policies-list">
               <li>Допустимые версии определяются по проекту и модели.</li>
               <li>Ошибка прошивки автоматически создаёт NCR с прикреплённым логом.</li>
               <li>Перезапуск отмечается как Reflash и сохраняет оба лога.</li>
@@ -701,12 +678,8 @@ export const FirmwareFlashingConsole: React.FC = () => {
             <p className="muted">Операторы, станции и результаты с прослеживаемостью логов.</p>
           </div>
           <div className="firmware-console__summary-actions">
-            <button type="button" className="secondary">
-              Экспорт CSV
-            </button>
-            <button type="button" className="secondary">
-              Экспорт XLSX
-            </button>
+            <button type="button" className="secondary">Экспорт CSV</button>
+            <button type="button" className="secondary">Экспорт XLSX</button>
           </div>
         </header>
         <div className="firmware-console__filters">
@@ -758,19 +731,19 @@ export const FirmwareFlashingConsole: React.FC = () => {
             </select>
           </label>
         </div>
-        <table className="firmware-console__table">
+        <table className="firmware-console__table table">
           <thead>
             <tr>
-              <th>Время</th>
-              <th>Оператор</th>
-              <th>Рабочая станция</th>
-              <th>Устройство</th>
-              <th>SN</th>
-              <th>Артефакт</th>
-              <th>Checksum</th>
-              <th>Длительность</th>
-              <th>Результат</th>
-              <th>Лог</th>
+              <th scope="col">Время</th>
+              <th scope="col">Оператор</th>
+              <th scope="col">Рабочая станция</th>
+              <th scope="col">Устройство</th>
+              <th scope="col">SN</th>
+              <th scope="col">Артефакт</th>
+              <th scope="col">Checksum</th>
+              <th scope="col">Длительность</th>
+              <th scope="col">Результат</th>
+              <th scope="col">Лог</th>
             </tr>
           </thead>
           <tbody>
@@ -793,7 +766,9 @@ export const FirmwareFlashingConsole: React.FC = () => {
                   <td>{job.checksum}</td>
                   <td>{job.durationSec ? formatDuration(job.durationSec) : '—'}</td>
                   <td>
-                    <span className={`status ${jobStatusClass[job.status]}`}>{jobStatusLabel[job.status]}</span>
+                    <span className={`firmware-console__status ${jobStatusClass[job.status]}`}>
+                      {jobStatusLabel[job.status]}
+                    </span>
                   </td>
                   <td>
                     {job.resultLogUrl ? (
@@ -812,4 +787,5 @@ export const FirmwareFlashingConsole: React.FC = () => {
       </section>
     </section>
   );
+
 };
