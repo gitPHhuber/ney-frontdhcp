@@ -495,42 +495,6 @@ export const ProductionDashboard: React.FC = () => {
   ];
 
 
-  const lineSignals = useMemo(
-    () =>
-      productionLines.map(line => ({
-        ...line,
-        attainment: Math.round((line.throughputPerShift / line.targetPerShift) * 100),
-      })),
-    [productionLines],
-  );
-
-  const qualitySummary = useMemo(() => {
-    const blocked = qualityChecks.filter(check => check.status === 'blocked').length;
-    const failed = qualityChecks.filter(check => check.status === 'failed').length;
-    const pending = qualityChecks.filter(check => check.status === 'pending').length;
-    const openNonconformances = nonconformances.filter(nc => nc.status !== 'closed').length;
-    return { blocked, failed, pending, total: qualityChecks.length, openNonconformances };
-  }, [qualityChecks, nonconformances]);
-
-  const recentQualityChecks = useMemo(
-    () => qualityChecks.slice(0, 6),
-    [qualityChecks],
-  );
-
-  const upcomingMaintenance = useMemo(() => {
-    return maintenanceOrders
-      .filter(order => order.status !== 'completed')
-      .sort((a, b) => new Date(a.schedule).getTime() - new Date(b.schedule).getTime())
-      .slice(0, 6);
-  }, [maintenanceOrders]);
-
-  const tabs: { id: TabKey; label: string }[] = [
-    { id: 'orders', label: 'Заказы' },
-    { id: 'operations', label: 'Операции' },
-    { id: 'resources', label: 'Ресурсы' },
-    { id: 'quality', label: 'Качество и поддержка' },
-  ];
-
   return (
     <section className="mes-production" aria-label="Операции производства">
       <header className="mes-production__header">

@@ -1,30 +1,25 @@
-import * as XLSX from 'xlsx';
-
 import type { ExportRow } from './passportExportRows';
 
-const createExcelBlob = (rows: ExportRow[]) => {
-  const worksheet = XLSX.utils.aoa_to_sheet(rows);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
-  const arrayBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  return new Blob([arrayBuffer], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  });
-};
-
-const triggerFileDownload = (blob: Blob, filename: string) => {
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(link.href), 5000);
-};
-
+type XlsxModule = typeof import('xlsx');
 type JsPdfCtor = typeof import('jspdf').jsPDF;
+type XlsxModuleWithUtils = XlsxModule & { utils: NonNullable<XlsxModule['utils']> };
 
+let xlsxModulePromise: Promise<XlsxModuleWithUtils> | null = null;
 let jsPdfCtorPromise: Promise<JsPdfCtor> | null = null;
+
+const loadXlsxModule = async (): Promise<XlsxModuleWithUtils> => {
+  if (!xlsxModulePromise) {
+    xlsxModulePromise = import('xlsx').then(module => {
+      const resolved = (module as { default?: XlsxModuleWithUtils }).default;
+      const xlsx = (resolved ?? module) as XlsxModuleWithUtils;
+      if (!xlsx.utils) {
+        throw new Error('xlsx module is missing utils API');
+      }
+      return xlsx;
+    });
+  }
+  return xlsxModulePromise;
+};
 
 const loadJsPdfConstructor = async (): Promise<JsPdfCtor> => {
   if (!jsPdfCtorPromise) {
@@ -40,8 +35,29 @@ const loadJsPdfConstructor = async (): Promise<JsPdfCtor> => {
   return jsPdfCtorPromise;
 };
 
-export const downloadPassportWorkbook = (rows: ExportRow[], filename: string) => {
-  const blob = createExcelBlob(rows);
+const createExcelBlob = async (rows: ExportRow[]): Promise<Blob> => {
+  const xlsx = await loadXlsxModule();
+  const worksheet = xlsx.utils.aoa_to_sheet(rows);
+  const workbook = xlsx.utils.book_new();
+  xlsx.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
+  const arrayBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+  return new Blob([arrayBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+};
+
+const triggerFileDownload = (blob: Blob, filename: string) => {
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 5000);
+};
+
+export const downloadPassportWorkbook = async (rows: ExportRow[], filename: string) => {
+  const blob = await createExcelBlob(rows);
   triggerFileDownload(blob, `${filename}.xlsx`);
 };
 

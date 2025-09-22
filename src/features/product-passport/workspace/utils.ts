@@ -1,4 +1,4 @@
-import type { DeviceModel, PassportTemplateField, ProductPassport } from '../../entities';
+import type { DeviceModel, PassportTemplateField, ProductPassport } from '../../../entities';
 import type { TemplateFieldValue } from '../types';
 import type { DeviceFormValues, TemplateFieldDraft } from './types';
 
