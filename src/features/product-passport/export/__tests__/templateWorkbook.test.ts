@@ -239,7 +239,7 @@ class MockWorkbook {
     },
   };
 
-  addWorksheet(name: string, _options?: unknown) {
+  addWorksheet(name: string) {
     const worksheet = new MockWorksheet(name);
     this.worksheets.push(worksheet);
     return worksheet;

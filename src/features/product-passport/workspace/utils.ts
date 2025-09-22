@@ -1,9 +1,4 @@
-import type {
-  DeviceModel,
-  PassportTemplateField,
-  ProductPassport,
-  TemplatePrimitiveFieldType,
-} from '../../../entities';
+import type { DeviceModel, PassportTemplateField, ProductPassport } from '../../../entities';
 import type { TemplateFieldValue } from '../types';
 import type { DeviceFormValues, TemplateFieldDraft } from './types';
 
@@ -42,14 +37,14 @@ export const normalizeFieldDraft = (draft: TemplateFieldDraft): PassportTemplate
       type: 'table',
       minRows: draft.minRows,
       maxRows: draft.maxRows,
-          columns: draft.columns
-            .filter(column => column.title.trim())
-            .map(column => ({
-              id: column.id,
-              title: column.title,
-              key: column.key || createSlug(column.title) || column.id,
-              type: column.type ?? 'text',
-            })),
+      columns: draft.columns
+        .filter(column => column.title.trim())
+        .map(column => ({
+          id: column.id,
+          title: column.title,
+          key: column.key || createSlug(column.title) || column.id,
+          type: column.type ?? 'text',
+        })),
     };
   }
   return {
