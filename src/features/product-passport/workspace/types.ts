@@ -2,7 +2,7 @@ import type {
   DeviceModel,
   DeviceStatus,
   PassportTemplateField,
-} from '../../entities';
+} from '../../../entities';
 
 export type DeviceFormValues = {
   assetTag: string;
@@ -31,7 +31,7 @@ export type TemplateCreationPayload = {
   description?: string;
   deviceModelId: string;
   setActive: boolean;
-  isActive?: boolean;
+  isActive: boolean;
   fields: PassportTemplateField[];
 };
 

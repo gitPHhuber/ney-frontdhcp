@@ -1,0 +1,171 @@
+import type { InventoryState } from '../inventory/types';
+import { seedReferenceTime } from './common';
+
+const now = seedReferenceTime;
+
+export const inventorySeed: InventoryState = {
+  items: [
+    { id: 'item-fin-001', sku: 'FG-ROUTER-1U', name: 'Edge Router 1U', uom: 'ea', type: 'finished', unitCost: 3200 },
+    { id: 'item-fin-002', sku: 'FCB-HIL', name: 'Flight Control Board', uom: 'ea', type: 'finished', unitCost: 1480 },
+    { id: 'item-sub-001', sku: 'ASM-FPGA', name: 'FPGA Processing Module', uom: 'ea', type: 'subassembly', unitCost: 580 },
+    { id: 'item-sub-002', sku: 'ASM-IMU', name: 'IMU Harness Assembly', uom: 'ea', type: 'subassembly', unitCost: 210 },
+    { id: 'item-raw-001', sku: 'PCB-10', name: 'PCB Board 10-layer', uom: 'ea', type: 'raw', unitCost: 85 },
+    { id: 'item-raw-002', sku: 'CAP-470', name: '470uF Capacitor', uom: 'ea', type: 'raw', unitCost: 1.75 },
+    { id: 'item-raw-003', sku: 'MCU-H7', name: 'STM32H7 MCU', uom: 'ea', type: 'raw', unitCost: 27.5 },
+    { id: 'item-raw-004', sku: 'IMU-9AX', name: '9-axis IMU Sensor', uom: 'ea', type: 'raw', unitCost: 41.5 },
+  ],
+  boms: [
+    {
+      id: 'bom-asm-fpga',
+      itemId: 'item-sub-001',
+      components: [
+        { itemId: 'item-raw-001', qty: 1 },
+        { itemId: 'item-raw-002', qty: 20 },
+      ],
+    },
+    {
+      id: 'bom-imu-harness',
+      itemId: 'item-sub-002',
+      components: [
+        { itemId: 'item-raw-003', qty: 1 },
+        { itemId: 'item-raw-004', qty: 1 },
+      ],
+    },
+    {
+      id: 'bom-router',
+      itemId: 'item-fin-001',
+      components: [
+        { itemId: 'item-sub-001', qty: 1 },
+        { itemId: 'item-raw-002', qty: 4 },
+      ],
+    },
+    {
+      id: 'bom-flight-board',
+      itemId: 'item-fin-002',
+      components: [
+        { itemId: 'item-sub-002', qty: 1 },
+        { itemId: 'item-raw-002', qty: 6 },
+      ],
+    },
+  ],
+  warehouses: [
+    { id: 'wh-main', name: 'Main Plant' },
+    { id: 'wh-eu', name: 'EU Fulfillment' },
+  ],
+  locations: [
+    { id: 'loc-main-raw', warehouseId: 'wh-main', path: 'RAW/ZoneA/Bin12' },
+    { id: 'loc-main-wip', warehouseId: 'wh-main', path: 'WIP/Line1/Cell3' },
+    { id: 'loc-main-fg', warehouseId: 'wh-main', path: 'FG/Rack2/Shelf1' },
+    { id: 'loc-eu-fg', warehouseId: 'wh-eu', path: 'FG/RowB/Bay4' },
+  ],
+  stockLots: [
+    {
+      id: 'lot-raw-001',
+      itemId: 'item-raw-001',
+      lotNo: 'PCB-2403A',
+      qty: 120,
+      locationId: 'loc-main-raw',
+      status: 'available',
+    },
+    {
+      id: 'lot-raw-002',
+      itemId: 'item-raw-002',
+      lotNo: 'CAP-2403',
+      qty: 2500,
+      locationId: 'loc-main-raw',
+      status: 'available',
+    },
+    {
+      id: 'lot-raw-003',
+      itemId: 'item-raw-003',
+      lotNo: 'MCU-2402',
+      qty: 320,
+      locationId: 'loc-main-raw',
+      status: 'available',
+    },
+    {
+      id: 'lot-raw-004',
+      itemId: 'item-raw-004',
+      lotNo: 'IMU-2401',
+      qty: 140,
+      locationId: 'loc-main-raw',
+      status: 'available',
+    },
+    {
+      id: 'lot-sub-001',
+      itemId: 'item-sub-001',
+      lotNo: 'FPGA-2402',
+      qty: 40,
+      locationId: 'loc-main-wip',
+      status: 'reserved',
+    },
+    {
+      id: 'lot-sub-002',
+      itemId: 'item-sub-002',
+      lotNo: 'IMU-ASM-2403',
+      qty: 30,
+      locationId: 'loc-main-wip',
+      status: 'reserved',
+    },
+    {
+      id: 'lot-fin-001',
+      itemId: 'item-fin-001',
+      lotNo: 'FG-2402',
+      qty: 18,
+      locationId: 'loc-main-fg',
+      status: 'available',
+    },
+    {
+      id: 'lot-fin-002',
+      itemId: 'item-fin-002',
+      lotNo: 'FC-2403',
+      qty: 6,
+      locationId: 'loc-main-wip',
+      status: 'reserved',
+    },
+  ],
+  stockMoves: [
+    {
+      id: 'sm-001',
+      itemId: 'item-raw-001',
+      qty: 10,
+      fromLocationId: 'loc-main-raw',
+      toLocationId: 'loc-main-wip',
+      refType: 'WorkOrder',
+      refId: 'wo-router-10-1',
+      ts: new Date(now.getTime() - 1000 * 60 * 60).toISOString(),
+      note: 'Issue PCB to line',
+    },
+    {
+      id: 'sm-002',
+      itemId: 'item-raw-003',
+      qty: 12,
+      fromLocationId: 'loc-main-raw',
+      toLocationId: 'loc-main-wip',
+      refType: 'WorkOrder',
+      refId: 'wo-flight-01-1',
+      ts: new Date(now.getTime() - 1000 * 60 * 80).toISOString(),
+      note: 'Issue MCUs for flight control',
+    },
+    {
+      id: 'sm-003',
+      itemId: 'item-fin-001',
+      qty: 5,
+      fromLocationId: 'loc-main-wip',
+      toLocationId: 'loc-main-fg',
+      refType: 'ProductionOrder',
+      refId: 'po-router-10',
+      ts: new Date(now.getTime() - 1000 * 60 * 30).toISOString(),
+    },
+    {
+      id: 'sm-004',
+      itemId: 'item-fin-002',
+      qty: 2,
+      fromLocationId: 'loc-main-wip',
+      toLocationId: 'loc-main-fg',
+      refType: 'ProductionOrder',
+      refId: 'po-flight-01',
+      ts: new Date(now.getTime() - 1000 * 60 * 25).toISOString(),
+    },
+  ],
+};

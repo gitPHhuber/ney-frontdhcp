@@ -300,7 +300,7 @@ export const PassportWizardTab = ({ devices, models, templates }: PassportWizard
       const rows = buildPassportExportRows(passport, history);
       const filename = `${passport.metadata.assetTag}-паспорт-v${passport.version}`;
       if (type === 'excel') {
-        downloadPassportWorkbook(rows, filename);
+        await downloadPassportWorkbook(rows, filename);
       } else {
         await downloadPassportPdf(rows, filename);
       }
