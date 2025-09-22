@@ -42,42 +42,43 @@ export const QualityOperationsBoard: React.FC = () => {
   [nonconformances]);
 
   return (
-    <section className="quality-board" aria-label="Качество и тестирование">
-      <header className="quality-board__header">
-        <div>
+    <section className="mes-layout quality-board" aria-label="Качество и тестирование">
+      <header className="mes-layout__hero">
+        <div className="mes-layout__hero-main">
           <h1>Качество и соответствие</h1>
           <p className="muted">
             Прослеживаемость по контрольным точкам, статус эскалаций и готовность тестовых планов flight control.
           </p>
         </div>
-        <div className="quality-board__actions">
+        <div className="mes-layout__hero-actions quality-board__actions">
           <button type="button" className="primary">Запросить аудит</button>
           <button type="button" className="secondary">Экспортировать 8D отчёт</button>
         </div>
       </header>
-      <div className="quality-board__grid">
-        <article className="quality-card">
-          <header>
-            <h2>КПИ качества</h2>
-          </header>
-          <div className="quality-card__body">
-            <div className="metric">
-              <span className="metric__label">Пройдено</span>
-              <span className="metric__value">
-                {qualityScore ? formatPercent(qualityScore.passed) : '—'}
-              </span>
+      <div className="mes-layout__primary">
+        <div className="quality-board__grid">
+          <article className="mes-card quality-card">
+            <header>
+              <h2>КПИ качества</h2>
+            </header>
+            <div className="quality-card__body">
+              <div className="metric">
+                <span className="metric__label">Пройдено</span>
+                <span className="metric__value">
+                  {qualityScore ? formatPercent(qualityScore.passed) : '—'}
+                </span>
+              </div>
+              <div className="metric">
+                <span className="metric__label">Заблокировано</span>
+                <span className="metric__value">{qualityScore ? qualityScore.blocked : 0}</span>
+              </div>
+              <div className="metric">
+                <span className="metric__label">Записей в журнале</span>
+                <span className="metric__value">{qualityChecks.length}</span>
+              </div>
             </div>
-            <div className="metric">
-              <span className="metric__label">Заблокировано</span>
-              <span className="metric__value">{qualityScore ? qualityScore.blocked : 0}</span>
-            </div>
-            <div className="metric">
-              <span className="metric__label">Записей в журнале</span>
-              <span className="metric__value">{qualityChecks.length}</span>
-            </div>
-          </div>
-        </article>
-        <article className="quality-card quality-card--tall">
+          </article>
+          <article className="mes-card quality-card quality-card--tall">
           <header>
             <h2>Несоответствия</h2>
             <p className="muted">Внимание на высокие степени риска.</p>
@@ -95,7 +96,7 @@ export const QualityOperationsBoard: React.FC = () => {
             {escalations.length === 0 && <li className="muted">Нет открытых инцидентов</li>}
           </ul>
         </article>
-        <article className="quality-card quality-card--tall">
+        <article className="mes-card quality-card quality-card--tall">
           <header>
             <h2>Планы тестирования</h2>
             <p className="muted">Охват и владельцы по каждому обязательному сценарию.</p>
@@ -113,7 +114,7 @@ export const QualityOperationsBoard: React.FC = () => {
             ))}
           </ul>
         </article>
-        <article className="quality-card">
+        <article className="mes-card quality-card">
           <header>
             <h2>Ход тестов</h2>
             <p className="muted">Полевые данные из HIL и burn-in.</p>
@@ -137,6 +138,7 @@ export const QualityOperationsBoard: React.FC = () => {
             </div>
           </div>
         </article>
+        </div>
       </div>
     </section>
   );

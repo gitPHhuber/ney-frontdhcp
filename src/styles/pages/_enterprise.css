@@ -195,9 +195,74 @@
   gap: 1rem;
 }
 
-.mes-production {
+.mes-layout {
   display: grid;
-  gap: 1.75rem;
+  gap: 2rem;
+}
+
+.mes-layout__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr);
+  align-items: start;
+  gap: 1.5rem;
+}
+
+.mes-layout__hero-main {
+  display: grid;
+  gap: 1rem;
+}
+
+.mes-layout__hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-self: start;
+}
+
+.mes-layout__stats {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.mes-layout__columns {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 2.4fr) minmax(260px, 1fr);
+  align-items: start;
+}
+
+.mes-layout__primary,
+.mes-layout__secondary {
+  display: grid;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.mes-layout__full {
+  grid-column: 1 / -1;
+}
+
+.mes-card {
+  background: var(--surface-card);
+  border-radius: 18px;
+  padding: 1.4rem;
+  box-shadow: var(--shadow-md);
+  display: grid;
+  gap: 1rem;
+}
+
+.mes-card--muted {
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
+  box-shadow: none;
+}
+
+@media (max-width: 1200px) {
+  .mes-layout__hero,
+  .mes-layout__columns {
+    grid-template-columns: 1fr;
+  }
 }
 
 .mes-production__summary {
@@ -663,15 +728,6 @@
 }
 
 
-.mes-command {
-  display: grid;
-  gap: 1.75rem;
-}
-
-.mes-command__header,
-.mes-production__header,
-.quality-board__header,
-.test-lab__header,
 .workforce__header {
   display: flex;
   justify-content: space-between;
@@ -892,34 +948,13 @@
   min-width: 0;
 }
 
-.firmware-console {
-  display: grid;
-  gap: 2rem;
-}
-
-.firmware-console__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
 .firmware-console__metrics {
-  margin-top: 1.25rem;
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin-top: 0.75rem;
 }
 
 .firmware-console__agents {
-  background: var(--surface-card);
-  border-radius: 18px;
-  padding: 1.2rem;
-  box-shadow: var(--shadow-md);
-  display: grid;
-  gap: 1rem;
   min-width: 260px;
+  padding: 1.25rem;
 }
 
 .firmware-console__agents ul {
@@ -943,14 +978,14 @@
   color: var(--text-muted);
 }
 
-.firmware-console__content {
+.firmware-console__workspace {
   display: grid;
   gap: 1.5rem;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
 }
 
 @media (max-width: 1200px) {
-  .firmware-console__content {
+  .firmware-console__workspace {
     grid-template-columns: 1fr;
   }
 }

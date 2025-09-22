@@ -496,13 +496,13 @@ export const ProductionDashboard: React.FC = () => {
 
 
   return (
-    <section className="mes-production" aria-label="Операции производства">
-      <header className="mes-production__header">
-        <div>
+    <section className="mes-layout mes-production" aria-label="Операции производства">
+      <header className="mes-layout__hero">
+        <div className="mes-layout__hero-main">
           <h1>Операционное управление производством</h1>
           <p className="muted">Контролируйте портфель заказов, загрузку смены и качество на одном экране.</p>
         </div>
-        <div className="mes-production__actions">
+        <div className="mes-layout__hero-actions mes-production__actions">
           <button type="button" className="secondary">
             Сводка смены
           </button>
@@ -512,7 +512,8 @@ export const ProductionDashboard: React.FC = () => {
         </div>
       </header>
 
-      <div className="mes-production__summary" role="list">
+      <div className="mes-layout__primary">
+        <div className="mes-production__summary" role="list">
         <div className="mes-production__summary-card" role="listitem">
           <span className="metric__label">Заказы в работе</span>
           <span className="metric__value">{orderSummary.inProgress}</span>
@@ -1352,6 +1353,7 @@ export const ProductionDashboard: React.FC = () => {
           </div>
         )}
       </div>
+    </div>
     </section>
   );
 };
