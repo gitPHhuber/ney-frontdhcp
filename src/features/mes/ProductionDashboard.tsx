@@ -5,7 +5,9 @@ import {
   useProductionLinesQuery,
   useProductionOrdersQuery,
   useQualityChecksQuery,
+
   useValueStreamsQuery,
+
   useWorkCentersQuery,
   useWorkOrdersQuery,
 } from './hooks';
@@ -32,6 +34,7 @@ const productionStatusLabel: Record<ProductionOrder['status'], string> = {
   'in-progress': 'В работе',
   completed: 'Завершён',
   closed: 'Закрыт',
+
 };
 
 const workOrderStatusLabel: Record<WorkOrder['status'], string> = {
@@ -41,6 +44,7 @@ const workOrderStatusLabel: Record<WorkOrder['status'], string> = {
   completed: 'Завершено',
   blocked: 'Заблокировано',
 };
+
 
 const qualityStatusLabel = {
   pending: 'Ожидает',
@@ -71,11 +75,13 @@ const maintenanceTypeLabel = {
 
 export const ProductionDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('orders');
+
   const [orderStatusFilter, setOrderStatusFilter] = useState<ProductionOrder['status'] | 'all'>('all');
   const [orderView, setOrderView] = useState<'table' | 'timeline'>('table');
   const [operationFocus, setOperationFocus] = useState<'status' | 'shift'>('status');
   const [selectedStream, setSelectedStream] = useState<'all' | string>('all');
   const [nonconformanceSeverity, setNonconformanceSeverity] = useState<'all' | 'low' | 'medium' | 'high'>('all');
+
 
   const { data: productionOrders = [] } = useProductionOrdersQuery();
   const { data: workOrders = [] } = useWorkOrdersQuery();
@@ -262,6 +268,7 @@ export const ProductionDashboard: React.FC = () => {
     [workOrders],
   );
 
+
   const blockedOperations = useMemo(
     () => workOrders.filter(order => order.status === 'blocked').slice(0, 5),
     [workOrders],
@@ -307,6 +314,7 @@ export const ProductionDashboard: React.FC = () => {
       .slice(0, 6);
   }, [workOrders]);
 
+
   const backlogByCenter = useMemo(() => {
     return workCenters
       .map(center => {
@@ -325,6 +333,7 @@ export const ProductionDashboard: React.FC = () => {
       })
       .sort((a, b) => b.inQueue - a.inQueue);
   }, [workCenters, workOrders]);
+
 
   const lineSignals = useMemo(
     () =>
@@ -485,6 +494,43 @@ export const ProductionDashboard: React.FC = () => {
     { id: 'quality', label: 'Качество и поддержка' },
   ];
 
+
+  const lineSignals = useMemo(
+    () =>
+      productionLines.map(line => ({
+        ...line,
+        attainment: Math.round((line.throughputPerShift / line.targetPerShift) * 100),
+      })),
+    [productionLines],
+  );
+
+  const qualitySummary = useMemo(() => {
+    const blocked = qualityChecks.filter(check => check.status === 'blocked').length;
+    const failed = qualityChecks.filter(check => check.status === 'failed').length;
+    const pending = qualityChecks.filter(check => check.status === 'pending').length;
+    const openNonconformances = nonconformances.filter(nc => nc.status !== 'closed').length;
+    return { blocked, failed, pending, total: qualityChecks.length, openNonconformances };
+  }, [qualityChecks, nonconformances]);
+
+  const recentQualityChecks = useMemo(
+    () => qualityChecks.slice(0, 6),
+    [qualityChecks],
+  );
+
+  const upcomingMaintenance = useMemo(() => {
+    return maintenanceOrders
+      .filter(order => order.status !== 'completed')
+      .sort((a, b) => new Date(a.schedule).getTime() - new Date(b.schedule).getTime())
+      .slice(0, 6);
+  }, [maintenanceOrders]);
+
+  const tabs: { id: TabKey; label: string }[] = [
+    { id: 'orders', label: 'Заказы' },
+    { id: 'operations', label: 'Операции' },
+    { id: 'resources', label: 'Ресурсы' },
+    { id: 'quality', label: 'Качество и поддержка' },
+  ];
+
   return (
     <section className="mes-production" aria-label="Операции производства">
       <header className="mes-production__header">
@@ -548,6 +594,7 @@ export const ProductionDashboard: React.FC = () => {
                 <h3>Производственные заказы</h3>
                 <p className="muted">Факт исполнения по каждому заказу и контроль сроков.</p>
               </header>
+
               <div className="mes-production__toolbar">
                 <div className="mes-production__filters" role="group" aria-label="Фильтрация по статусу заказа">
                   {([
@@ -667,6 +714,7 @@ export const ProductionDashboard: React.FC = () => {
                   )}
                 </ol>
               )}
+
             </article>
             <article className="mes-production__panel">
               <header>
@@ -683,10 +731,12 @@ export const ProductionDashboard: React.FC = () => {
                         <p className="muted">Поставка до {formatDate(order.dueDate)}</p>
                       </div>
                       <div className="mes-production__list-meta">
+
                         <span className="chip chip--ghost">
                           <span className="chip__label">Прогресс</span>
                           <span className="chip__value">{progress}%</span>
                         </span>
+
                         <span className={`status status--${order.status}`}>
                           {productionStatusLabel[order.status]}
                         </span>
@@ -699,6 +749,7 @@ export const ProductionDashboard: React.FC = () => {
             </article>
             <article className="mes-production__panel">
               <header>
+
                 <h3>Value stream сегментация</h3>
                 <p className="muted">Зоны ответственности, риск и ближайшие вехи по потокам.</p>
               </header>
@@ -758,6 +809,7 @@ export const ProductionDashboard: React.FC = () => {
                 ))}
                 {streamInsights.length === 0 && <li className="muted">Потоки не настроены</li>}
               </ul>
+
             </article>
           </div>
         )}
@@ -769,6 +821,7 @@ export const ProductionDashboard: React.FC = () => {
                 <h3>Исполнение операций</h3>
                 <p className="muted">Распределение по статусам и назначенным исполнителям.</p>
               </header>
+
               <div className="mes-production__toolbar mes-production__toolbar--sub">
                 <div className="mes-production__filters" role="group" aria-label="Представление операций">
                   <button
@@ -868,6 +921,7 @@ export const ProductionDashboard: React.FC = () => {
                   ))}
                 </div>
               )}
+
             </article>
             <article className="mes-production__panel">
               <header>
@@ -882,6 +936,7 @@ export const ProductionDashboard: React.FC = () => {
                       <p className="muted">Заказ {order.prodOrderId}</p>
                     </div>
                     <div className="mes-production__list-meta">
+
                       {order.assignee && (
                         <span className="chip chip--ghost">
                           <span className="chip__label">Исполнитель</span>
@@ -894,6 +949,7 @@ export const ProductionDashboard: React.FC = () => {
                           <span className="chip__value">{formatDateTime(order.startedAt)}</span>
                         </span>
                       )}
+
                       <span className={`status status--${order.status}`}>
                         {workOrderStatusLabel[order.status]}
                       </span>
@@ -916,6 +972,7 @@ export const ProductionDashboard: React.FC = () => {
                       <p className="muted">{productionOrderMap.get(order.prodOrderId)?.itemId ?? order.prodOrderId}</p>
                     </div>
                     <div className="mes-production__list-meta">
+
                       {order.startedAt && (
                         <span className="chip chip--ghost">
                           <span className="chip__label">Старт</span>
@@ -928,12 +985,14 @@ export const ProductionDashboard: React.FC = () => {
                           <span className="chip__value">{order.assignee}</span>
                         </span>
                       )}
+
                     </div>
                   </li>
                 ))}
                 {activeOperations.length === 0 && <li className="muted">Нет операций в работе</li>}
               </ul>
             </article>
+
             <article className="mes-production__panel">
               <header>
                 <h3>Лидеры смены</h3>
@@ -986,6 +1045,7 @@ export const ProductionDashboard: React.FC = () => {
                 {operationAging.length === 0 && <li className="muted">Просроченных операций нет</li>}
               </ul>
             </article>
+
           </div>
         )}
 
@@ -996,6 +1056,7 @@ export const ProductionDashboard: React.FC = () => {
                 <h3>Производственные линии</h3>
                 <p className="muted">Факт выполнения смены, доступность и риски.</p>
               </header>
+
               <div className="mes-production__toolbar mes-production__toolbar--sub">
                 <div className="mes-production__filters" role="group" aria-label="Фильтр по потокам">
                   <button
@@ -1022,6 +1083,7 @@ export const ProductionDashboard: React.FC = () => {
               <ul className="mes-production__lines">
                 {filteredLineSignals.map(line => (
                   <li key={line.id}>
+
                     <div className="mes-production__line-body">
                       <div className="mes-production__line-heading">
                         <strong>{line.name}</strong>
@@ -1052,10 +1114,12 @@ export const ProductionDashboard: React.FC = () => {
                           <span className="chip__value">{line.attainment}%</span>
                         </span>
                       </div>
+
                     </div>
                   </li>
                 ))}
                 {filteredLineSignals.length === 0 && <li className="muted">Линии не настроены</li>}
+
               </ul>
             </article>
             <article className="mes-production__panel">
@@ -1073,7 +1137,9 @@ export const ProductionDashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
+
                   {filteredBacklogByCenter.map(center => (
+
                     <tr key={center.id}>
                       <td>
                         <div>
@@ -1081,6 +1147,7 @@ export const ProductionDashboard: React.FC = () => {
                           {center.capabilities && <p className="muted">{center.capabilities}</p>}
                         </div>
                       </td>
+
                       <td>
                         <span className="chip">
                           <span className="chip__label">Очередь</span>
@@ -1099,9 +1166,12 @@ export const ProductionDashboard: React.FC = () => {
                           <span className="chip__value">{center.blocked}</span>
                         </span>
                       </td>
+
                     </tr>
                   ))}
                   {filteredBacklogByCenter.length === 0 && (
+
+
                     <tr>
                       <td colSpan={4} className="mes-production__empty">
                         Нет активных рабочих центров
@@ -1111,6 +1181,7 @@ export const ProductionDashboard: React.FC = () => {
                 </tbody>
               </table>
             </article>
+
             <article className="mes-production__panel">
               <header>
                 <h3>Загрузка потоков</h3>
@@ -1158,6 +1229,7 @@ export const ProductionDashboard: React.FC = () => {
                 {streamLoads.length === 0 && <li className="muted">Потоки не настроены</li>}
               </ul>
             </article>
+
           </div>
         )}
 
@@ -1214,6 +1286,7 @@ export const ProductionDashboard: React.FC = () => {
             </article>
             <article className="mes-production__panel">
               <header>
+
                 <h3>Фокус проверки</h3>
                 <p className="muted">Какие объекты попадают в контроль чаще других.</p>
               </header>
@@ -1265,6 +1338,7 @@ export const ProductionDashboard: React.FC = () => {
               </div>
               <ul className="mes-production__list">
                 {filteredNonconformances.map(nc => (
+
                   <li key={nc.id}>
                     <div>
                       <strong>
@@ -1272,6 +1346,7 @@ export const ProductionDashboard: React.FC = () => {
                       </strong>
                       <p className="muted">{nc.action ?? 'Действие не назначено'}</p>
                     </div>
+
                     <div className="mes-production__list-meta">
                       <span className={`chip chip--risk-${nc.severity}`}>
                         <span className="chip__label">Риск</span>
@@ -1281,9 +1356,11 @@ export const ProductionDashboard: React.FC = () => {
                         {nonconformanceStatusLabel[nc.status]}
                       </span>
                     </div>
+
                   </li>
                 ))}
                 {filteredNonconformances.length === 0 && <li className="muted">Несоответствий нет</li>}
+
               </ul>
             </article>
             <article className="mes-production__panel">
