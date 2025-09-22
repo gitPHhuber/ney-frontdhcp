@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -7,6 +8,8 @@ import { DeviceModelsTab } from './workspace/tabs/DeviceModelsTab';
 import { InventoryTab } from './workspace/tabs/InventoryTab';
 import { PassportWizardTab } from './workspace/tabs/PassportWizardTab';
 import { TemplatesTab } from './workspace/tabs/TemplatesTab';
+
+
 
 export const ProductPassportWorkspace = () => {
   const [activeTab, setActiveTab] = useState<'wizard' | 'inventory' | 'models' | 'templates'>('wizard');
