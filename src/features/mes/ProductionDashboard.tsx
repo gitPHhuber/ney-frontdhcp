@@ -5,6 +5,9 @@ import {
   useProductionLinesQuery,
   useProductionOrdersQuery,
   useQualityChecksQuery,
+
+  useValueStreamsQuery,
+
   useWorkCentersQuery,
   useWorkOrdersQuery,
 } from './hooks';
@@ -31,6 +34,7 @@ const productionStatusLabel: Record<ProductionOrder['status'], string> = {
   'in-progress': 'В работе',
   completed: 'Завершён',
   closed: 'Закрыт',
+
 };
 
 const workOrderStatusLabel: Record<WorkOrder['status'], string> = {
@@ -40,6 +44,7 @@ const workOrderStatusLabel: Record<WorkOrder['status'], string> = {
   completed: 'Завершено',
   blocked: 'Заблокировано',
 };
+
 
 const qualityStatusLabel = {
   pending: 'Ожидает',
@@ -71,6 +76,13 @@ const maintenanceTypeLabel = {
 export const ProductionDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('orders');
 
+  const [orderStatusFilter, setOrderStatusFilter] = useState<ProductionOrder['status'] | 'all'>('all');
+  const [orderView, setOrderView] = useState<'table' | 'timeline'>('table');
+  const [operationFocus, setOperationFocus] = useState<'status' | 'shift'>('status');
+  const [selectedStream, setSelectedStream] = useState<'all' | string>('all');
+  const [nonconformanceSeverity, setNonconformanceSeverity] = useState<'all' | 'low' | 'medium' | 'high'>('all');
+
+
   const { data: productionOrders = [] } = useProductionOrdersQuery();
   const { data: workOrders = [] } = useWorkOrdersQuery();
   const { data: workCenters = [] } = useWorkCentersQuery();
@@ -78,6 +90,7 @@ export const ProductionDashboard: React.FC = () => {
   const { data: qualityChecks = [] } = useQualityChecksQuery();
   const { data: nonconformances = [] } = useNonconformancesQuery();
   const { data: maintenanceOrders = [] } = useMaintenanceOrdersQuery();
+  const { data: valueStreams = [] } = useValueStreamsQuery();
 
   const productionOrderMap = useMemo(
     () => new Map(productionOrders.map(order => [order.id, order])),
@@ -104,6 +117,52 @@ export const ProductionDashboard: React.FC = () => {
           );
     return { total, inProgress, completed, dueSoon, overdue, averageProgress };
   }, [productionOrders, workOrders]);
+
+  const orderStatusCounts = useMemo(
+    () =>
+      productionOrders.reduce(
+        (acc, order) => {
+          acc[order.status] = (acc[order.status] ?? 0) + 1;
+          return acc;
+        },
+        {
+          draft: 0,
+          released: 0,
+          'in-progress': 0,
+          completed: 0,
+          closed: 0,
+        } as Record<ProductionOrder['status'], number>,
+      ),
+    [productionOrders],
+  );
+
+  const filteredOrders = useMemo(() => {
+    const base =
+      orderStatusFilter === 'all'
+        ? [...productionOrders]
+        : productionOrders.filter(order => order.status === orderStatusFilter);
+    return base.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+  }, [orderStatusFilter, productionOrders]);
+
+  const ordersTimeline = useMemo(
+    () =>
+      filteredOrders.map(order => {
+        const dueTs = new Date(order.dueDate).getTime();
+        const diffMs = dueTs - Date.now();
+        const dayMs = 1000 * 60 * 60 * 24;
+        const daysLeft = Math.ceil(diffMs / dayMs);
+        const overdueDays = diffMs < 0 ? Math.ceil(Math.abs(diffMs) / dayMs) : 0;
+        const progress = getProgress(order, workOrders);
+        const dueLabel =
+          diffMs < 0
+            ? `Просрочено на ${overdueDays} дн.`
+            : daysLeft <= 0
+            ? 'Срок сегодня'
+            : `Осталось ${daysLeft} дн.`;
+        return { ...order, daysLeft, progress, dueLabel };
+      }),
+    [filteredOrders, workOrders],
+  );
 
   const criticalOrders = useMemo(() => {
     return productionOrders
@@ -151,15 +210,110 @@ export const ProductionDashboard: React.FC = () => {
     }));
   }, [workOrders]);
 
+  const shiftBuckets = useMemo(() => {
+    const definitions: {
+      key: string;
+      title: string;
+      window: string;
+      predicate: (order: WorkOrder) => boolean;
+    }[] = [
+      {
+        key: 'shift-a',
+        title: 'Смена A',
+        window: '06:00 — 14:00',
+        predicate: order => {
+          if (!order.startedAt) return false;
+          const hour = new Date(order.startedAt).getHours();
+          return hour >= 6 && hour < 14;
+        },
+      },
+      {
+        key: 'shift-b',
+        title: 'Смена B',
+        window: '14:00 — 22:00',
+        predicate: order => {
+          if (!order.startedAt) return false;
+          const hour = new Date(order.startedAt).getHours();
+          return hour >= 14 && hour < 22;
+        },
+      },
+      {
+        key: 'shift-c',
+        title: 'Ночная смена',
+        window: '22:00 — 06:00',
+        predicate: order => {
+          if (!order.startedAt) return false;
+          const hour = new Date(order.startedAt).getHours();
+          return hour >= 22 || hour < 6;
+        },
+      },
+      {
+        key: 'no-start',
+        title: 'Ожидают запуска',
+        window: 'Без фактического старта',
+        predicate: order => !order.startedAt,
+      },
+    ];
+
+    return definitions.map(definition => ({
+      ...definition,
+      orders: workOrders
+        .filter(order => definition.predicate(order))
+        .sort((a, b) => (a.startedAt ?? '').localeCompare(b.startedAt ?? '')),
+    }));
+  }, [workOrders]);
+
   const activeOperations = useMemo(
     () => workOrders.filter(order => order.status === 'in-progress').slice(0, 6),
     [workOrders],
   );
 
+
   const blockedOperations = useMemo(
     () => workOrders.filter(order => order.status === 'blocked').slice(0, 5),
     [workOrders],
   );
+
+  const operationAging = useMemo(
+    () =>
+      workOrders
+        .filter(order => order.startedAt && order.status === 'in-progress')
+        .map(order => ({
+          ...order,
+          agingMin: Math.max(
+            0,
+            Math.round((Date.now() - new Date(order.startedAt ?? '').getTime()) / (1000 * 60)),
+          ),
+        }))
+        .sort((a, b) => b.agingMin - a.agingMin)
+        .slice(0, 5),
+    [workOrders],
+  );
+
+  const operatorUtilization = useMemo(() => {
+    const stats = workOrders.reduce(
+      (acc, order) => {
+        if (!order.assignee) {
+          return acc;
+        }
+        if (!acc[order.assignee]) {
+          acc[order.assignee] = { active: 0, total: 0 };
+        }
+        acc[order.assignee].total += 1;
+        if (order.status === 'in-progress') {
+          acc[order.assignee].active += 1;
+        }
+        return acc;
+      },
+      {} as Record<string, { active: number; total: number }>,
+    );
+
+    return Object.entries(stats)
+      .map(([assignee, value]) => ({ assignee, ...value }))
+      .sort((a, b) => b.active - a.active || b.total - a.total)
+      .slice(0, 6);
+  }, [workOrders]);
+
 
   const backlogByCenter = useMemo(() => {
     return workCenters
@@ -179,6 +333,167 @@ export const ProductionDashboard: React.FC = () => {
       })
       .sort((a, b) => b.inQueue - a.inQueue);
   }, [workCenters, workOrders]);
+
+
+  const lineSignals = useMemo(
+    () =>
+      productionLines.map(line => ({
+        ...line,
+        attainment: Math.round((line.throughputPerShift / line.targetPerShift) * 100),
+      })),
+    [productionLines],
+  );
+
+  const filteredLineSignals = useMemo(
+    () =>
+      selectedStream === 'all'
+        ? lineSignals
+        : lineSignals.filter(line => line.streamId === selectedStream),
+    [lineSignals, selectedStream],
+  );
+
+  const streamLoads = useMemo(
+    () =>
+      valueStreams.map(stream => {
+        const lines = lineSignals.filter(line => line.streamId === stream.id);
+        const totalTarget = lines.reduce((acc, line) => acc + line.targetPerShift, 0);
+        const totalThroughput = lines.reduce((acc, line) => acc + line.throughputPerShift, 0);
+        const totalWip = lines.reduce((acc, line) => acc + line.currentWip, 0);
+        const attainment = totalTarget === 0 ? 0 : Math.round((totalThroughput / totalTarget) * 100);
+        const blockers = lines.flatMap(line => line.blockers);
+        return {
+          id: stream.id,
+          name: stream.name,
+          focus: stream.focus,
+          demand: stream.demandThisWeek,
+          backlog: stream.backlogUnits,
+          risk: stream.riskLevel,
+          attainment,
+          totalThroughput,
+          totalTarget,
+          totalWip,
+          blockers,
+        };
+      }),
+    [lineSignals, valueStreams],
+  );
+
+  const streamInsights = useMemo(() => {
+    return valueStreams.map(stream => {
+      const load = streamLoads.find(item => item.id === stream.id);
+      const lines = lineSignals.filter(line => line.streamId === stream.id);
+      const availability =
+        lines.length === 0
+          ? 0
+          : Math.round((lines.reduce((acc, line) => acc + line.availability, 0) / lines.length) * 100);
+      return {
+        id: stream.id,
+        name: stream.name,
+        focus: stream.focus,
+        demand: load?.demand ?? stream.demandThisWeek,
+        backlog: load?.backlog ?? stream.backlogUnits,
+        wip: load?.totalWip ?? 0,
+        attainment: load?.attainment ?? 0,
+        risk: load?.risk ?? stream.riskLevel,
+        blockers: load?.blockers ?? [],
+        gatekeepers: stream.gatekeepers,
+        nextMilestone: stream.nextMilestone,
+        availability,
+        lineCount: lines.length,
+      };
+    });
+  }, [lineSignals, streamLoads, valueStreams]);
+
+  const streamCenterIds = useMemo(() => {
+    if (selectedStream === 'all') {
+      return new Set<string>();
+    }
+    return new Set(
+      productionLines
+        .filter(line => line.streamId === selectedStream)
+        .flatMap(line => line.workCenterIds),
+    );
+  }, [productionLines, selectedStream]);
+
+  const filteredBacklogByCenter = useMemo(
+    () =>
+      selectedStream === 'all'
+        ? backlogByCenter
+        : backlogByCenter.filter(center => streamCenterIds.has(center.id)),
+    [backlogByCenter, selectedStream, streamCenterIds],
+  );
+
+  const qualitySummary = useMemo(() => {
+    const blocked = qualityChecks.filter(check => check.status === 'blocked').length;
+    const failed = qualityChecks.filter(check => check.status === 'failed').length;
+    const pending = qualityChecks.filter(check => check.status === 'pending').length;
+    const openNonconformances = nonconformances.filter(nc => nc.status !== 'closed').length;
+    return { blocked, failed, pending, total: qualityChecks.length, openNonconformances };
+  }, [qualityChecks, nonconformances]);
+
+  const recentQualityChecks = useMemo(
+    () => qualityChecks.slice(0, 6),
+    [qualityChecks],
+  );
+
+  const upcomingMaintenance = useMemo(() => {
+    return maintenanceOrders
+      .filter(order => order.status !== 'completed')
+      .sort((a, b) => new Date(a.schedule).getTime() - new Date(b.schedule).getTime())
+      .slice(0, 6);
+  }, [maintenanceOrders]);
+
+  const qualityByEntity = useMemo(() => {
+    const aggregates = qualityChecks.reduce(
+      (acc, check) => {
+        const key = check.entityType;
+        if (!acc[key]) {
+          acc[key] = { total: 0, blocked: 0, failed: 0 };
+        }
+        acc[key].total += 1;
+        if (check.status === 'blocked') {
+          acc[key].blocked += 1;
+        }
+        if (check.status === 'failed') {
+          acc[key].failed += 1;
+        }
+        return acc;
+      },
+      {} as Record<string, { total: number; blocked: number; failed: number }>,
+    );
+
+    return Object.entries(aggregates)
+      .map(([entity, values]) => ({ entity, ...values }))
+      .sort((a, b) => b.total - a.total);
+  }, [qualityChecks]);
+
+  const nonconformanceCounts = useMemo(
+    () =>
+      nonconformances.reduce(
+        (acc, item) => {
+          acc[item.severity] = (acc[item.severity] ?? 0) + 1;
+          return acc;
+        },
+        { low: 0, medium: 0, high: 0 } as Record<'low' | 'medium' | 'high', number>,
+      ),
+    [nonconformances],
+  );
+
+  const filteredNonconformances = useMemo(
+    () =>
+      nonconformanceSeverity === 'all'
+        ? nonconformances
+        : nonconformances.filter(nc => nc.severity === nonconformanceSeverity),
+    [nonconformances, nonconformanceSeverity],
+  );
+
+  const tabs: { id: TabKey; label: string }[] = [
+    { id: 'orders', label: 'Заказы' },
+    { id: 'operations', label: 'Операции' },
+    { id: 'resources', label: 'Ресурсы' },
+    { id: 'quality', label: 'Качество и поддержка' },
+  ];
+
 
   const lineSignals = useMemo(
     () =>
@@ -279,59 +594,127 @@ export const ProductionDashboard: React.FC = () => {
                 <h3>Производственные заказы</h3>
                 <p className="muted">Факт исполнения по каждому заказу и контроль сроков.</p>
               </header>
-              <table className="mes-production__table">
-                <thead>
-                  <tr>
-                    <th>Заказ</th>
-                    <th>Объём</th>
-                    <th>Срок</th>
-                    <th>Статус</th>
-                    <th>Прогресс</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {productionOrders.map(order => {
-                    const progress = getProgress(order, workOrders);
-                    return (
-                      <tr key={order.id}>
-                        <td>
-                          <div>
-                            <strong>{order.id}</strong>
-                            <p className="muted">Номенклатура {order.itemId}</p>
-                          </div>
-                        </td>
-                        <td>{order.qty}</td>
-                        <td>{formatDate(order.dueDate)}</td>
-                        <td>
-                          <span className={`status status--${order.status}`}>
-                            {productionStatusLabel[order.status]}
-                          </span>
-                        </td>
-                        <td>
-                          <div
-                            className="progress"
-                            role="progressbar"
-                            aria-valuenow={progress}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                          >
-                            <div className="progress__bar" style={{ width: `${progress}%` }}>
-                              <span>{progress}%</span>
+
+              <div className="mes-production__toolbar">
+                <div className="mes-production__filters" role="group" aria-label="Фильтрация по статусу заказа">
+                  {([
+                    { id: 'all', label: 'Все', count: orderSummary.total },
+                    { id: 'in-progress', label: 'В работе', count: orderStatusCounts['in-progress'] },
+                    { id: 'released', label: 'Выпущен', count: orderStatusCounts.released },
+                    { id: 'draft', label: 'Черновик', count: orderStatusCounts.draft },
+                    { id: 'completed', label: 'Завершён', count: orderStatusCounts.completed },
+                    { id: 'closed', label: 'Закрыт', count: orderStatusCounts.closed },
+                  ] as const).map(option => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`mes-production__filter ${orderStatusFilter === option.id ? 'mes-production__filter--active' : ''}`}
+                      aria-pressed={orderStatusFilter === option.id}
+                      onClick={() => setOrderStatusFilter(option.id)}
+                    >
+                      <span>{option.label}</span>
+                      <span className="mes-production__filter-count">{option.count}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="mes-production__view-toggle" role="group" aria-label="Представление заказов">
+                  <button
+                    type="button"
+                    className={`mes-production__toggle ${orderView === 'table' ? 'mes-production__toggle--active' : ''}`}
+                    aria-pressed={orderView === 'table'}
+                    onClick={() => setOrderView('table')}
+                  >
+                    Таблица
+                  </button>
+                  <button
+                    type="button"
+                    className={`mes-production__toggle ${orderView === 'timeline' ? 'mes-production__toggle--active' : ''}`}
+                    aria-pressed={orderView === 'timeline'}
+                    onClick={() => setOrderView('timeline')}
+                  >
+                    Таймлайн
+                  </button>
+                </div>
+              </div>
+              {orderView === 'table' ? (
+                <table className="mes-production__table">
+                  <thead>
+                    <tr>
+                      <th>Заказ</th>
+                      <th>Объём</th>
+                      <th>Срок</th>
+                      <th>Статус</th>
+                      <th>Прогресс</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredOrders.map(order => {
+                      const progress = getProgress(order, workOrders);
+                      return (
+                        <tr key={order.id}>
+                          <td>
+                            <div>
+                              <strong>{order.id}</strong>
+                              <p className="muted">Номенклатура {order.itemId}</p>
                             </div>
-                          </div>
+                          </td>
+                          <td>{order.qty}</td>
+                          <td>{formatDate(order.dueDate)}</td>
+                          <td>
+                            <span className={`status status--${order.status}`}>
+                              {productionStatusLabel[order.status]}
+                            </span>
+                          </td>
+                          <td>
+                            <div
+                              className="progress"
+                              role="progressbar"
+                              aria-valuenow={progress}
+                              aria-valuemin={0}
+                              aria-valuemax={100}
+                            >
+                              <div className="progress__bar" style={{ width: `${progress}%` }}>
+                                <span>{progress}%</span>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {filteredOrders.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="mes-production__empty">
+                          Нет активных производственных заказов
                         </td>
                       </tr>
-                    );
-                  })}
-                  {productionOrders.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="mes-production__empty">
-                        Нет активных производственных заказов
-                      </td>
-                    </tr>
+                    )}
+                  </tbody>
+                </table>
+              ) : (
+                <ol className="mes-production__timeline">
+                  {ordersTimeline.map(order => (
+                    <li key={order.id} className="mes-production__timeline-item">
+                      <div className="mes-production__timeline-header">
+                        <strong>{order.id}</strong>
+                        <span className={`status status--${order.status}`}>
+                          {productionStatusLabel[order.status]}
+                        </span>
+                      </div>
+                      <p className="muted">Срок {formatDate(order.dueDate)} • {order.dueLabel}</p>
+                      <div className="mes-production__timeline-progress">
+                        <div className="mes-production__timeline-track">
+                          <div className="mes-production__timeline-bar" style={{ width: `${order.progress}%` }} />
+                        </div>
+                        <span className="mes-production__timeline-value">{order.progress}%</span>
+                      </div>
+                    </li>
+                  ))}
+                  {ordersTimeline.length === 0 && (
+                    <li className="muted">Нет заказов в выбранном фильтре</li>
                   )}
-                </tbody>
-              </table>
+                </ol>
+              )}
+
             </article>
             <article className="mes-production__panel">
               <header>
@@ -366,26 +749,67 @@ export const ProductionDashboard: React.FC = () => {
             </article>
             <article className="mes-production__panel">
               <header>
-                <h3>Сводка статусов</h3>
+
+                <h3>Value stream сегментация</h3>
+                <p className="muted">Зоны ответственности, риск и ближайшие вехи по потокам.</p>
               </header>
-              <div className="mes-production__metrics">
-                <div className="metric">
-                  <span className="metric__label">Всего заказов</span>
-                  <span className="metric__value">{orderSummary.total}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric__label">Выполнено</span>
-                  <span className="metric__value">{orderSummary.completed}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric__label">Операций завершено</span>
-                  <span className="metric__value">{workOrderSummary.completed}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric__label">Блокеров</span>
-                  <span className="metric__value">{workOrderSummary.blocked}</span>
-                </div>
-              </div>
+              <ul className="mes-production__stream-list">
+                {streamInsights.map(stream => (
+                  <li key={stream.id} className="mes-production__stream-card">
+                    <div className="mes-production__stream-header">
+                      <div className="mes-production__stream-title">
+                        <strong>{stream.name}</strong>
+                        <p className="muted">{stream.focus}</p>
+                      </div>
+                      <div className="mes-production__stream-tags">
+                        <span className={`chip chip--risk-${stream.risk}`}>
+                          <span className="chip__label">Риск</span>
+                          <span className="chip__value">{stream.risk}</span>
+                        </span>
+                        <span className="chip chip--ghost">
+                          <span className="chip__label">Линий</span>
+                          <span className="chip__value">{stream.lineCount}</span>
+                        </span>
+                        <span className="chip chip--ghost">
+                          <span className="chip__label">Доступность</span>
+                          <span className="chip__value">{stream.availability}%</span>
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mes-production__stream-stats">
+                      <span className="chip chip--ghost">
+                        <span className="chip__label">Спрос недели</span>
+                        <span className="chip__value">{stream.demand}</span>
+                      </span>
+                      <span className="chip chip--ghost">
+                        <span className="chip__label">Backlog</span>
+                        <span className="chip__value">{stream.backlog}</span>
+                      </span>
+                      <span className="chip chip--ghost">
+                        <span className="chip__label">WIP</span>
+                        <span className="chip__value">{stream.wip}</span>
+                      </span>
+                      <span className="chip chip--ghost">
+                        <span className="chip__label">Выполнение</span>
+                        <span className="chip__value">{stream.attainment}%</span>
+                      </span>
+                    </div>
+                    <div className="mes-production__stream-notes">
+                      <span className="muted">
+                        Дежурные: {stream.gatekeepers.length > 0 ? stream.gatekeepers.join(', ') : 'не назначены'}
+                      </span>
+                      <span className="muted">Следующий рубеж: {stream.nextMilestone}</span>
+                    </div>
+                    {stream.blockers.length > 0 && (
+                      <div className="mes-production__stream-alert">
+                        <span className="alert">Блокеры: {stream.blockers.join(', ')}</span>
+                      </div>
+                    )}
+                  </li>
+                ))}
+                {streamInsights.length === 0 && <li className="muted">Потоки не настроены</li>}
+              </ul>
+
             </article>
           </div>
         )}
@@ -397,46 +821,107 @@ export const ProductionDashboard: React.FC = () => {
                 <h3>Исполнение операций</h3>
                 <p className="muted">Распределение по статусам и назначенным исполнителям.</p>
               </header>
-              <div className="mes-production__operations">
-                {operationsGroups.map(group => (
-                  <section key={group.key}>
-                    <header className="mes-production__operations-header">
-                      <h4>{group.title}</h4>
-                      <p className="muted">{group.hint}</p>
-                    </header>
-                    <ul className="mes-production__list">
-                      {group.orders.map(order => (
 
-                    <li key={order.id}>
-                      <div>
-                        <strong>{order.opId}</strong>
-                        <p className="muted">Заказ {order.prodOrderId}</p>
-                      </div>
-                      <div className="mes-production__list-meta">
-                        {order.startedAt && (
-                          <span className="chip chip--ghost">
-                            <span className="chip__label">Старт</span>
-                            <span className="chip__value">{formatDateTime(order.startedAt)}</span>
-                          </span>
-                        )}
-                        {order.assignee && (
-                          <span className="chip chip--ghost">
-                            <span className="chip__label">Исполнитель</span>
-                            <span className="chip__value">{order.assignee}</span>
-                          </span>
-                        )}
-                        <span className={`status status--${order.status}`}>
-                          {workOrderStatusLabel[order.status]}
-                        </span>
-                      </div>
-                    </li>
-
-                      ))}
-                      {group.orders.length === 0 && <li className="muted">Нет операций в статусе</li>}
-                    </ul>
-                  </section>
-                ))}
+              <div className="mes-production__toolbar mes-production__toolbar--sub">
+                <div className="mes-production__filters" role="group" aria-label="Представление операций">
+                  <button
+                    type="button"
+                    className={`mes-production__toggle ${operationFocus === 'status' ? 'mes-production__toggle--active' : ''}`}
+                    aria-pressed={operationFocus === 'status'}
+                    onClick={() => setOperationFocus('status')}
+                  >
+                    По статусам
+                  </button>
+                  <button
+                    type="button"
+                    className={`mes-production__toggle ${operationFocus === 'shift' ? 'mes-production__toggle--active' : ''}`}
+                    aria-pressed={operationFocus === 'shift'}
+                    onClick={() => setOperationFocus('shift')}
+                  >
+                    По сменам
+                  </button>
+                </div>
               </div>
+              {operationFocus === 'status' ? (
+                <div className="mes-production__operations">
+                  {operationsGroups.map(group => (
+                    <section key={group.key}>
+                      <header className="mes-production__operations-header">
+                        <h4>{group.title}</h4>
+                        <p className="muted">{group.hint}</p>
+                      </header>
+                      <ul className="mes-production__list">
+                        {group.orders.map(order => (
+                          <li key={order.id}>
+                            <div>
+                              <strong>{order.opId}</strong>
+                              <p className="muted">Заказ {order.prodOrderId}</p>
+                            </div>
+                            <div className="mes-production__list-meta">
+                              {order.startedAt && (
+                                <span className="chip chip--ghost">
+                                  <span className="chip__label">Старт</span>
+                                  <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                                </span>
+                              )}
+                              {order.assignee && (
+                                <span className="chip chip--ghost">
+                                  <span className="chip__label">Исполнитель</span>
+                                  <span className="chip__value">{order.assignee}</span>
+                                </span>
+                              )}
+                              <span className={`status status--${order.status}`}>
+                                {workOrderStatusLabel[order.status]}
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                        {group.orders.length === 0 && <li className="muted">Нет операций в статусе</li>}
+                      </ul>
+                    </section>
+                  ))}
+                </div>
+              ) : (
+                <div className="mes-production__operations">
+                  {shiftBuckets.map(group => (
+                    <section key={group.key}>
+                      <header className="mes-production__operations-header">
+                        <h4>{group.title}</h4>
+                        <p className="muted">{group.window}</p>
+                      </header>
+                      <ul className="mes-production__list">
+                        {group.orders.map(order => (
+                          <li key={order.id}>
+                            <div>
+                              <strong>{order.opId}</strong>
+                              <p className="muted">Заказ {order.prodOrderId}</p>
+                            </div>
+                            <div className="mes-production__list-meta">
+                              {order.startedAt && (
+                                <span className="chip chip--ghost">
+                                  <span className="chip__label">Старт</span>
+                                  <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                                </span>
+                              )}
+                              {order.assignee && (
+                                <span className="chip chip--ghost">
+                                  <span className="chip__label">Исполнитель</span>
+                                  <span className="chip__value">{order.assignee}</span>
+                                </span>
+                              )}
+                              <span className={`status status--${order.status}`}>
+                                {workOrderStatusLabel[order.status]}
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                        {group.orders.length === 0 && <li className="muted">Нет операций в смене</li>}
+                      </ul>
+                    </section>
+                  ))}
+                </div>
+              )}
+
             </article>
             <article className="mes-production__panel">
               <header>
@@ -507,6 +992,60 @@ export const ProductionDashboard: React.FC = () => {
                 {activeOperations.length === 0 && <li className="muted">Нет операций в работе</li>}
               </ul>
             </article>
+
+            <article className="mes-production__panel">
+              <header>
+                <h3>Лидеры смены</h3>
+                <p className="muted">Активные исполнители и глубина очереди по ним.</p>
+              </header>
+              <ul className="mes-production__operator-list">
+                {operatorUtilization.map(operator => (
+                  <li key={operator.assignee} className="mes-production__operator">
+                    <div>
+                      <strong>{operator.assignee}</strong>
+                      <p className="muted">Активно {operator.active} / Всего {operator.total}</p>
+                    </div>
+                    <div className="mes-production__bar">
+                      <div
+                        className="mes-production__bar-fill"
+                        style={{ width: operator.total === 0 ? '0%' : `${(operator.active / operator.total) * 100}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+                {operatorUtilization.length === 0 && <li className="muted">Исполнители не назначены</li>}
+              </ul>
+            </article>
+            <article className="mes-production__panel">
+              <header>
+                <h3>Долгие операции</h3>
+                <p className="muted">Мониторинг затянувшихся заданий текущей смены.</p>
+              </header>
+              <ul className="mes-production__list">
+                {operationAging.map(order => (
+                  <li key={order.id}>
+                    <div>
+                      <strong>{order.opId}</strong>
+                      <p className="muted">Заказ {order.prodOrderId}</p>
+                    </div>
+                    <div className="mes-production__list-meta">
+                      {order.startedAt && (
+                        <span className="chip chip--ghost">
+                          <span className="chip__label">Старт</span>
+                          <span className="chip__value">{formatDateTime(order.startedAt)}</span>
+                        </span>
+                      )}
+                      <span className="chip chip--accent">
+                        <span className="chip__label">В работе</span>
+                        <span className="chip__value">{order.agingMin} мин</span>
+                      </span>
+                    </div>
+                  </li>
+                ))}
+                {operationAging.length === 0 && <li className="muted">Просроченных операций нет</li>}
+              </ul>
+            </article>
+
           </div>
         )}
 
@@ -517,8 +1056,32 @@ export const ProductionDashboard: React.FC = () => {
                 <h3>Производственные линии</h3>
                 <p className="muted">Факт выполнения смены, доступность и риски.</p>
               </header>
+
+              <div className="mes-production__toolbar mes-production__toolbar--sub">
+                <div className="mes-production__filters" role="group" aria-label="Фильтр по потокам">
+                  <button
+                    type="button"
+                    className={`mes-production__filter ${selectedStream === 'all' ? 'mes-production__filter--active' : ''}`}
+                    aria-pressed={selectedStream === 'all'}
+                    onClick={() => setSelectedStream('all')}
+                  >
+                    Все потоки
+                  </button>
+                  {valueStreams.map(stream => (
+                    <button
+                      key={stream.id}
+                      type="button"
+                      className={`mes-production__filter ${selectedStream === stream.id ? 'mes-production__filter--active' : ''}`}
+                      aria-pressed={selectedStream === stream.id}
+                      onClick={() => setSelectedStream(stream.id)}
+                    >
+                      {stream.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <ul className="mes-production__lines">
-                {lineSignals.map(line => (
+                {filteredLineSignals.map(line => (
                   <li key={line.id}>
 
                     <div className="mes-production__line-body">
@@ -555,7 +1118,8 @@ export const ProductionDashboard: React.FC = () => {
                     </div>
                   </li>
                 ))}
-                {lineSignals.length === 0 && <li className="muted">Линии не настроены</li>}
+                {filteredLineSignals.length === 0 && <li className="muted">Линии не настроены</li>}
+
               </ul>
             </article>
             <article className="mes-production__panel">
@@ -573,7 +1137,9 @@ export const ProductionDashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {backlogByCenter.map(center => (
+
+                  {filteredBacklogByCenter.map(center => (
+
                     <tr key={center.id}>
                       <td>
                         <div>
@@ -603,7 +1169,9 @@ export const ProductionDashboard: React.FC = () => {
 
                     </tr>
                   ))}
-                  {backlogByCenter.length === 0 && (
+                  {filteredBacklogByCenter.length === 0 && (
+
+
                     <tr>
                       <td colSpan={4} className="mes-production__empty">
                         Нет активных рабочих центров
@@ -613,6 +1181,55 @@ export const ProductionDashboard: React.FC = () => {
                 </tbody>
               </table>
             </article>
+
+            <article className="mes-production__panel">
+              <header>
+                <h3>Загрузка потоков</h3>
+                <p className="muted">Синхронизация спроса, WIP и выполнения.</p>
+              </header>
+              <ul className="mes-production__operator-list">
+                {streamLoads.map(stream => (
+                  <li key={stream.id} className="mes-production__operator">
+                    <div>
+                      <strong>{stream.name}</strong>
+                      <p className="muted">{stream.focus}</p>
+                    </div>
+                    <div className="mes-production__stream-meta">
+                      <span className={`chip chip--risk-${stream.risk}`}>
+                        <span className="chip__label">Риск</span>
+                        <span className="chip__value">{stream.risk}</span>
+                      </span>
+                      <span className="chip chip--ghost">
+                        <span className="chip__label">Спрос</span>
+                        <span className="chip__value">{stream.demand}</span>
+                      </span>
+                      <span className="chip chip--ghost">
+                        <span className="chip__label">Backlog</span>
+                        <span className="chip__value">{stream.backlog}</span>
+                      </span>
+                    </div>
+                    <div className="mes-production__bar">
+                      <div
+                        className="mes-production__bar-fill"
+                        style={{
+                          width:
+                            stream.totalTarget === 0 ? '0%' : `${Math.min(100, (stream.totalThroughput / stream.totalTarget) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="mes-production__stream-footer">
+                      <span className="muted">WIP {stream.totalWip}</span>
+                      <span className="muted">Выполнение {stream.attainment}%</span>
+                      {stream.blockers.length > 0 && (
+                        <span className="muted">Блокеры: {stream.blockers.join(', ')}</span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+                {streamLoads.length === 0 && <li className="muted">Потоки не настроены</li>}
+              </ul>
+            </article>
+
           </div>
         )}
 
@@ -669,11 +1286,59 @@ export const ProductionDashboard: React.FC = () => {
             </article>
             <article className="mes-production__panel">
               <header>
+
+                <h3>Фокус проверки</h3>
+                <p className="muted">Какие объекты попадают в контроль чаще других.</p>
+              </header>
+              <div className="mes-production__distribution">
+                {qualityByEntity.map(item => (
+                  <div key={item.entity} className="mes-production__distribution-row">
+                    <span className="mes-production__distribution-label">{item.entity}</span>
+                    <div className="mes-production__distribution-bar">
+                      <div
+                        className="mes-production__distribution-fill mes-production__distribution-fill--quality"
+                        style={{ width: `${item.total === 0 ? 0 : (item.failed / item.total) * 100}%` }}
+                      />
+                      <div
+                        className="mes-production__distribution-fill mes-production__distribution-fill--blocked"
+                        style={{ width: `${item.total === 0 ? 0 : (item.blocked / item.total) * 100}%` }}
+                      />
+                    </div>
+                    <span className="mes-production__distribution-value">{item.total}</span>
+                  </div>
+                ))}
+                {qualityByEntity.length === 0 && <p className="muted">Контрольные точки не настроены</p>}
+              </div>
+            </article>
+            <article className="mes-production__panel">
+              <header>
                 <h3>Несоответствия</h3>
                 <p className="muted">Мониторинг эскалаций и плана корректирующих действий.</p>
               </header>
+              <div className="mes-production__toolbar mes-production__toolbar--sub">
+                <div className="mes-production__filters" role="group" aria-label="Фильтр по критичности NCR">
+                  {([
+                    { id: 'all', label: 'Все', count: nonconformances.length },
+                    { id: 'high', label: 'High', count: nonconformanceCounts.high },
+                    { id: 'medium', label: 'Medium', count: nonconformanceCounts.medium },
+                    { id: 'low', label: 'Low', count: nonconformanceCounts.low },
+                  ] as const).map(option => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`mes-production__filter ${nonconformanceSeverity === option.id ? 'mes-production__filter--active' : ''}`}
+                      aria-pressed={nonconformanceSeverity === option.id}
+                      onClick={() => setNonconformanceSeverity(option.id)}
+                    >
+                      <span>{option.label}</span>
+                      <span className="mes-production__filter-count">{option.count}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
               <ul className="mes-production__list">
-                {nonconformances.map(nc => (
+                {filteredNonconformances.map(nc => (
+
                   <li key={nc.id}>
                     <div>
                       <strong>
@@ -694,7 +1359,8 @@ export const ProductionDashboard: React.FC = () => {
 
                   </li>
                 ))}
-                {nonconformances.length === 0 && <li className="muted">Несоответствий нет</li>}
+                {filteredNonconformances.length === 0 && <li className="muted">Несоответствий нет</li>}
+
               </ul>
             </article>
             <article className="mes-production__panel">
