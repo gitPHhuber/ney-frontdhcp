@@ -8,15 +8,148 @@ import type {
   PassportTemplate,
   PassportTemplateField,
   ProductPassport,
+  TemplateFieldValue,
+  TemplateTableRow,
 } from './types';
 
 const getState = () => enterpriseState.passports;
 
 const cloneFields = (fields: PassportTemplateField[]): PassportTemplateField[] =>
-  fields.map(field => ({
-    ...field,
-    options: field.options ? field.options.map(option => ({ ...option })) : undefined,
-  }));
+  fields.map(field => {
+    if (field.type === 'table') {
+      return {
+        ...field,
+        columns: field.columns.map(column => ({ ...column })),
+      };
+    }
+    return {
+      ...field,
+      options: field.options ? field.options.map(option => ({ ...option })) : undefined,
+    };
+  });
+
+const cloneLayout = (layout: PassportTemplate['layout']): PassportTemplate['layout'] => {
+  if (!layout) {
+    return undefined;
+  }
+  return {
+    sheetName: layout.sheetName,
+    columnWidths: layout.columnWidths ? { ...layout.columnWidths } : undefined,
+    rowHeights: layout.rowHeights ? { ...layout.rowHeights } : undefined,
+    staticCells: layout.staticCells?.map(cell => ({
+      ...cell,
+      merge: cell.merge ? { ...cell.merge } : undefined,
+      style: cell.style
+        ? {
+            ...cell.style,
+            font: cell.style.font ? { ...cell.style.font } : undefined,
+            alignment: cell.style.alignment ? { ...cell.style.alignment } : undefined,
+            border: cell.style.border
+              ? {
+                  top: cell.style.border.top ? { ...cell.style.border.top } : undefined,
+                  bottom: cell.style.border.bottom ? { ...cell.style.border.bottom } : undefined,
+                  left: cell.style.border.left ? { ...cell.style.border.left } : undefined,
+                  right: cell.style.border.right ? { ...cell.style.border.right } : undefined,
+                }
+              : undefined,
+            numberFormat: cell.style.numberFormat,
+          }
+        : undefined,
+    })),
+    bindings: layout.bindings?.map(binding => ({
+      ...binding,
+      merge: binding.merge ? { ...binding.merge } : undefined,
+      style: binding.style
+        ? {
+            ...binding.style,
+            font: binding.style.font ? { ...binding.style.font } : undefined,
+            alignment: binding.style.alignment ? { ...binding.style.alignment } : undefined,
+            border: binding.style.border
+              ? {
+                  top: binding.style.border.top ? { ...binding.style.border.top } : undefined,
+                  bottom: binding.style.border.bottom ? { ...binding.style.border.bottom } : undefined,
+                  left: binding.style.border.left ? { ...binding.style.border.left } : undefined,
+                  right: binding.style.border.right ? { ...binding.style.border.right } : undefined,
+                }
+              : undefined,
+            numberFormat: binding.style.numberFormat,
+          }
+        : undefined,
+    })),
+    tables: layout.tables?.map(table => ({
+      ...table,
+      fillEmptyRowsWithGrid: table.fillEmptyRowsWithGrid,
+      columns: table.columns.map(column => ({
+        ...column,
+        style: column.style
+          ? {
+              ...column.style,
+              font: column.style.font ? { ...column.style.font } : undefined,
+              alignment: column.style.alignment ? { ...column.style.alignment } : undefined,
+              border: column.style.border
+                ? {
+                    top: column.style.border.top ? { ...column.style.border.top } : undefined,
+                    bottom: column.style.border.bottom ? { ...column.style.border.bottom } : undefined,
+                    left: column.style.border.left ? { ...column.style.border.left } : undefined,
+                    right: column.style.border.right ? { ...column.style.border.right } : undefined,
+                  }
+                : undefined,
+              numberFormat: column.style.numberFormat,
+            }
+          : undefined,
+        headerStyle: column.headerStyle
+          ? {
+              ...column.headerStyle,
+              font: column.headerStyle.font ? { ...column.headerStyle.font } : undefined,
+              alignment: column.headerStyle.alignment ? { ...column.headerStyle.alignment } : undefined,
+              border: column.headerStyle.border
+                ? {
+                    top: column.headerStyle.border.top ? { ...column.headerStyle.border.top } : undefined,
+                    bottom: column.headerStyle.border.bottom ? { ...column.headerStyle.border.bottom } : undefined,
+                    left: column.headerStyle.border.left ? { ...column.headerStyle.border.left } : undefined,
+                    right: column.headerStyle.border.right ? { ...column.headerStyle.border.right } : undefined,
+                  }
+                : undefined,
+              numberFormat: column.headerStyle.numberFormat,
+            }
+          : undefined,
+      })),
+      headerStyle: table.headerStyle
+        ? {
+            ...table.headerStyle,
+            font: table.headerStyle.font ? { ...table.headerStyle.font } : undefined,
+            alignment: table.headerStyle.alignment ? { ...table.headerStyle.alignment } : undefined,
+            border: table.headerStyle.border
+              ? {
+                  top: table.headerStyle.border.top ? { ...table.headerStyle.border.top } : undefined,
+                  bottom: table.headerStyle.border.bottom ? { ...table.headerStyle.border.bottom } : undefined,
+                  left: table.headerStyle.border.left ? { ...table.headerStyle.border.left } : undefined,
+                  right: table.headerStyle.border.right ? { ...table.headerStyle.border.right } : undefined,
+                }
+              : undefined,
+            numberFormat: table.headerStyle.numberFormat,
+          }
+        : undefined,
+      rowStyle: table.rowStyle
+        ? {
+            ...table.rowStyle,
+            font: table.rowStyle.font ? { ...table.rowStyle.font } : undefined,
+            alignment: table.rowStyle.alignment ? { ...table.rowStyle.alignment } : undefined,
+            border: table.rowStyle.border
+              ? {
+                  top: table.rowStyle.border.top ? { ...table.rowStyle.border.top } : undefined,
+                  bottom: table.rowStyle.border.bottom ? { ...table.rowStyle.border.bottom } : undefined,
+                  left: table.rowStyle.border.left ? { ...table.rowStyle.border.left } : undefined,
+                  right: table.rowStyle.border.right ? { ...table.rowStyle.border.right } : undefined,
+                }
+              : undefined,
+            numberFormat: table.rowStyle.numberFormat,
+          }
+        : undefined,
+      gridStyle: table.gridStyle ? { ...table.gridStyle } : undefined,
+    })),
+  };
+};
 
 const findDeviceModel = (deviceModelId: string): DeviceModel | undefined =>
   getState().deviceModels.find(model => model.id === deviceModelId);
@@ -45,6 +178,58 @@ const ensureHistoryMap = (deviceId: string) => {
   return state.deviceHistory[deviceId];
 };
 
+const resolveAutofillValue = (
+  fieldKey: string,
+  device: NetworkDevice,
+  metadata: ProductPassport['metadata'],
+): TemplateFieldValue | undefined => {
+  switch (fieldKey) {
+    case 'assetTag':
+    case 'inventoryNumber':
+      return metadata.assetTag;
+    case 'productName':
+    case 'model':
+    case 'modelName':
+      return metadata.modelName;
+    case 'serialNumber':
+    case 'serial':
+      return metadata.serialNumber;
+    case 'sku':
+    case 'article':
+      return device.assetTag;
+    case 'location':
+      return metadata.location;
+    case 'ipAddress':
+      return metadata.ipAddress;
+    case 'owner':
+    case 'responsible':
+      return metadata.owner;
+    default:
+      return undefined;
+  }
+};
+
+const applyAutofill = (
+  schema: PassportTemplateField[],
+  device: NetworkDevice,
+  metadata: ProductPassport['metadata'],
+  values: Record<string, TemplateFieldValue>,
+) => {
+  schema.forEach(field => {
+    if (field.type === 'table') {
+      return;
+    }
+    if (values[field.key] !== undefined) {
+      return;
+    }
+    const autofilled = resolveAutofillValue(field.key, device, metadata);
+    if (autofilled !== undefined) {
+      values[field.key] = autofilled;
+    }
+  });
+  return values;
+};
+
 const nextTemplateVersion = (deviceModelId: string): number => {
   const state = getState();
   const versions = state.templates
@@ -64,6 +249,7 @@ const markTemplateActive = (deviceModelId: string, templateId: string) => {
   state.templates.forEach(template => {
     if (template.deviceModelId === deviceModelId) {
       template.isActive = template.id === templateId;
+      template.status = template.isActive ? 'published' : template.status ?? 'draft';
     }
   });
 };
@@ -160,9 +346,16 @@ export const productPassportRepository = {
     const templates = deviceModelId
       ? state.templates.filter(template => template.deviceModelId === deviceModelId)
       : state.templates;
-    return templates.map(template => ({ ...template, fields: cloneFields(template.fields) }));
+    return templates.map(template => ({
+      ...template,
+      fields: cloneFields(template.fields),
+      layout: cloneLayout(template.layout),
+    }));
   },
-  async createTemplate({ setActive = false, ...template }: Omit<PassportTemplate, 'id' | 'version' | 'createdAt'> & { setActive?: boolean }): Promise<PassportTemplate> {
+  async createTemplate({
+    setActive = false,
+    ...template
+  }: Omit<PassportTemplate, 'id' | 'version' | 'createdAt'> & { setActive?: boolean }): Promise<PassportTemplate> {
     const state = getState();
     const record: PassportTemplate = {
       ...template,
@@ -171,6 +364,8 @@ export const productPassportRepository = {
       isActive: Boolean(setActive),
       createdAt: new Date().toISOString(),
       fields: cloneFields(template.fields),
+      layout: cloneLayout(template.layout),
+      status: template.status ?? (setActive ? 'published' : 'draft'),
     };
     state.templates.push(record);
     if (record.isActive) {
@@ -179,6 +374,7 @@ export const productPassportRepository = {
     return {
       ...record,
       fields: cloneFields(record.fields),
+      layout: cloneLayout(record.layout),
     };
   },
   async setTemplateActive(templateId: string): Promise<void> {
@@ -192,12 +388,24 @@ export const productPassportRepository = {
   async getTemplateById(templateId: string): Promise<PassportTemplate | undefined> {
     const state = getState();
     const template = state.templates.find(entry => entry.id === templateId);
-    return template ? { ...template, fields: cloneFields(template.fields) } : undefined;
+    return template
+      ? {
+          ...template,
+          fields: cloneFields(template.fields),
+          layout: cloneLayout(template.layout),
+        }
+      : undefined;
   },
   async getActiveTemplate(deviceModelId: string): Promise<PassportTemplate | undefined> {
     const state = getState();
     const template = state.templates.find(entry => entry.deviceModelId === deviceModelId && entry.isActive);
-    return template ? { ...template, fields: cloneFields(template.fields) } : undefined;
+    return template
+      ? {
+          ...template,
+          fields: cloneFields(template.fields),
+          layout: cloneLayout(template.layout),
+        }
+      : undefined;
   },
   async getDeviceHistory(deviceId: string): Promise<DeviceHistoryEntry[]> {
     return deepClone(ensureHistoryMap(deviceId));
@@ -237,12 +445,21 @@ export const productPassportRepository = {
       updatedAt: new Date().toISOString(),
       metadata,
       schema,
-      fieldValues: schema.reduce<Record<string, string | number | boolean | string[]>>((acc, field) => {
-        if (field.defaultValue !== undefined) {
-          acc[field.key] = field.defaultValue;
-        }
-        return acc;
-      }, {}),
+      fieldValues: applyAutofill(
+        schema,
+        device,
+        metadata,
+        schema.reduce<Record<string, TemplateFieldValue>>((acc, field) => {
+          if (field.type === 'table') {
+            acc[field.key] = Array.isArray(field.defaultValue) ? (field.defaultValue as TemplateTableRow[]) : [];
+            return acc;
+          }
+          if (field.defaultValue !== undefined) {
+            acc[field.key] = field.defaultValue;
+          }
+          return acc;
+        }, {}),
+      ),
       attachments: [],
       history: [
         {
@@ -262,14 +479,27 @@ export const productPassportRepository = {
     if (!passport) {
       throw new Error(`Passport ${passportId} not found`);
     }
+    const device = findDevice(passport.deviceId);
+    if (!device) {
+      throw new Error(`Device ${passport.deviceId} not found`);
+    }
     passport.templateId = template.id;
     passport.schema = cloneFields(template.fields);
-    passport.fieldValues = template.fields.reduce<Record<string, string | number | boolean | string[]>>((acc, field) => {
-      if (field.defaultValue !== undefined) {
-        acc[field.key] = field.defaultValue;
-      }
-      return acc;
-    }, {});
+    passport.fieldValues = applyAutofill(
+      template.fields,
+      device,
+      passport.metadata,
+      template.fields.reduce<Record<string, TemplateFieldValue>>((acc, field) => {
+        if (field.type === 'table') {
+          acc[field.key] = Array.isArray(field.defaultValue) ? (field.defaultValue as TemplateTableRow[]) : [];
+          return acc;
+        }
+        if (field.defaultValue !== undefined) {
+          acc[field.key] = field.defaultValue;
+        }
+        return acc;
+      }, {}),
+    );
     passport.updatedAt = new Date().toISOString();
     passport.history.push({
       ts: passport.updatedAt,
@@ -289,7 +519,10 @@ export const productPassportRepository = {
     passport.updatedAt = new Date().toISOString();
     return hydratePassport(passport);
   },
-  async updatePassportValues(passportId: string, values: Record<string, string | number | boolean | string[]>): Promise<ProductPassport> {
+  async updatePassportValues(
+    passportId: string,
+    values: Record<string, TemplateFieldValue>,
+  ): Promise<ProductPassport> {
     const state = getState();
     const passport = state.passports.find(entry => entry.id === passportId);
     if (!passport) {
@@ -309,6 +542,9 @@ export const productPassportRepository = {
     if (!device) {
       throw new Error(`Device ${passport.deviceId} not found`);
     }
+    const sourceTemplate = passport.templateId
+      ? state.templates.find(entry => entry.id === passport.templateId)
+      : undefined;
     const template: PassportTemplate = {
       id: generateId('template'),
       deviceModelId: device.deviceModelId,
@@ -318,6 +554,9 @@ export const productPassportRepository = {
       isActive: Boolean(setActive),
       createdAt: new Date().toISOString(),
       fields: cloneFields(passport.schema),
+      layout: cloneLayout(sourceTemplate?.layout),
+      status: setActive ? 'published' : 'draft',
+      fileNamePattern: sourceTemplate?.fileNamePattern,
     };
     state.templates.push(template);
     if (template.isActive) {

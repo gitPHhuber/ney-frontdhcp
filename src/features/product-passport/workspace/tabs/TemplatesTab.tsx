@@ -28,6 +28,8 @@ export const TemplatesTab = ({ templates, models }: TemplatesTabProps) => {
         fields: payload.fields,
         isActive: payload.setActive,
         setActive: payload.setActive,
+        layout: payload.layout,
+        status: payload.status,
       }),
     onSuccess: template => {
       queryClient.invalidateQueries({ queryKey: queryKeys.productPassports.templates() });
@@ -90,7 +92,13 @@ export const TemplatesTab = ({ templates, models }: TemplatesTabProps) => {
                     <td>v{template.version}</td>
                     <td>{template.fields.length}</td>
                     <td>{new Date(template.createdAt).toLocaleDateString('ru-RU')}</td>
-                    <td>{template.isActive ? 'Активен' : 'Черновик'}</td>
+                    <td>
+                      {template.status === 'archived'
+                        ? 'Архив'
+                        : template.status === 'published' || template.isActive
+                        ? 'Опубликован'
+                        : 'Черновик'}
+                    </td>
                     <td>
                       <button
                         type="button"

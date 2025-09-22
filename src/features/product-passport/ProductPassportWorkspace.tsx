@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { productPassportRepository } from '../../entities';
+import { FeatureFlag, isFeatureEnabled } from '../../shared/config/featureFlags';
 import { queryKeys } from '../../shared/api/queryKeys';
 import { DeviceModelsTab } from './workspace/tabs/DeviceModelsTab';
 import { InventoryTab } from './workspace/tabs/InventoryTab';
@@ -10,11 +11,11 @@ import { TemplatesTab } from './workspace/tabs/TemplatesTab';
 
 type TabKey = 'wizard' | 'inventory' | 'models' | 'templates';
 
-const tabs: Array<{ id: TabKey; label: string }> = [
-  { id: 'wizard', label: 'Мастер паспорта' },
+const tabs: Array<{ id: TabKey; label: string; featureFlag?: FeatureFlag }> = [
+  { id: 'wizard', label: 'Мастер паспорта', featureFlag: 'passport-wizard' },
   { id: 'inventory', label: 'Инвентарь' },
   { id: 'models', label: 'Модели изделий' },
-  { id: 'templates', label: 'Шаблоны паспортов' },
+  { id: 'templates', label: 'Шаблоны паспортов', featureFlag: 'template-builder' },
 ];
 
 const useWorkspaceData = () => {
@@ -50,6 +51,15 @@ export const ProductPassportWorkspace = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('wizard');
   const { devicesQuery, modelsQuery, templatesQuery } = useWorkspaceData();
 
+  const availableTabs = tabs.filter(tab => !tab.featureFlag || isFeatureEnabled(tab.featureFlag));
+
+  useEffect(() => {
+    if (!availableTabs.find(tab => tab.id === activeTab)) {
+      const fallback = availableTabs[0]?.id ?? 'inventory';
+      setActiveTab(fallback);
+    }
+  }, [activeTab, availableTabs]);
+
   if (devicesQuery.isLoading || modelsQuery.isLoading || templatesQuery.isLoading) {
     return <LoadingState />;
   }
@@ -65,7 +75,7 @@ export const ProductPassportWorkspace = () => {
   return (
     <div className="passport-workspace">
       <div className="tab-strip">
-        {tabs.map(tab => (
+        {availableTabs.map(tab => (
           <button
             key={tab.id}
             type="button"

@@ -1,7 +1,9 @@
 import type {
   DeviceModel,
   DeviceStatus,
+  PassportTemplate,
   PassportTemplateField,
+  TemplatePrimitiveFieldType,
 } from '../../../entities';
 
 export type DeviceFormValues = {
@@ -24,6 +26,14 @@ export type TemplateFieldDraft = {
   options: string;
   placeholder?: string;
   defaultValue?: string;
+  columns: Array<{
+    id: string;
+    title: string;
+    key: string;
+    type: TemplatePrimitiveFieldType;
+  }>;
+  minRows?: number;
+  maxRows?: number;
 };
 
 export type TemplateCreationPayload = {
@@ -33,6 +43,8 @@ export type TemplateCreationPayload = {
   setActive: boolean;
   isActive: boolean;
   fields: PassportTemplateField[];
+  layout?: PassportTemplate['layout'];
+  status?: PassportTemplate['status'];
 };
 
 export type ModelLookup = Map<string, DeviceModel>;

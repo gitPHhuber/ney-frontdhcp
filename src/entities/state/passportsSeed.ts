@@ -1,4 +1,4 @@
-import type { ProductPassportState } from '../product-passport/types';
+import type { PassportTemplateLayout, ProductPassportState } from '../product-passport/types';
 import { seedReferenceTime } from './common';
 
 const now = seedReferenceTime;
@@ -81,6 +81,478 @@ const dellTemplateFields = [
   },
 ];
 
+const vegmanTemplateFields = [
+  {
+    id: 'vegman-product-name',
+    key: 'productName',
+    label: 'Наименование изделия',
+    type: 'text' as const,
+    required: true,
+  },
+  {
+    id: 'vegman-article',
+    key: 'article',
+    label: 'Артикул',
+    type: 'text' as const,
+    required: true,
+  },
+  {
+    id: 'vegman-serial',
+    key: 'serial',
+    label: 'Серийный номер',
+    type: 'text' as const,
+    required: true,
+  },
+  {
+    id: 'vegman-manufactured',
+    key: 'manufacturedAt',
+    label: 'Дата производства',
+    type: 'date' as const,
+    required: true,
+  },
+  {
+    id: 'vegman-firmware',
+    key: 'firmware',
+    label: 'Версия прошивки',
+    type: 'text' as const,
+  },
+  {
+    id: 'vegman-inspector',
+    key: 'inspector',
+    label: 'Проверяющий',
+    type: 'text' as const,
+  },
+  {
+    id: 'vegman-location',
+    key: 'location',
+    label: 'Расположение',
+    type: 'text' as const,
+  },
+  {
+    id: 'vegman-ip-address',
+    key: 'ipAddress',
+    label: 'IP-адрес',
+    type: 'text' as const,
+  },
+  {
+    id: 'vegman-responsible',
+    key: 'responsible',
+    label: 'Ответственный',
+    type: 'text' as const,
+  },
+  {
+    id: 'vegman-notes',
+    key: 'notes',
+    label: 'Примечания',
+    type: 'multiline' as const,
+  },
+  {
+    id: 'vegman-components',
+    key: 'components',
+    label: 'Комплектующие',
+    type: 'table' as const,
+    minRows: 0,
+    maxRows: 50,
+    columns: [
+      { id: 'vegman-components-name', key: 'name', title: 'Наименование', type: 'text' as const },
+      { id: 'vegman-components-pn', key: 'pn', title: 'Part Number', type: 'text' as const },
+      { id: 'vegman-components-qty', key: 'qty', title: 'Кол-во', type: 'number' as const },
+      { id: 'vegman-components-remark', key: 'remark', title: 'Примечание', type: 'text' as const },
+    ],
+  },
+];
+
+const vegmanTemplateLayout: PassportTemplateLayout = {
+  sheetName: 'Документ',
+  columnWidths: { 2: 20, 3: 45, 4: 30, 5: 15 },
+  rowHeights: { 2: 28, 13: 20, 14: 20, 15: 20, 18: 20 },
+  staticCells: [
+    {
+      id: 'vegman-title',
+      row: 2,
+      col: 2,
+      value: 'ПАСПОРТ ИЗДЕЛИЯ',
+      merge: { cols: 4 },
+      style: {
+        font: { name: 'Calibri', size: 16, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-subtitle',
+      row: 4,
+      col: 2,
+      value: 'Модель:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-model-value',
+      row: 4,
+      col: 3,
+      value: 'S220',
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-organization-label',
+      row: 5,
+      col: 2,
+      value: 'Организация:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-organization-value',
+      row: 5,
+      col: 3,
+      value: '<наименование организации>',
+      merge: { cols: 3 },
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-product-label',
+      row: 6,
+      col: 2,
+      value: 'Наименование:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-article-label',
+      row: 7,
+      col: 2,
+      value: 'Артикул:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-serial-label',
+      row: 8,
+      col: 2,
+      value: 'Серийный №:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-date-label',
+      row: 9,
+      col: 2,
+      value: 'Дата произв.:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-firmware-label',
+      row: 10,
+      col: 2,
+      value: 'Прошивка:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-inspector-label',
+      row: 11,
+      col: 2,
+      value: 'Проверил:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-location-label',
+      row: 12,
+      col: 2,
+      value: 'Расположение:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-notes-label',
+      row: 13,
+      col: 2,
+      value: 'Примечания:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-ip-label',
+      row: 16,
+      col: 2,
+      value: 'IP-адрес:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-responsible-label',
+      row: 17,
+      col: 2,
+      value: 'Ответственный:',
+      style: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'right', vertical: 'middle' },
+      },
+    },
+    {
+      id: 'vegman-qr-frame',
+      row: 8,
+      col: 5,
+      value: '',
+      merge: { rows: 4 },
+      style: {
+        border: {
+          top: { style: 'thin' },
+          bottom: { style: 'thin' },
+          left: { style: 'thin' },
+          right: { style: 'thin' },
+        },
+      },
+    },
+  ],
+  bindings: [
+    {
+      fieldKey: 'productName',
+      row: 6,
+      col: 3,
+      merge: { cols: 3 },
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle', wrapText: true },
+      },
+    },
+    {
+      fieldKey: 'article',
+      row: 7,
+      col: 3,
+      merge: { cols: 2 },
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+      },
+    },
+    {
+      fieldKey: 'serial',
+      row: 8,
+      col: 3,
+      merge: { cols: 2 },
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+      },
+    },
+    {
+      fieldKey: 'manufacturedAt',
+      row: 9,
+      col: 3,
+      merge: { cols: 2 },
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+        numberFormat: 'dd.mm.yyyy',
+      },
+    },
+    {
+      fieldKey: 'firmware',
+      row: 10,
+      col: 3,
+      merge: { cols: 2 },
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+      },
+    },
+    {
+      fieldKey: 'inspector',
+      row: 11,
+      col: 3,
+      merge: { cols: 3 },
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+      },
+    },
+    {
+      fieldKey: 'location',
+      row: 12,
+      col: 3,
+      merge: { cols: 3 },
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+      },
+    },
+    {
+      fieldKey: 'notes',
+      row: 13,
+      col: 3,
+      merge: { cols: 3, rows: 3 },
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'top', wrapText: true },
+        border: {
+          top: { style: 'thin' },
+          bottom: { style: 'thin' },
+          left: { style: 'thin' },
+          right: { style: 'thin' },
+        },
+      },
+    },
+    {
+      fieldKey: 'ipAddress',
+      row: 16,
+      col: 3,
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+      },
+    },
+    {
+      fieldKey: 'responsible',
+      row: 17,
+      col: 3,
+      merge: { cols: 3 },
+      style: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+      },
+    },
+  ],
+  tables: [
+    {
+      fieldKey: 'components',
+      row: 18,
+      col: 2,
+      drawHeader: true,
+      showGrid: true,
+      minRows: 0,
+      maxRows: 50,
+      fillEmptyRowsWithGrid: true,
+      columns: [
+        {
+          id: 'vegman-components-name-col',
+          key: 'name',
+          title: 'Наименование',
+          type: 'text' as const,
+          width: 30,
+          style: {
+            font: { name: 'Calibri', size: 11 },
+            alignment: { horizontal: 'left', vertical: 'top', wrapText: true },
+          },
+          headerStyle: {
+            font: { name: 'Calibri', size: 11, bold: true },
+            alignment: { horizontal: 'center', vertical: 'middle' },
+            border: {
+              top: { style: 'thin' },
+              bottom: { style: 'thin' },
+              left: { style: 'thin' },
+              right: { style: 'thin' },
+            },
+          },
+        },
+        {
+          id: 'vegman-components-pn-col',
+          key: 'pn',
+          title: 'Part Number',
+          type: 'text' as const,
+          width: 20,
+          style: {
+            font: { name: 'Calibri', size: 11 },
+            alignment: { horizontal: 'left', vertical: 'top', wrapText: true },
+          },
+          headerStyle: {
+            font: { name: 'Calibri', size: 11, bold: true },
+            alignment: { horizontal: 'center', vertical: 'middle' },
+            border: {
+              top: { style: 'thin' },
+              bottom: { style: 'thin' },
+              left: { style: 'thin' },
+              right: { style: 'thin' },
+            },
+          },
+        },
+        {
+          id: 'vegman-components-qty-col',
+          key: 'qty',
+          title: 'Кол-во',
+          type: 'number' as const,
+          width: 8,
+          style: {
+            font: { name: 'Calibri', size: 11 },
+            alignment: { horizontal: 'center', vertical: 'middle' },
+            numberFormat: '0',
+          },
+          headerStyle: {
+            font: { name: 'Calibri', size: 11, bold: true },
+            alignment: { horizontal: 'center', vertical: 'middle' },
+            border: {
+              top: { style: 'thin' },
+              bottom: { style: 'thin' },
+              left: { style: 'thin' },
+              right: { style: 'thin' },
+            },
+          },
+        },
+        {
+          id: 'vegman-components-note-col',
+          key: 'remark',
+          title: 'Примечание',
+          type: 'text' as const,
+          width: 30,
+          style: {
+            font: { name: 'Calibri', size: 11 },
+            alignment: { horizontal: 'left', vertical: 'top', wrapText: true },
+          },
+          headerStyle: {
+            font: { name: 'Calibri', size: 11, bold: true },
+            alignment: { horizontal: 'center', vertical: 'middle' },
+            border: {
+              top: { style: 'thin' },
+              bottom: { style: 'thin' },
+              left: { style: 'thin' },
+              right: { style: 'thin' },
+            },
+          },
+        },
+      ],
+      headerStyle: {
+        font: { name: 'Calibri', size: 11, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' },
+      },
+      rowStyle: {
+        font: { name: 'Calibri', size: 11 },
+        alignment: { horizontal: 'left', vertical: 'top', wrapText: true },
+      },
+      gridStyle: { style: 'thin', color: '#000000' },
+    },
+  ],
+} as const;
+
 export const passportsSeed: ProductPassportState = {
   devices: [
     {
@@ -113,6 +585,16 @@ export const passportsSeed: ProductPassportState = {
       owner: 'Команда безопасности',
       status: 'in_service',
     },
+    {
+      id: 'device-vegman-220-01',
+      assetTag: 'VG-220-01',
+      deviceModelId: 'model-vegman-s220',
+      serialNumber: 'S220-VEGMAN-0001',
+      ipAddress: '10.55.0.20',
+      location: 'Цех 2 / Линия Vegman',
+      owner: 'Команда производственной автоматики',
+      status: 'in_service',
+    },
   ],
   deviceModels: [
     {
@@ -133,6 +615,12 @@ export const passportsSeed: ProductPassportState = {
       name: 'Juniper SRX340',
       description: 'Пограничный межсетевой экран и VPN-шлюз.',
     },
+    {
+      id: 'model-vegman-s220',
+      vendor: 'Vegman',
+      name: 'S220',
+      description: 'Компактный терминал Vegman S220 для индустриальных IoT-сценариев.',
+    },
   ],
   templates: [
     {
@@ -144,6 +632,7 @@ export const passportsSeed: ProductPassportState = {
       isActive: true,
       createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 30).toISOString(),
       fields: ciscoTemplateFields.map(field => ({ ...field })),
+      status: 'published',
     },
     {
       id: 'tpl-dell-base-v1',
@@ -154,6 +643,20 @@ export const passportsSeed: ProductPassportState = {
       isActive: true,
       createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 45).toISOString(),
       fields: dellTemplateFields.map(field => ({ ...field })),
+      status: 'published',
+    },
+    {
+      id: 'tpl-vegman-s220-v1',
+      deviceModelId: 'model-vegman-s220',
+      name: 'Vegman S220 — паспорт изделия',
+      description: 'Эталонный паспорт Vegman S220 с таблицей комплектующих.',
+      version: 1,
+      isActive: true,
+      createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 7).toISOString(),
+      fields: vegmanTemplateFields.map(field => ({ ...field })),
+      layout: vegmanTemplateLayout,
+      status: 'published',
+      fileNamePattern: 'Паспорт_S220_{serial}',
     },
   ],
   passports: [

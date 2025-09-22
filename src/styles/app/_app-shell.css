@@ -1232,6 +1232,58 @@ main > .container {
   gap: 0.6rem;
 }
 
+.passport-row-editor__table {
+  display: grid;
+  gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+
+.passport-row-editor__table-controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.passport-row-editor__table-controls label {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 120px;
+}
+
+.passport-row-editor__table-columns {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.passport-row-editor__table-column {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 0.65rem;
+  background: rgba(30, 41, 59, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.passport-table-editor {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.passport-table-editor__actions {
+  width: 120px;
+  text-align: center;
+}
+
+.passport-table-editor__controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .passport-constructor__preview {
   display: grid;
   gap: 1rem;
