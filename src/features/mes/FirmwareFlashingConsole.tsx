@@ -276,14 +276,14 @@ export const FirmwareFlashingConsole: React.FC = () => {
   };
 
   return (
-    <section className="firmware-console" aria-label="Консоль прошивки">
-      <header className="firmware-console__header">
-        <div>
+    <section className="mes-layout firmware-console" aria-label="Консоль прошивки">
+      <header className="mes-layout__hero">
+        <div className="mes-layout__hero-main">
           <h1>Прошивка устройств</h1>
           <p className="muted">
             Управляйте стендами прошивки, контролируйте версии и прослеживаемость для серверов и дронов в одной панели.
           </p>
-          <div className="firmware-console__metrics">
+          <div className="mes-layout__stats firmware-console__metrics">
             <div className="metric">
               <span className="metric__label">Всего прошивок сегодня</span>
               <span className="metric__value">{totalJobs}</span>
@@ -306,7 +306,7 @@ export const FirmwareFlashingConsole: React.FC = () => {
             </div>
           </div>
         </div>
-        <aside className="firmware-console__agents">
+        <aside className="mes-card firmware-console__agents">
           <h2>Состояние агентов</h2>
           <ul>
             {agents.map(agent => (
@@ -332,8 +332,8 @@ export const FirmwareFlashingConsole: React.FC = () => {
         </aside>
       </header>
 
-      <div className="firmware-console__content">
-        <section className="firmware-console__panels" aria-label="Панели прошивки">
+      <div className="mes-layout__columns firmware-console__workspace">
+        <section className="mes-layout__primary firmware-console__panels" aria-label="Панели прошивки">
           <div className="firmware-console__panel-actions">
             <button type="button" className="primary" disabled={readyPorts.length === 0}>
               Прошить всё подключённое ({readyPorts.length})
@@ -653,7 +653,7 @@ export const FirmwareFlashingConsole: React.FC = () => {
           </div>
         </section>
 
-        <aside className="firmware-console__sidebar">
+        <aside className="mes-layout__secondary firmware-console__sidebar">
           <section className="firmware-console__presets" aria-label="Шаблоны прошивки">
             <header>
               <h2>Шаблоны конфигураций</h2>
@@ -694,7 +694,7 @@ export const FirmwareFlashingConsole: React.FC = () => {
         </aside>
       </div>
 
-      <section className="firmware-console__summary" aria-label="Сводка прошивок">
+      <section className="mes-card firmware-console__summary mes-layout__full" aria-label="Сводка прошивок">
         <header>
           <div>
             <h2>Сводка прошивок</h2>
