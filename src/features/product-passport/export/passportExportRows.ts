@@ -2,14 +2,23 @@ import type {
   DeviceHistoryEntry,
   ProductPassport,
 } from '../../../entities';
-import type { TemplateFieldValue } from '../types';
+import type { TemplateFieldValue, TemplateTableRow } from '../types';
 import { formatPassportDateTime } from '../utils/date';
 
 export type ExportRow = [string, string];
 
 const formatFieldValue = (value: TemplateFieldValue | undefined) => {
   if (Array.isArray(value)) {
-    return value.join(', ');
+    if (value.length > 0 && typeof value[0] === 'object' && value[0] !== null) {
+      const rows = value as TemplateTableRow[];
+      return rows
+        .map((row, index) => {
+          const entries = Object.values(row ?? {}).filter(cell => cell !== undefined && cell !== '');
+          return `${index + 1}. ${entries.length > 0 ? entries.join(', ') : '—'}`;
+        })
+        .join('\n');
+    }
+    return (value as Array<string | number | boolean | string[]>).join(', ');
   }
   if (typeof value === 'boolean') {
     return value ? 'Да' : 'Нет';

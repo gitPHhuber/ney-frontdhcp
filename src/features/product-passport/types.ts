@@ -1,1 +1,1 @@
-export type TemplateFieldValue = string | number | boolean | string[];
+export type { TemplateFieldValue, TemplateTableRow, TemplatePrimitiveValue } from '../../entities/product-passport/types';

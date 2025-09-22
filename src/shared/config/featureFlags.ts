@@ -4,6 +4,8 @@ export type FeatureFlag =
   | 'reports-builder'
   | 'executive-dashboard-insights'
   | 'automation-playbooks'
+  | 'passport-wizard'
+  | 'template-builder'
   | 'product-passport-autofill'
   | 'navigation-diagnostics-export'
   | 'mes-command-center'
@@ -19,6 +21,8 @@ const activeFlags: Record<FeatureFlag, boolean> = {
   'reports-builder': true,
   'executive-dashboard-insights': true,
   'automation-playbooks': true,
+  'passport-wizard': true,
+  'template-builder': true,
   'product-passport-autofill': true,
   'navigation-diagnostics-export': true,
   'mes-command-center': true,

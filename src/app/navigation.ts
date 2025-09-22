@@ -272,7 +272,7 @@ export const appNavigation: NavigationSection[] = [
         loader: loadProductPassportPage,
         group: 'Автоматизация',
         groupKey: 'navigation.sections.automation',
-        featureFlag: 'product-passport-autofill',
+        featureFlag: 'passport-wizard',
       },
     ],
   },

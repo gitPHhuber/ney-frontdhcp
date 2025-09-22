@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -13,8 +14,12 @@ import {
 } from '../../../../entities';
 import { queryKeys } from '../../../../shared/api/queryKeys';
 import { buildPassportExportRows } from '../../export/passportExportRows';
-import { downloadPassportPdf, downloadPassportWorkbook } from '../../export/passportExportDownload';
-import type { TemplateFieldValue } from '../../types';
+import {
+  buildPassportFilename,
+  downloadPassportPdf,
+  downloadPassportWorkbook,
+} from '../../export/passportExportDownload';
+import type { TemplateFieldValue, TemplateTableRow } from '../../types';
 import { formatPassportDateTime } from '../../utils/date';
 import { DeviceFormModal } from '../components/DeviceFormModal';
 import { DeviceSearchModal } from '../components/DeviceSearchModal';
@@ -287,6 +292,10 @@ export const PassportWizardTab = ({ devices, models, templates }: PassportWizard
     if (!passport) {
       return;
     }
+    if (type === 'excel' && (!selectedTemplate || !selectedTemplate.layout)) {
+      toast.error('Выберите шаблон с разметкой Excel для экспорта.');
+      return;
+    }
     setExporting(true);
     try {
       const currentValues = detailsForm.getValues();
@@ -295,12 +304,16 @@ export const PassportWizardTab = ({ devices, models, templates }: PassportWizard
         toast.error(`Заполните обязательные поля: ${missing.join(', ')}`);
         return;
       }
-      await productPassportRepository.updatePassportValues(passport.id, currentValues);
+      const updatedPassport = await productPassportRepository.updatePassportValues(passport.id, currentValues);
+      setPassport(updatedPassport);
       const history = await productPassportRepository.getDeviceHistory(passport.deviceId);
-      const rows = buildPassportExportRows(passport, history);
-      const filename = `${passport.metadata.assetTag}-паспорт-v${passport.version}`;
+      const rows = buildPassportExportRows(updatedPassport, history);
+      const filename = buildPassportFilename(selectedTemplate ?? null, updatedPassport);
       if (type === 'excel') {
-        await downloadPassportWorkbook(rows, filename);
+        if (!selectedTemplate || !selectedTemplate.layout) {
+          throw new Error('Template is required for Excel export');
+        }
+        await downloadPassportWorkbook(selectedTemplate, updatedPassport, filename);
       } else {
         await downloadPassportPdf(rows, filename);
       }
@@ -521,6 +534,129 @@ export const PassportWizardTab = ({ devices, models, templates }: PassportWizard
                       name={field.key}
                       render={({ field: controllerField }) => {
                         switch (field.type) {
+                          case 'table': {
+                            const tableField = field;
+                            const rows = Array.isArray(controllerField.value)
+                              ? (controllerField.value as TemplateTableRow[])
+                              : [];
+                            const minRows = tableField.minRows ?? 0;
+                            const maxRows = tableField.maxRows;
+                            const ensureRow = (rowIndex: number) => {
+                              const next = [...rows];
+                              while (next.length <= rowIndex) {
+                                next.push({});
+                              }
+                              return next;
+                            };
+                            const handleCellChange = (rowIndex: number, columnKey: string, value: string | number) => {
+                              const next = ensureRow(rowIndex);
+                              next[rowIndex] = {
+                                ...next[rowIndex],
+                                [columnKey]: value,
+                              };
+                              controllerField.onChange(next);
+                            };
+                            const handleAddRow = () => {
+                              if (maxRows && rows.length >= maxRows) {
+                                return;
+                              }
+                              controllerField.onChange([...rows, {}]);
+                            };
+                            const handleRemoveRow = (rowIndex: number) => {
+                              if (rows.length <= minRows) {
+                                return;
+                              }
+                              controllerField.onChange(rows.filter((_, index) => index !== rowIndex));
+                            };
+                            const rowsToRender = Array.from({ length: Math.max(rows.length, minRows, 1) }, (_, index) =>
+                              rows[index] ?? ({} as TemplateTableRow),
+                            );
+                            return (
+                              <div className="passport-table-editor">
+                                <table className="data-table">
+                                  <thead>
+                                    <tr>
+                                      {tableField.columns.map(column => (
+                                        <th key={column.id}>{column.title}</th>
+                                      ))}
+                                      <th className="passport-table-editor__actions">Действия</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {rowsToRender.map((row, rowIndex) => {
+                                      const isPersisted = rowIndex < rows.length;
+                                      const canRemove = rows.length > minRows && isPersisted;
+                                      return (
+                                        <tr key={rowIndex}>
+                                          {tableField.columns.map(column => {
+                                            const cellValue = row[column.key];
+                                            const baseProps = {
+                                              value:
+                                                cellValue === undefined || cellValue === null
+                                                  ? ''
+                                                  : (cellValue as string | number),
+                                              onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                                                const rawValue =
+                                                  column.type === 'number'
+                                                    ? event.target.value === ''
+                                                      ? ''
+                                                      : Number(event.target.value)
+                                                    : event.target.value;
+                                                handleCellChange(rowIndex, column.key, rawValue as string | number);
+                                              },
+                                            };
+                                            if (column.type === 'number') {
+                                              return (
+                                                <td key={column.id}>
+                                                  <input type="number" {...baseProps} />
+                                                </td>
+                                              );
+                                            }
+                                            if (column.type === 'date') {
+                                              return (
+                                                <td key={column.id}>
+                                                  <input type="date" {...baseProps} />
+                                                </td>
+                                              );
+                                            }
+                                            return (
+                                              <td key={column.id}>
+                                                <input type="text" {...baseProps} />
+                                              </td>
+                                            );
+                                          })}
+                                          <td className="passport-table-editor__actions">
+                                            <button
+                                              type="button"
+                                              className="ghost"
+                                              onClick={() => handleRemoveRow(rowIndex)}
+                                              disabled={!canRemove}
+                                            >
+                                              Удалить
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                                <div className="passport-table-editor__controls">
+                                  <button
+                                    type="button"
+                                    className="secondary"
+                                    onClick={handleAddRow}
+                                    disabled={Boolean(maxRows && rows.length >= maxRows)}
+                                  >
+                                    Добавить строку
+                                  </button>
+                                  <span className="muted">
+                                    Строк: {rows.length}. {minRows ? `Мин: ${minRows}. ` : ''}
+                                    {maxRows ? `Макс: ${maxRows}.` : ''}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          }
                           case 'number':
                             return (
                               <input
