@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { mesRepository } from '../../entities';
+import type { FlashJobStatus } from '../../entities';
 import { queryKeys } from '../../shared/api/queryKeys';
 
 export const useProductionOrdersQuery = () =>
@@ -73,6 +74,55 @@ export const useTestRunsQuery = () =>
     queryKey: queryKeys.mes.testRuns,
     queryFn: () => mesRepository.listTestRuns(),
     staleTime: 10_000,
+  });
+
+export const useFlashAgentsQuery = () =>
+  useQuery({
+    queryKey: queryKeys.mes.flashAgents,
+    queryFn: () => mesRepository.listFlashAgents(),
+    staleTime: 5_000,
+    refetchInterval: 15_000,
+  });
+
+export const useFlashPortsQuery = () =>
+  useQuery({
+    queryKey: queryKeys.mes.flashPorts,
+    queryFn: () => mesRepository.listFlashPorts(),
+    staleTime: 2_000,
+    refetchInterval: 5_000,
+  });
+
+export const useFlashPresetsQuery = () =>
+  useQuery({
+    queryKey: queryKeys.mes.flashPresets,
+    queryFn: () => mesRepository.listFlashPresets(),
+    staleTime: 60_000,
+  });
+
+export const useFlashArtifactsQuery = (filters: Partial<Record<'project' | 'deviceType' | 'model', string>> = {}) =>
+  useQuery({
+    queryKey: queryKeys.mes.flashArtifacts(filters),
+    queryFn: () => mesRepository.listFlashArtifacts(filters),
+    staleTime: 30_000,
+  });
+
+export const useFlashJobsQuery = (
+  filters: {
+    date?: 'today' | 'week';
+    status?: FlashJobStatus | 'all';
+  } = { date: 'today', status: 'all' },
+) =>
+  useQuery({
+    queryKey: queryKeys.mes.flashJobs({ date: filters.date ?? 'all', status: filters.status ?? 'all' }),
+    queryFn: () => mesRepository.listFlashJobs(filters),
+    refetchInterval: 15_000,
+  });
+
+export const useDeviceSessionsQuery = () =>
+  useQuery({
+    queryKey: queryKeys.mes.deviceSessions,
+    queryFn: () => mesRepository.listDeviceSessions(),
+    staleTime: 60_000,
   });
 
 export const useGenerateWorkOrders = () => {
