@@ -1,24 +1,24 @@
+import type { Worksheet } from 'exceljs';
 import type { ExportRow } from './passportExportRows';
 
-type XlsxModule = typeof import('xlsx');
+type ExceljsModule = typeof import('exceljs');
 type JsPdfCtor = typeof import('jspdf').jsPDF;
-type XlsxModuleWithUtils = XlsxModule & { utils: NonNullable<XlsxModule['utils']> };
 
-let xlsxModulePromise: Promise<XlsxModuleWithUtils> | null = null;
+let exceljsModulePromise: Promise<ExceljsModule> | null = null;
 let jsPdfCtorPromise: Promise<JsPdfCtor> | null = null;
 
-const loadXlsxModule = async (): Promise<XlsxModuleWithUtils> => {
-  if (!xlsxModulePromise) {
-    xlsxModulePromise = import('xlsx').then(module => {
-      const resolved = (module as { default?: XlsxModuleWithUtils }).default;
-      const xlsx = (resolved ?? module) as XlsxModuleWithUtils;
-      if (!xlsx.utils) {
-        throw new Error('xlsx module is missing utils API');
+const loadExceljsModule = async (): Promise<ExceljsModule> => {
+  if (!exceljsModulePromise) {
+    exceljsModulePromise = import('exceljs').then(module => {
+      const resolved = (module as { default?: ExceljsModule }).default;
+      const exceljs = (resolved ?? module) as ExceljsModule;
+      if (!exceljs.Workbook) {
+        throw new Error('exceljs module is missing Workbook constructor');
       }
-      return xlsx;
+      return exceljs;
     });
   }
-  return xlsxModulePromise;
+  return exceljsModulePromise;
 };
 
 const loadJsPdfConstructor = async (): Promise<JsPdfCtor> => {
@@ -35,12 +35,81 @@ const loadJsPdfConstructor = async (): Promise<JsPdfCtor> => {
   return jsPdfCtorPromise;
 };
 
+const resolveTemplateUrl = () => {
+  const templateUrl = import.meta.env.VITE_VEGMAN_PASSPORT_TEMPLATE_URL;
+  if (!templateUrl) {
+    throw new Error(
+      'Vegman passport template URL is not configured. Set VITE_VEGMAN_PASSPORT_TEMPLATE_URL to a reachable .xlsx template.',
+    );
+  }
+  return templateUrl;
+};
+const DATA_START_ROW = 6;
+const TEMPLATE_LAST_ROW = 150;
+const LABEL_COLUMN = 'B';
+const VALUE_COLUMN = 'D';
+
+const fetchTemplateWorkbook = async (ExcelJS: ExceljsModule) => {
+  const templateUrl = resolveTemplateUrl();
+  const response = await fetch(templateUrl);
+  if (!response.ok) {
+    throw new Error(`Template is unavailable (${response.status})`);
+  }
+  const templateBuffer = await response.arrayBuffer();
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(templateBuffer);
+  return workbook;
+};
+
+const updateTimestamp = (worksheet: Worksheet) => {
+  const labelCell = worksheet.getCell('E4');
+  if (!labelCell.value) {
+    labelCell.value = 'Дата выгрузки:';
+  }
+  labelCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF4F81BD' } };
+  labelCell.alignment = { vertical: 'middle', horizontal: 'right' };
+
+  const dateCell = worksheet.getCell('F4');
+  dateCell.value = new Date();
+  dateCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF4F81BD' } };
+  dateCell.alignment = { vertical: 'middle', horizontal: 'left' };
+  dateCell.numFmt = 'dd.mm.yyyy hh:mm';
+};
+
+const clearRemainingRows = (worksheet: Worksheet, fromRow: number) => {
+  for (let rowIndex = fromRow; rowIndex <= TEMPLATE_LAST_ROW; rowIndex += 1) {
+    const labelCell = worksheet.getCell(`${LABEL_COLUMN}${rowIndex}`);
+    const valueCell = worksheet.getCell(`${VALUE_COLUMN}${rowIndex}`);
+    if (labelCell.value || valueCell.value) {
+      labelCell.value = '';
+      valueCell.value = '';
+    }
+  }
+};
+
+const fillWorksheetWithRows = (worksheet: Worksheet, rows: ExportRow[]) => {
+  rows.forEach(([label, value], index) => {
+    const rowNumber = DATA_START_ROW + index;
+    const labelCell = worksheet.getCell(`${LABEL_COLUMN}${rowNumber}`);
+    const valueCell = worksheet.getCell(`${VALUE_COLUMN}${rowNumber}`);
+    labelCell.value = label ?? '';
+    valueCell.value = value ?? '';
+  });
+
+  const nextRow = DATA_START_ROW + rows.length;
+  clearRemainingRows(worksheet, nextRow);
+};
+
 const createExcelBlob = async (rows: ExportRow[]): Promise<Blob> => {
-  const xlsx = await loadXlsxModule();
-  const worksheet = xlsx.utils.aoa_to_sheet(rows);
-  const workbook = xlsx.utils.book_new();
-  xlsx.utils.book_append_sheet(workbook, worksheet, 'Паспорт');
-  const arrayBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const ExcelJS = await loadExceljsModule();
+  const workbook = await fetchTemplateWorkbook(ExcelJS);
+  const worksheet = workbook.getWorksheet('Паспорт') ?? workbook.worksheets[0];
+  if (!worksheet) {
+    throw new Error('Template sheet is missing');
+  }
+  updateTimestamp(worksheet);
+  fillWorksheetWithRows(worksheet, rows);
+  const arrayBuffer = await workbook.xlsx.writeBuffer();
   return new Blob([arrayBuffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
