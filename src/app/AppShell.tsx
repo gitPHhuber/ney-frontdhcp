@@ -13,6 +13,8 @@ import { appNavigation, type NavigationItem } from './navigation';
 const AppShell: FC = () => {
   const { t } = useTranslation();
   const { user, logout, hasPermission } = useAuth();
+  const buildInfo = __APP_BUILD_INFO__;
+  const buildTimestamp = new Date(buildInfo.time).toLocaleString();
   const [isPaletteOpen, setPaletteOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -47,6 +49,10 @@ const AppShell: FC = () => {
       }),
     }))
     .filter(section => section.items.length > 0);
+
+  useEffect(() => {
+    console.log('[AppShell] import.meta.env', import.meta.env);
+  }, []);
 
   useEffect(() => {
     const handleHotkey = (event: KeyboardEvent) => {
@@ -145,6 +151,16 @@ const AppShell: FC = () => {
           </span>
         </button>
         <div className="flex items-center gap-4">
+          <div
+            className="hidden min-w-[160px] flex-col rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs text-neutral-300 sm:flex"
+            aria-label={t('app.buildInfo', {
+              defaultValue: 'Current build information',
+            })}
+          >
+            <span className="text-[0.7rem] uppercase tracking-wide text-neutral-400">Build</span>
+            <span className="font-mono text-sm text-neutral-100">{buildInfo.commit}</span>
+            <span className="truncate text-[0.7rem] text-neutral-400">{buildTimestamp}</span>
+          </div>
           <NotificationCenter />
           <div className="user-menu inline-flex items-center gap-3 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-neutral-100">
             <span className="font-medium leading-none">

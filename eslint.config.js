@@ -26,6 +26,7 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
+        __APP_BUILD_INFO__: 'readonly',
       },
     },
     plugins: {

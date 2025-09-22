@@ -50,6 +50,7 @@ type ManualPanelState = {
   portId?: string;
   presetId?: string;
   artifactId?: string;
+  artifactVersion?: string;
   project?: 'servers' | 'drones';
   deviceType?: string;
   model?: string;
@@ -59,6 +60,8 @@ type ManualPanelState = {
     verify: boolean;
     setParams: boolean;
   };
+  checklist?: FlashChecklistItem[];
+  ignorePolicy?: boolean;
 };
 
 const formatDuration = (seconds?: number) => {
@@ -150,6 +153,7 @@ export const FirmwareFlashingConsole: React.FC = () => {
   const { data: deviceSessions = [] } = useDeviceSessionsQuery();
 
   const [manualPanels, setManualPanels] = useState<ManualPanelState[]>([]);
+  const [portOverrides, setPortOverrides] = useState<Record<string, boolean>>({});
   const [projectFilter, setProjectFilter] = useState<'all' | 'servers' | 'drones'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'queued' | 'running' | 'ok' | 'error' | 'aborted'>('all');
   const [workstationFilter, setWorkstationFilter] = useState<'all' | string>('all');
@@ -249,16 +253,20 @@ export const FirmwareFlashingConsole: React.FC = () => {
   };
 
   const handlePresetApply = (preset: FlashPreset) => {
+    const presetArtifact = artifactMap.get(preset.artifactId);
     setManualPanels(prev => [
       ...prev,
       {
         id: `manual-${Date.now()}`,
         presetId: preset.id,
         artifactId: preset.artifactId,
+        artifactVersion: presetArtifact?.version,
         project: preset.project,
         deviceType: preset.deviceType,
         model: preset.model,
         options: { ...preset.defaultOptions },
+        checklist: preset.defaultChecklist.map(item => ({ ...item })),
+        ignorePolicy: false,
       },
     ]);
   };
@@ -349,9 +357,19 @@ export const FirmwareFlashingConsole: React.FC = () => {
               const artifact = job ? artifactMap.get(job.artifactId) : undefined;
               const session = job ? sessionMap.get(job.serialNumber) : undefined;
               const mismatch = Boolean(job && artifact && !artifact.compatibleModels.includes(job.model));
-              const versionAllowed = artifact?.allowed ?? true;
+              const sessionAllowsArtifact = job?.artifactId
+                ? session?.allowedArtifactIds?.includes(job.artifactId) ?? true
+                : true;
+              const matchesDeclaredModel = job && artifact
+                ? artifact.project === job.project && artifact.deviceType === job.deviceType && artifact.model === job.model
+                : true;
+              const versionAllowed = Boolean(
+                artifact ? artifact.allowed && sessionAllowsArtifact && matchesDeclaredModel : true,
+              );
+              const portOverride = Boolean(portOverrides[port.id]);
+              const policySatisfied = versionAllowed || (canOverride && portOverride);
               const options = preset?.defaultOptions;
-              const canStartPort = !job && port.state === 'ready';
+              const canStartPort = !job && port.state === 'ready' && policySatisfied;
               const canDetach = job?.status === 'running' ? false : true;
               const logLink = job?.resultLogUrl;
               return (
@@ -412,18 +430,27 @@ export const FirmwareFlashingConsole: React.FC = () => {
                       <span>
                         Модель {job?.model} не входит в совместимые для {artifact?.version}
                       </span>
-                      {canOverride ? (
-                        <button type="button" className="ghost">
-                          Переопределить
-                        </button>
-                      ) : (
-                        <span className="chip chip--danger">Требуется мастер</span>
-                      )}
+                      <span className="chip chip--danger">Требуется мастер</span>
                     </div>
                   )}
                   {!versionAllowed && (
                     <div className="firmware-console__alert firmware-console__alert--warning">
                       <span>Версия не разрешена политикой выпуска.</span>
+                      {canOverride && (
+                        <label className="firmware-console__override">
+                          <input
+                            type="checkbox"
+                            checked={portOverride}
+                            onChange={event =>
+                              setPortOverrides(prev => ({
+                                ...prev,
+                                [port.id]: event.target.checked,
+                              }))
+                            }
+                          />
+                          <span>Игнорировать политику</span>
+                        </label>
+                      )}
                     </div>
                   )}
                   <div className="firmware-console__log-wrapper">{logPreview(job)}</div>
@@ -467,8 +494,15 @@ export const FirmwareFlashingConsole: React.FC = () => {
               const mismatch = Boolean(
                 panel.model && artifact && !artifact.compatibleModels.includes(panel.model),
               );
-              const versionAllowed = artifact?.allowed ?? true;
-              const canStart = Boolean(panel.serialNumber && panel.artifactId && (versionAllowed || canOverride));
+              const matchesDeclaredModel = artifact
+                ? (!panel.project || artifact.project === panel.project) &&
+                  (!panel.deviceType || artifact.deviceType === panel.deviceType) &&
+                  (!panel.model || artifact.model === panel.model)
+                : true;
+              const versionAllowed = Boolean(artifact ? artifact.allowed && matchesDeclaredModel : true);
+              const ignorePolicy = Boolean(panel.ignorePolicy);
+              const policySatisfied = versionAllowed || ignorePolicy;
+              const canStart = Boolean(panel.serialNumber && panel.artifactId && policySatisfied);
               return (
                 <article key={panel.id} className="firmware-console__panel firmware-console__panel--manual">
                   <header className="firmware-console__panel-header">
@@ -502,10 +536,13 @@ export const FirmwareFlashingConsole: React.FC = () => {
                           handleManualChange(panel.id, {
                             presetId: newPreset?.id,
                             artifactId: newPreset?.artifactId,
+                            artifactVersion: newPreset?.artifactId ? artifactMap.get(newPreset.artifactId)?.version : panel.artifactVersion,
                             project: newPreset?.project,
                             deviceType: newPreset?.deviceType,
                             model: newPreset?.model,
                             options: newPreset ? { ...newPreset.defaultOptions } : panel.options,
+                            checklist: newPreset ? newPreset.defaultChecklist.map(item => ({ ...item })) : panel.checklist,
+                            ignorePolicy: false,
                           });
                         }}
                       >
@@ -526,9 +563,11 @@ export const FirmwareFlashingConsole: React.FC = () => {
                           const selectedArtifact = artifactId ? artifactMap.get(artifactId) : undefined;
                           handleManualChange(panel.id, {
                             artifactId,
+                            artifactVersion: selectedArtifact?.version,
                             project: selectedArtifact?.project ?? panel.project,
                             deviceType: selectedArtifact?.deviceType ?? panel.deviceType,
                             model: selectedArtifact?.model ?? panel.model,
+                            ignorePolicy: false,
                           });
                         }}
                       >
@@ -619,7 +658,7 @@ export const FirmwareFlashingConsole: React.FC = () => {
                     </div>
                   </dl>
                   {optionsBadges(options)}
-                  {renderChecklist(preset?.defaultChecklist)}
+                  {renderChecklist(panel.checklist ?? preset?.defaultChecklist)}
                   {mismatch && (
                     <div className="firmware-console__alert">
                       <span>
@@ -637,6 +676,20 @@ export const FirmwareFlashingConsole: React.FC = () => {
                   {!versionAllowed && (
                     <div className="firmware-console__alert firmware-console__alert--warning">
                       <span>Версия не разрешена политикой выпуска.</span>
+                      {canOverride && (
+                        <label className="firmware-console__override">
+                          <input
+                            type="checkbox"
+                            checked={ignorePolicy}
+                            onChange={event =>
+                              handleManualChange(panel.id, {
+                                ignorePolicy: event.target.checked,
+                              })
+                            }
+                          />
+                          <span>Игнорировать политику</span>
+                        </label>
+                      )}
                     </div>
                   )}
                   <div className="firmware-console__panel-actions">
